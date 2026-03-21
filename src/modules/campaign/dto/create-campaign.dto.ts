@@ -2,7 +2,7 @@ import { IsDateString, IsObject, IsOptional, IsString, IsUUID } from 'class-vali
 
 export class CreateCampaignDto {
   @IsOptional()
-  @IsUUID()
+  @IsUUID('all')
   tenant_id?: string;
 
   @IsString()
@@ -24,7 +24,7 @@ export class CreateCampaignDto {
   @IsDateString()
   end_date?: string;
 
-  @IsUUID()
+  @IsUUID('all')
   questionnaire_version_id!: string;
 
   @IsOptional()

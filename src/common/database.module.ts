@@ -2,6 +2,8 @@ import { Global, Module } from '@nestjs/common';
 import { Pool } from 'pg';
 import { DB_POOL } from './constants';
 import { DatabaseService } from './database.service';
+import { JsonLoggerService } from './json-logger.service';
+import { MetricsService } from './metrics.service';
 
 @Global()
 @Module({
@@ -15,7 +17,9 @@ import { DatabaseService } from './database.service';
         }),
     },
     DatabaseService,
+    JsonLoggerService,
+    MetricsService,
   ],
-  exports: [DB_POOL, DatabaseService],
+  exports: [DB_POOL, DatabaseService, JsonLoggerService, MetricsService],
 })
 export class DatabaseModule {}

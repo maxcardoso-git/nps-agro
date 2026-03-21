@@ -5,6 +5,8 @@
   "description": "Survey Runtime Engine for dynamic interviews",
   "scripts": {
     "build": "tsc -p tsconfig.build.json",
+    "migrate": "./scripts/run-migrations.sh",
+    "deploy:vps": "./scripts/deploy.sh",
     "start": "node dist/main.js",
     "start:dev": "ts-node src/main.ts",
     "test": "jest --runInBand",
@@ -14,12 +16,15 @@
   "dependencies": {
     "@nestjs/jwt": "^11.0.0",
     "@nestjs/passport": "^11.0.5",
+    "@nestjs/throttler": "^6.4.0",
     "@nestjs/common": "^11.1.0",
     "@nestjs/core": "^11.1.0",
     "@nestjs/platform-express": "^11.1.0",
     "bcryptjs": "^2.4.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
+    "dotenv": "^16.6.1",
+    "helmet": "^8.1.0",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
     "pg": "^8.12.0",
@@ -28,6 +33,7 @@
   },
   "devDependencies": {
     "@nestjs/testing": "^11.1.0",
+    "@types/bcryptjs": "^2.4.6",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.2",
     "@types/passport-jwt": "^4.0.1",

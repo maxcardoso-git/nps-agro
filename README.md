@@ -2,20 +2,84 @@
 
 ## Environment
 
-Use `.env.example` as base:
+Environment templates:
 
+- `.env.development.example`
+- `.env.production.example`
+- `.env.example` (legacy baseline)
+
+Required variables:
+
+- `NODE_ENV`
+- `PORT`
 - `DATABASE_URL`
-- `DATABASE_URL_TEST` (optional for DB integration tests)
-- `JWT_SECRET`
+- `JWT_SECRET` (min 32 chars)
 - `JWT_EXPIRES_IN`
+- `APP_NAME`
+- `LOG_LEVEL`
 
-## Migrations
+## Database Migrations
 
-Phase 2 minimal database change:
+Versioned SQL files:
 
-```sql
-sql/migrations/20260321_phase2_auth_access.sql
+- `sql/versioned/001_init_schema.sql`
+- `sql/versioned/002_indexes.sql`
+- `sql/versioned/003_views.sql`
+- `sql/versioned/004_phase2_alter_app_user.sql`
+- `sql/versioned/100_seed_dev.sql` (optional dev seed)
+
+Run migrations:
+
+```bash
+DATABASE_URL=postgresql://... ./scripts/run-migrations.sh
 ```
+
+Run migrations + dev seeds:
+
+```bash
+DATABASE_URL=postgresql://... RUN_DEV_SEEDS=true ./scripts/run-migrations.sh
+```
+
+## Build & Runtime
+
+```bash
+npm install
+npm run build
+node dist/main.js
+```
+
+Health endpoint:
+
+- `GET /health`
+
+## PM2
+
+PM2 config:
+
+- `ecosystem.config.js`
+
+Start:
+
+```bash
+mkdir -p /var/log/nps-agro-api
+pm2 start ecosystem.config.js --only nps-agro-api
+pm2 save
+```
+
+## Deploy (VPS)
+
+Script:
+
+- `scripts/deploy.sh`
+
+Pipeline:
+
+1. `git pull origin main`
+2. `npm install`
+3. `npm run build`
+4. run migrations
+5. restart PM2
+6. validate `/health`
 
 ## Main Modules
 
@@ -26,14 +90,4 @@ sql/migrations/20260321_phase2_auth_access.sql
 - `campaign` (`/campaigns`)
 - `reporting` (`/reports/campaigns/:campaignId/*`)
 - `survey` (`/interviews/*`)
-
-## Global Concerns
-
-- JWT auth guard
-- tenant scope guard
-- permission guard
-- request id interceptor
-- response envelope interceptor
-- audit context interceptor
-- global exception filter
-
+- `health` (`/health`)

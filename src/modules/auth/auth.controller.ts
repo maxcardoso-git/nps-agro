@@ -1,4 +1,5 @@
 import { Body, Controller, Get, Post } from '@nestjs/common';
+import { AuthUserClaims } from '../../common/types';
 import { CurrentUser } from '../access/current-user.decorator';
 import { Public } from '../access/public.decorator';
 import { AuthService } from './auth.service';
@@ -15,7 +16,7 @@ export class AuthController {
   }
 
   @Get('me')
-  async me(@CurrentUser() user: { sub: string; email: string; role: string; tenant_id: string; permissions?: string[] }) {
+  async me(@CurrentUser() user: AuthUserClaims) {
     return this.authService.getProfile(user);
   }
 }

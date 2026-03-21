@@ -9,6 +9,10 @@ export class ResponseEnvelopeInterceptor implements NestInterceptor {
 
     return next.handle().pipe(
       map((data: unknown) => {
+        if (request.path === '/health') {
+          return data;
+        }
+
         if (
           typeof data === 'object' &&
           data !== null &&

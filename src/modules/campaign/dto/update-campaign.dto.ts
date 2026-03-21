@@ -22,7 +22,7 @@ export class UpdateCampaignDto {
   end_date?: string;
 
   @IsOptional()
-  @IsUUID()
+  @IsUUID('all')
   questionnaire_version_id?: string;
 
   @IsOptional()

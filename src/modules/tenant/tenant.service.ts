@@ -63,7 +63,7 @@ export class TenantService {
       throw new DomainException('FORBIDDEN_TENANT_SCOPE', 'Acesso negado ao tenant solicitado', HttpStatus.FORBIDDEN);
     }
 
-    const updated = await this.tenantRepository.update(id, dto);
+    const updated = await this.tenantRepository.update(id, dto as unknown as Record<string, unknown>);
     if (!updated) {
       throw new DomainException('TENANT_NOT_FOUND', 'Tenant não encontrado', HttpStatus.NOT_FOUND);
     }

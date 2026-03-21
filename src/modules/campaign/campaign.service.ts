@@ -106,7 +106,7 @@ export class CampaignService {
       }
     }
 
-    const updated = await this.campaignRepository.update(id, dto);
+    const updated = await this.campaignRepository.update(id, dto as unknown as Record<string, unknown>);
     if (!updated) {
       throw new DomainException('CAMPAIGN_NOT_FOUND', 'Campanha não encontrada', HttpStatus.NOT_FOUND);
     }

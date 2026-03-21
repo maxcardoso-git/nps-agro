@@ -2,7 +2,7 @@ import { IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateQuestionnaireDto {
   @IsOptional()
-  @IsUUID()
+  @IsUUID('all')
   tenant_id?: string;
 
   @IsString()
@@ -12,4 +12,3 @@ export class CreateQuestionnaireDto {
   @IsString()
   description?: string;
 }
-
