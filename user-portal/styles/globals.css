@@ -1,0 +1,27 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-primary: #1168bd;
+  --color-secondary: #0b4884;
+  --color-bg: #f6f8fb;
+  --color-text: #1f2937;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background: radial-gradient(circle at 0% 0%, #ffffff 0%, var(--color-bg) 48%, #e9eef7 100%);
+  color: var(--color-text);
+  font-family: 'IBM Plex Sans', 'Segoe UI', sans-serif;
+}

@@ -1,0 +1,147 @@
+{
+  "common": {
+    "loading": "Carregando...",
+    "logout": "Sair",
+    "language": "Idioma",
+    "menu": {
+      "dashboard": "Dashboard"
+    },
+    "forbidden": {
+      "title": "Acesso negado",
+      "description": "Seu perfil não possui permissão para acessar este portal.",
+      "roleLabel": "Perfil"
+    }
+  },
+  "auth": {
+    "title": "Entrar no User Portal",
+    "email": "E-mail",
+    "password": "Senha",
+    "tenantCode": "Código do tenant (opcional)",
+    "submit": "Entrar",
+    "loading": "Entrando...",
+    "genericError": "Falha na autenticação"
+  },
+  "dashboard": {
+    "title": "Executive Dashboard",
+    "empty": "Selecione uma campanha para visualizar os dados.",
+    "filters": {
+      "title": "Filtros",
+      "campaign": "Campanha",
+      "dateRangeStart": "Data inicial",
+      "dateRangeEnd": "Data final",
+      "region": "Região",
+      "sentiment": "Sentimento",
+      "npsMin": "NPS mínimo",
+      "npsMax": "NPS máximo",
+      "allCampaigns": "Todas as campanhas",
+      "allSentiments": "Todos os sentimentos"
+    },
+    "kpis": {
+      "nps": "NPS",
+      "totalInterviews": "Total entrevistas",
+      "promoters": "Promotores",
+      "neutrals": "Neutros",
+      "detractors": "Detratores"
+    },
+    "sentiments": {
+      "positive": "Positivo",
+      "neutral": "Neutro",
+      "negative": "Negativo",
+      "mixed": "Misto",
+      "unknown": "Desconhecido"
+    },
+    "campaign": {
+      "title": "Campanha",
+      "open": "Abrir detalhes"
+    },
+    "charts": {
+      "trend": "Tendência de NPS",
+      "sentiment": "Distribuição de sentimento",
+      "regional": "Breakdown regional"
+    },
+    "insights": {
+      "topTopics": "Top insights",
+      "empty": "Sem tópicos para o filtro atual.",
+      "alerts": "Alertas",
+      "noAlerts": "Sem detratores recentes para os filtros selecionados."
+    },
+    "interviews": {
+      "title": "Entrevistas",
+      "empty": "Nenhuma entrevista encontrada.",
+      "open": "Abrir",
+      "headers": {
+        "id": "ID",
+        "respondent": "Respondente",
+        "region": "Região",
+        "nps": "NPS",
+        "sentiment": "Sentimento",
+        "action": "Ação"
+      }
+    },
+    "errors": {
+      "forbidden": "Você não possui permissão para visualizar os dados.",
+      "generic": "Falha ao carregar o dashboard."
+    }
+  },
+  "reports": {
+    "empty": "Sem dados disponíveis.",
+    "filters": {
+      "title": "Filtros",
+      "campaign": "Campanha",
+      "dateRangeStart": "Data inicial",
+      "dateRangeEnd": "Data final",
+      "region": "Região",
+      "sentiment": "Sentimento",
+      "npsMin": "NPS mínimo",
+      "npsMax": "NPS máximo",
+      "allCampaigns": "Todas as campanhas",
+      "allSentiments": "Todos os sentimentos"
+    },
+    "kpis": {
+      "nps": "NPS",
+      "totalInterviews": "Total entrevistas",
+      "promoters": "Promotores",
+      "neutrals": "Neutros",
+      "detractors": "Detratores"
+    },
+    "sentiments": {
+      "positive": "Positivo",
+      "neutral": "Neutro",
+      "negative": "Negativo",
+      "mixed": "Misto",
+      "unknown": "Desconhecido"
+    },
+    "charts": {
+      "trend": "Evolução temporal",
+      "sentiment": "Sentimento"
+    },
+    "campaignDetail": {
+      "title": "Campaign Analytics",
+      "interviews": "Tabela de entrevistas"
+    },
+    "interviews": {
+      "empty": "Nenhuma entrevista encontrada.",
+      "open": "Abrir",
+      "missingCampaign": "campaignId não informado.",
+      "notFound": "Entrevista não encontrada para a campanha.",
+      "headers": {
+        "id": "ID",
+        "respondent": "Respondente",
+        "region": "Região",
+        "nps": "NPS",
+        "sentiment": "Sentimento",
+        "action": "Ação"
+      }
+    },
+    "interviewDetail": {
+      "title": "Interview Detail",
+      "respondent": "Respondente",
+      "metrics": "Métricas",
+      "summary": "Resumo",
+      "topics": "Tópicos"
+    },
+    "errors": {
+      "generic": "Falha ao carregar os dados do relatório."
+    }
+  }
+}

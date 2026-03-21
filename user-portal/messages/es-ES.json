@@ -1,0 +1,147 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "logout": "Salir",
+    "language": "Idioma",
+    "menu": {
+      "dashboard": "Dashboard"
+    },
+    "forbidden": {
+      "title": "Acceso denegado",
+      "description": "Tu rol no tiene permiso para este portal.",
+      "roleLabel": "Rol"
+    }
+  },
+  "auth": {
+    "title": "Ingresar al User Portal",
+    "email": "Correo",
+    "password": "Contraseña",
+    "tenantCode": "Código del tenant (opcional)",
+    "submit": "Ingresar",
+    "loading": "Ingresando...",
+    "genericError": "Falló la autenticación"
+  },
+  "dashboard": {
+    "title": "Dashboard Ejecutivo",
+    "empty": "Seleccione una campaña para ver datos.",
+    "filters": {
+      "title": "Filtros",
+      "campaign": "Campaña",
+      "dateRangeStart": "Fecha inicial",
+      "dateRangeEnd": "Fecha final",
+      "region": "Región",
+      "sentiment": "Sentimiento",
+      "npsMin": "NPS mínimo",
+      "npsMax": "NPS máximo",
+      "allCampaigns": "Todas las campañas",
+      "allSentiments": "Todos los sentimientos"
+    },
+    "kpis": {
+      "nps": "NPS",
+      "totalInterviews": "Total entrevistas",
+      "promoters": "Promotores",
+      "neutrals": "Neutros",
+      "detractors": "Detractores"
+    },
+    "sentiments": {
+      "positive": "Positivo",
+      "neutral": "Neutro",
+      "negative": "Negativo",
+      "mixed": "Mixto",
+      "unknown": "Desconocido"
+    },
+    "campaign": {
+      "title": "Campaña",
+      "open": "Abrir detalle"
+    },
+    "charts": {
+      "trend": "Tendencia NPS",
+      "sentiment": "Distribución de sentimiento",
+      "regional": "Desglose regional"
+    },
+    "insights": {
+      "topTopics": "Top insights",
+      "empty": "Sin tópicos para los filtros actuales.",
+      "alerts": "Alertas",
+      "noAlerts": "No hay detractores recientes para los filtros."
+    },
+    "interviews": {
+      "title": "Entrevistas",
+      "empty": "No se encontraron entrevistas.",
+      "open": "Abrir",
+      "headers": {
+        "id": "ID",
+        "respondent": "Respondente",
+        "region": "Región",
+        "nps": "NPS",
+        "sentiment": "Sentimiento",
+        "action": "Acción"
+      }
+    },
+    "errors": {
+      "forbidden": "No tienes permiso para ver este dashboard.",
+      "generic": "Error al cargar el dashboard."
+    }
+  },
+  "reports": {
+    "empty": "No hay datos disponibles.",
+    "filters": {
+      "title": "Filtros",
+      "campaign": "Campaña",
+      "dateRangeStart": "Fecha inicial",
+      "dateRangeEnd": "Fecha final",
+      "region": "Región",
+      "sentiment": "Sentimiento",
+      "npsMin": "NPS mínimo",
+      "npsMax": "NPS máximo",
+      "allCampaigns": "Todas las campañas",
+      "allSentiments": "Todos los sentimientos"
+    },
+    "kpis": {
+      "nps": "NPS",
+      "totalInterviews": "Total entrevistas",
+      "promoters": "Promotores",
+      "neutrals": "Neutros",
+      "detractors": "Detractores"
+    },
+    "sentiments": {
+      "positive": "Positivo",
+      "neutral": "Neutro",
+      "negative": "Negativo",
+      "mixed": "Mixto",
+      "unknown": "Desconocido"
+    },
+    "charts": {
+      "trend": "Evolución temporal",
+      "sentiment": "Sentimiento"
+    },
+    "campaignDetail": {
+      "title": "Analítica de Campaña",
+      "interviews": "Tabla de entrevistas"
+    },
+    "interviews": {
+      "empty": "No se encontraron entrevistas.",
+      "open": "Abrir",
+      "missingCampaign": "campaignId es obligatorio.",
+      "notFound": "Entrevista no encontrada para la campaña.",
+      "headers": {
+        "id": "ID",
+        "respondent": "Respondente",
+        "region": "Región",
+        "nps": "NPS",
+        "sentiment": "Sentimiento",
+        "action": "Acción"
+      }
+    },
+    "interviewDetail": {
+      "title": "Detalle de entrevista",
+      "respondent": "Respondente",
+      "metrics": "Métricas",
+      "summary": "Resumen",
+      "topics": "Tópicos"
+    },
+    "errors": {
+      "generic": "Error al cargar los datos del reporte."
+    }
+  }
+}

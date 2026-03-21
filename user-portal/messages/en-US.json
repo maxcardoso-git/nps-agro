@@ -1,0 +1,147 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "logout": "Logout",
+    "language": "Language",
+    "menu": {
+      "dashboard": "Dashboard"
+    },
+    "forbidden": {
+      "title": "Access denied",
+      "description": "Your role is not allowed to access this portal.",
+      "roleLabel": "Role"
+    }
+  },
+  "auth": {
+    "title": "Sign in to User Portal",
+    "email": "Email",
+    "password": "Password",
+    "tenantCode": "Tenant code (optional)",
+    "submit": "Sign in",
+    "loading": "Signing in...",
+    "genericError": "Authentication failed"
+  },
+  "dashboard": {
+    "title": "Executive Dashboard",
+    "empty": "Select a campaign to view data.",
+    "filters": {
+      "title": "Filters",
+      "campaign": "Campaign",
+      "dateRangeStart": "Date start",
+      "dateRangeEnd": "Date end",
+      "region": "Region",
+      "sentiment": "Sentiment",
+      "npsMin": "NPS min",
+      "npsMax": "NPS max",
+      "allCampaigns": "All campaigns",
+      "allSentiments": "All sentiments"
+    },
+    "kpis": {
+      "nps": "NPS",
+      "totalInterviews": "Total interviews",
+      "promoters": "Promoters",
+      "neutrals": "Neutrals",
+      "detractors": "Detractors"
+    },
+    "sentiments": {
+      "positive": "Positive",
+      "neutral": "Neutral",
+      "negative": "Negative",
+      "mixed": "Mixed",
+      "unknown": "Unknown"
+    },
+    "campaign": {
+      "title": "Campaign",
+      "open": "Open details"
+    },
+    "charts": {
+      "trend": "NPS trend",
+      "sentiment": "Sentiment distribution",
+      "regional": "Regional breakdown"
+    },
+    "insights": {
+      "topTopics": "Top insights",
+      "empty": "No topics for current filters.",
+      "alerts": "Alerts",
+      "noAlerts": "No recent detractors for selected filters."
+    },
+    "interviews": {
+      "title": "Interviews",
+      "empty": "No interviews found.",
+      "open": "Open",
+      "headers": {
+        "id": "ID",
+        "respondent": "Respondent",
+        "region": "Region",
+        "nps": "NPS",
+        "sentiment": "Sentiment",
+        "action": "Action"
+      }
+    },
+    "errors": {
+      "forbidden": "You are not allowed to view this dashboard.",
+      "generic": "Failed to load dashboard."
+    }
+  },
+  "reports": {
+    "empty": "No data available.",
+    "filters": {
+      "title": "Filters",
+      "campaign": "Campaign",
+      "dateRangeStart": "Date start",
+      "dateRangeEnd": "Date end",
+      "region": "Region",
+      "sentiment": "Sentiment",
+      "npsMin": "NPS min",
+      "npsMax": "NPS max",
+      "allCampaigns": "All campaigns",
+      "allSentiments": "All sentiments"
+    },
+    "kpis": {
+      "nps": "NPS",
+      "totalInterviews": "Total interviews",
+      "promoters": "Promoters",
+      "neutrals": "Neutrals",
+      "detractors": "Detractors"
+    },
+    "sentiments": {
+      "positive": "Positive",
+      "neutral": "Neutral",
+      "negative": "Negative",
+      "mixed": "Mixed",
+      "unknown": "Unknown"
+    },
+    "charts": {
+      "trend": "Time evolution",
+      "sentiment": "Sentiment"
+    },
+    "campaignDetail": {
+      "title": "Campaign Analytics",
+      "interviews": "Interview table"
+    },
+    "interviews": {
+      "empty": "No interviews found.",
+      "open": "Open",
+      "missingCampaign": "campaignId is required.",
+      "notFound": "Interview not found for this campaign.",
+      "headers": {
+        "id": "ID",
+        "respondent": "Respondent",
+        "region": "Region",
+        "nps": "NPS",
+        "sentiment": "Sentiment",
+        "action": "Action"
+      }
+    },
+    "interviewDetail": {
+      "title": "Interview Detail",
+      "respondent": "Respondent",
+      "metrics": "Metrics",
+      "summary": "Summary",
+      "topics": "Topics"
+    },
+    "errors": {
+      "generic": "Failed to load report data."
+    }
+  }
+}
