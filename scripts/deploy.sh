@@ -18,7 +18,11 @@ set +a
 HEALTH_URL="${HEALTH_URL:-http://127.0.0.1:${PORT:-3000}/health}"
 
 echo "[1/7] Pulling latest code"
-git pull origin main
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  git pull origin main
+else
+  echo "Skipping git pull: repository metadata (.git) not found."
+fi
 
 echo "[2/7] Installing dependencies"
 npm install
