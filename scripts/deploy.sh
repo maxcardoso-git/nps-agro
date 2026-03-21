@@ -3,9 +3,19 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP_NAME="${APP_NAME:-nps-agro-api}"
-HEALTH_URL="${HEALTH_URL:-http://127.0.0.1:${PORT:-3000}/health}"
 
 cd "$ROOT_DIR"
+
+if [[ ! -f "$ROOT_DIR/.env.production" ]]; then
+  echo ".env.production not found in $ROOT_DIR"
+  exit 1
+fi
+
+set -a
+. "$ROOT_DIR/.env.production"
+set +a
+
+HEALTH_URL="${HEALTH_URL:-http://127.0.0.1:${PORT:-3000}/health}"
 
 echo "[1/7] Pulling latest code"
 git pull origin main
