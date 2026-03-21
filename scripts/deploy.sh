@@ -45,5 +45,18 @@ echo "[6/7] Persisting PM2 process list"
 pm2 save
 
 echo "[7/7] Validating health endpoint"
-curl -fsS "$HEALTH_URL" >/dev/null
-echo "Deploy completed successfully."
+ATTEMPTS=15
+SLEEP_SECONDS=2
+for ((i=1; i<=ATTEMPTS; i++)); do
+  if curl -fsS "$HEALTH_URL" >/dev/null; then
+    echo "Health check passed."
+    echo "Deploy completed successfully."
+    exit 0
+  fi
+
+  echo "Health check attempt $i/$ATTEMPTS failed. Retrying in ${SLEEP_SECONDS}s..."
+  sleep "$SLEEP_SECONDS"
+done
+
+echo "Health check failed after $ATTEMPTS attempts."
+exit 1
