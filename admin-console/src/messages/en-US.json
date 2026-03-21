@@ -1,0 +1,206 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "logout": "Logout",
+    "language": "Language",
+    "menu": {
+      "dashboard": "Dashboard",
+      "campaigns": "Campaigns",
+      "questionnaires": "Questionnaires",
+      "reports": "Reports",
+      "interviews": "Interviews",
+      "tenants": "Tenants",
+      "users": "Users",
+      "branding": "Branding"
+    },
+    "branding": {
+      "title": "Branding settings",
+      "previewTitle": "Preview",
+      "previewText": "This preview shows how the tenant branding will appear in the portal.",
+      "fields": {
+        "app_name": "Application name",
+        "logo_url": "Logo URL",
+        "primary_color": "Primary color",
+        "secondary_color": "Secondary color",
+        "background_color": "Background color",
+        "text_color": "Text color"
+      },
+      "actions": {
+        "save": "Save",
+        "reset": "Reset default",
+        "preview": "Apply preview"
+      }
+    }
+  },
+  "auth": {
+    "title": "Sign in to admin portal",
+    "email": "Email",
+    "password": "Password",
+    "tenantCode": "Tenant code (optional)",
+    "submit": "Sign in",
+    "loading": "Signing in...",
+    "genericError": "Authentication failed"
+  },
+  "dashboard": {
+    "title": "Overview",
+    "cards": {
+      "campaigns": "Campaigns",
+      "questionnaires": "Questionnaires",
+      "tenant": "Current tenant"
+    },
+    "recentCampaigns": "Recent campaigns"
+  },
+  "campaign": {
+    "title": "Campaigns",
+    "createTitle": "Create campaign",
+    "listTitle": "Campaign list",
+    "fields": {
+      "tenantId": "Tenant ID",
+      "name": "Name",
+      "description": "Description",
+      "segment": "Segment",
+      "questionnaireVersion": "Questionnaire version"
+    },
+    "actions": {
+      "create": "Create",
+      "activate": "Activate",
+      "pause": "Pause",
+      "complete": "Complete"
+    },
+    "table": {
+      "name": "Name",
+      "status": "Status",
+      "segment": "Segment",
+      "actions": "Actions"
+    },
+    "errors": {
+      "generic": "Could not process campaign"
+    }
+  },
+  "questionnaire": {
+    "title": "Questionnaires",
+    "createTitle": "Create questionnaire",
+    "listTitle": "Questionnaire list",
+    "versionEditorTitle": "Version editor",
+    "versionsTitle": "Versions",
+    "selectedQuestionnaire": "Selected questionnaire",
+    "fields": {
+      "name": "Name",
+      "description": "Description"
+    },
+    "actions": {
+      "create": "Create",
+      "createVersion": "Create version",
+      "validate": "Validate",
+      "publish": "Publish"
+    },
+    "table": {
+      "name": "Name",
+      "status": "Status",
+      "id": "ID",
+      "version": "Version",
+      "actions": "Actions"
+    },
+    "errors": {
+      "generic": "Could not process questionnaire",
+      "invalidSchema": "Invalid schema"
+    }
+  },
+  "reporting": {
+    "title": "Reports",
+    "filtersTitle": "Filters",
+    "interviewsTitle": "Interviews",
+    "fields": {
+      "campaign": "Campaign",
+      "region": "Region",
+      "sentiment": "Sentiment"
+    },
+    "kpis": {
+      "nps": "NPS",
+      "interviews": "Total interviews",
+      "promoters": "Promoters",
+      "detractors": "Detractors"
+    },
+    "charts": {
+      "npsBreakdown": "NPS breakdown",
+      "sentiment": "Sentiment distribution",
+      "topics": "Top topics"
+    },
+    "table": {
+      "topic": "Topic",
+      "frequency": "Frequency",
+      "interviewId": "Interview ID",
+      "respondent": "Respondent",
+      "status": "Status",
+      "sentiment": "Sentiment"
+    }
+  },
+  "survey": {
+    "title": "Interview runtime",
+    "startTitle": "Start interview",
+    "stateTitle": "Interview state",
+    "noQuestion": "No pending question right now.",
+    "fields": {
+      "campaign": "Campaign",
+      "respondentId": "Respondent ID",
+      "interviewId": "Interview ID",
+      "progress": "Progress"
+    },
+    "actions": {
+      "start": "Start",
+      "answer": "Submit answer",
+      "complete": "Complete"
+    },
+    "errors": {
+      "generic": "Could not execute interview"
+    }
+  },
+  "tenant": {
+    "title": "Tenants",
+    "createTitle": "Create tenant",
+    "listTitle": "Tenant list",
+    "fields": {
+      "name": "Name",
+      "code": "Code",
+      "timezone": "Timezone"
+    },
+    "actions": {
+      "create": "Create"
+    },
+    "table": {
+      "name": "Name",
+      "code": "Code",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "errors": {
+      "generic": "Could not process tenant"
+    }
+  },
+  "user": {
+    "title": "Users",
+    "tenantScopeTitle": "Tenant scope",
+    "createTitle": "Create user",
+    "listTitle": "User list",
+    "fields": {
+      "name": "Name",
+      "email": "Email",
+      "password": "Password"
+    },
+    "actions": {
+      "create": "Create"
+    },
+    "table": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "active": "Active"
+    },
+    "errors": {
+      "generic": "Could not process user"
+    }
+  },
+  "errors": {
+    "forbidden": "You are not allowed to access this resource."
+  }
+}

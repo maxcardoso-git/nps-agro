@@ -1,0 +1,137 @@
+{
+  "common": {
+    "loading": "Loading...",
+    "logout": "Logout",
+    "language": "Language",
+    "menu": {
+      "dashboard": "Executive Dashboard",
+      "campaignAnalytics": "Campaign Analytics",
+      "interviewExplorer": "Interview Explorer"
+    },
+    "restricted": {
+      "title": "Access denied",
+      "description": "Your role is not allowed to access the analytics portal.",
+      "roleLabel": "Role"
+    }
+  },
+  "auth": {
+    "title": "Access Analytics Portal",
+    "email": "Email",
+    "password": "Password",
+    "tenantCode": "Tenant code (optional)",
+    "submit": "Sign in",
+    "loading": "Signing in...",
+    "genericError": "Authentication failed"
+  },
+  "dashboard": {
+    "title": "Executive Dashboard",
+    "empty": "Select a campaign to display analytics.",
+    "filters": {
+      "title": "Filters",
+      "campaign": "Campaign",
+      "region": "Region",
+      "sentiment": "Sentiment",
+      "dateFrom": "Date from",
+      "dateTo": "Date to",
+      "allCampaigns": "All campaigns",
+      "allSentiments": "All sentiments"
+    },
+    "kpi": {
+      "nps": "NPS",
+      "totalInterviews": "Total interviews",
+      "promoters": "Promoters",
+      "neutrals": "Neutrals",
+      "detractors": "Detractors"
+    },
+    "charts": {
+      "trend": "NPS trend",
+      "sentiment": "Sentiment distribution",
+      "topics": "Top topics"
+    },
+    "insights": {
+      "title": "Top insights"
+    },
+    "alerts": {
+      "title": "Alerts",
+      "empty": "No critical alerts for current filters.",
+      "recentDetractor": "Recent detractor"
+    },
+    "interviews": {
+      "title": "Recent interviews",
+      "empty": "No interviews found.",
+      "table": {
+        "id": "Interview ID",
+        "respondent": "Respondent",
+        "region": "Region",
+        "nps": "NPS",
+        "sentiment": "Sentiment",
+        "status": "Status"
+      }
+    }
+  },
+  "reports": {
+    "empty": "No data available.",
+    "filters": {
+      "title": "Filters",
+      "campaign": "Campaign",
+      "region": "Region",
+      "sentiment": "Sentiment",
+      "dateFrom": "Date from",
+      "dateTo": "Date to",
+      "allCampaigns": "All campaigns",
+      "allSentiments": "All sentiments"
+    },
+    "kpi": {
+      "nps": "NPS",
+      "totalInterviews": "Total interviews",
+      "promoters": "Promoters",
+      "neutrals": "Neutrals",
+      "detractors": "Detractors"
+    },
+    "charts": {
+      "trend": "Time evolution",
+      "sentiment": "Sentiment",
+      "topics": "Drivers and topics"
+    },
+    "campaigns": {
+      "title": "Campaign Analytics",
+      "compareTitle": "Campaign comparison",
+      "listTitle": "Available campaigns",
+      "table": {
+        "name": "Name",
+        "status": "Status",
+        "segment": "Segment",
+        "action": "Action",
+        "open": "Open detail"
+      }
+    },
+    "campaignDetail": {
+      "title": "Campaign Detail",
+      "interviews": "Campaign interviews"
+    },
+    "interviews": {
+      "title": "Interview Explorer",
+      "searchTitle": "Text search",
+      "searchPlaceholder": "Search by respondent, summary or region",
+      "tableTitle": "Interview list",
+      "empty": "No interviews found.",
+      "missingCampaign": "Campaign ID not provided.",
+      "notFound": "Interview not found for this campaign.",
+      "table": {
+        "id": "Interview ID",
+        "respondent": "Respondent",
+        "region": "Region",
+        "nps": "NPS",
+        "sentiment": "Sentiment",
+        "status": "Status"
+      }
+    },
+    "interviewDetail": {
+      "title": "Interview Detail",
+      "respondent": "Respondent",
+      "metrics": "Metrics",
+      "summary": "Summary",
+      "topics": "Topics"
+    }
+  }
+}

@@ -1,0 +1,206 @@
+{
+  "common": {
+    "loading": "Cargando...",
+    "logout": "Salir",
+    "language": "Idioma",
+    "menu": {
+      "dashboard": "Dashboard",
+      "campaigns": "Campañas",
+      "questionnaires": "Cuestionarios",
+      "reports": "Reportes",
+      "interviews": "Entrevistas",
+      "tenants": "Tenants",
+      "users": "Usuarios",
+      "branding": "Branding"
+    },
+    "branding": {
+      "title": "Configuración de branding",
+      "previewTitle": "Vista previa",
+      "previewText": "Esta vista previa muestra cómo se verá el tenant en el portal.",
+      "fields": {
+        "app_name": "Nombre de la aplicación",
+        "logo_url": "URL del logo",
+        "primary_color": "Color primario",
+        "secondary_color": "Color secundario",
+        "background_color": "Color de fondo",
+        "text_color": "Color del texto"
+      },
+      "actions": {
+        "save": "Guardar",
+        "reset": "Restablecer",
+        "preview": "Aplicar vista previa"
+      }
+    }
+  },
+  "auth": {
+    "title": "Ingresar al portal administrativo",
+    "email": "Correo",
+    "password": "Contraseña",
+    "tenantCode": "Código del tenant (opcional)",
+    "submit": "Ingresar",
+    "loading": "Ingresando...",
+    "genericError": "Error de autenticación"
+  },
+  "dashboard": {
+    "title": "Resumen",
+    "cards": {
+      "campaigns": "Campañas",
+      "questionnaires": "Cuestionarios",
+      "tenant": "Tenant actual"
+    },
+    "recentCampaigns": "Campañas recientes"
+  },
+  "campaign": {
+    "title": "Campañas",
+    "createTitle": "Crear campaña",
+    "listTitle": "Lista de campañas",
+    "fields": {
+      "tenantId": "Tenant ID",
+      "name": "Nombre",
+      "description": "Descripción",
+      "segment": "Segmento",
+      "questionnaireVersion": "Versión de cuestionario"
+    },
+    "actions": {
+      "create": "Crear",
+      "activate": "Activar",
+      "pause": "Pausar",
+      "complete": "Finalizar"
+    },
+    "table": {
+      "name": "Nombre",
+      "status": "Estado",
+      "segment": "Segmento",
+      "actions": "Acciones"
+    },
+    "errors": {
+      "generic": "No fue posible procesar la campaña"
+    }
+  },
+  "questionnaire": {
+    "title": "Cuestionarios",
+    "createTitle": "Crear cuestionario",
+    "listTitle": "Lista de cuestionarios",
+    "versionEditorTitle": "Editor de versión",
+    "versionsTitle": "Versiones",
+    "selectedQuestionnaire": "Cuestionario seleccionado",
+    "fields": {
+      "name": "Nombre",
+      "description": "Descripción"
+    },
+    "actions": {
+      "create": "Crear",
+      "createVersion": "Crear versión",
+      "validate": "Validar",
+      "publish": "Publicar"
+    },
+    "table": {
+      "name": "Nombre",
+      "status": "Estado",
+      "id": "ID",
+      "version": "Versión",
+      "actions": "Acciones"
+    },
+    "errors": {
+      "generic": "No fue posible procesar el cuestionario",
+      "invalidSchema": "Schema inválido"
+    }
+  },
+  "reporting": {
+    "title": "Reportes",
+    "filtersTitle": "Filtros",
+    "interviewsTitle": "Entrevistas",
+    "fields": {
+      "campaign": "Campaña",
+      "region": "Región",
+      "sentiment": "Sentimiento"
+    },
+    "kpis": {
+      "nps": "NPS",
+      "interviews": "Total de entrevistas",
+      "promoters": "Promotores",
+      "detractors": "Detractores"
+    },
+    "charts": {
+      "npsBreakdown": "Desglose NPS",
+      "sentiment": "Distribución de sentimiento",
+      "topics": "Temas principales"
+    },
+    "table": {
+      "topic": "Tema",
+      "frequency": "Frecuencia",
+      "interviewId": "Interview ID",
+      "respondent": "Respondente",
+      "status": "Estado",
+      "sentiment": "Sentimiento"
+    }
+  },
+  "survey": {
+    "title": "Runtime de entrevistas",
+    "startTitle": "Iniciar entrevista",
+    "stateTitle": "Estado de entrevista",
+    "noQuestion": "No hay pregunta pendiente por ahora.",
+    "fields": {
+      "campaign": "Campaña",
+      "respondentId": "Respondent ID",
+      "interviewId": "Interview ID",
+      "progress": "Progreso"
+    },
+    "actions": {
+      "start": "Iniciar",
+      "answer": "Enviar respuesta",
+      "complete": "Finalizar"
+    },
+    "errors": {
+      "generic": "No fue posible ejecutar la entrevista"
+    }
+  },
+  "tenant": {
+    "title": "Tenants",
+    "createTitle": "Crear tenant",
+    "listTitle": "Lista de tenants",
+    "fields": {
+      "name": "Nombre",
+      "code": "Código",
+      "timezone": "Zona horaria"
+    },
+    "actions": {
+      "create": "Crear"
+    },
+    "table": {
+      "name": "Nombre",
+      "code": "Código",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "errors": {
+      "generic": "No fue posible procesar el tenant"
+    }
+  },
+  "user": {
+    "title": "Usuarios",
+    "tenantScopeTitle": "Scope del tenant",
+    "createTitle": "Crear usuario",
+    "listTitle": "Lista de usuarios",
+    "fields": {
+      "name": "Nombre",
+      "email": "Correo",
+      "password": "Contraseña"
+    },
+    "actions": {
+      "create": "Crear"
+    },
+    "table": {
+      "name": "Nombre",
+      "email": "Correo",
+      "role": "Rol",
+      "active": "Activo"
+    },
+    "errors": {
+      "generic": "No fue posible procesar el usuario"
+    }
+  },
+  "errors": {
+    "forbidden": "No tienes permiso para acceder a este recurso."
+  }
+}
