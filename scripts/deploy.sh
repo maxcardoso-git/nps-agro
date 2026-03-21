@@ -25,7 +25,7 @@ else
 fi
 
 echo "[2/7] Installing dependencies"
-npm install
+npm install --include=dev
 
 echo "[3/7] Building application"
 npm run build
