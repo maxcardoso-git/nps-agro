@@ -301,24 +301,26 @@ export class ContactAttemptRepository extends SqlRepositoryBase {
       [actionId, reservationMinutes],
     );
 
-    // Find next unreserved pending contact (no contact_attempt or last attempt was no_answer/busy)
+    // Find next unreserved pending contact
+    // Uses subquery to avoid FOR UPDATE on outer join
     const row = await this.one<{ id: string }>(
       `SELECT r.id
        FROM core.respondent r
-       LEFT JOIN LATERAL (
-         SELECT outcome FROM core.contact_attempt
-         WHERE respondent_id = r.id AND action_id = $1
-         ORDER BY created_at DESC LIMIT 1
-       ) ca ON true
-       LEFT JOIN core.interview i ON i.respondent_id = r.id AND i.action_id = $1 AND i.status = 'completed'
        WHERE r.action_id = $1
          AND r.tenant_id = $2
          AND (r.reserved_by IS NULL OR r.reserved_by = $3)
-         AND i.id IS NULL
-         AND (ca.outcome IS NULL OR ca.outcome IN ('no_answer', 'busy'))
+         AND NOT EXISTS (
+           SELECT 1 FROM core.interview i
+           WHERE i.respondent_id = r.id AND i.action_id = $1 AND i.status = 'completed'
+         )
+         AND NOT EXISTS (
+           SELECT 1 FROM core.contact_attempt ca
+           WHERE ca.respondent_id = r.id AND ca.action_id = $1
+             AND ca.outcome NOT IN ('no_answer', 'busy')
+         )
        ORDER BY r.created_at
        LIMIT 1
-       FOR UPDATE SKIP LOCKED`,
+       FOR UPDATE OF r SKIP LOCKED`,
       [actionId, tenantId, userId],
     );
 

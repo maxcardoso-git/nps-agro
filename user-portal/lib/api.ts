@@ -183,6 +183,17 @@ export const api = {
         session
       );
     },
+    releaseContact: async (
+      session: AuthSession,
+      actionId: string,
+      respondentId: string
+    ): Promise<void> => {
+      await request<unknown>(
+        `/actions/${actionId}/release-contact/${respondentId}`,
+        { method: 'POST' },
+        session
+      );
+    },
     getRespondents: async (
       session: AuthSession,
       actionId: string,
