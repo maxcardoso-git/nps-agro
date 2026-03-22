@@ -1,0 +1,14 @@
+node_modules
+dist
+.git
+.gitignore
+.planning
+*.md
+.env*
+user-portal/node_modules
+user-portal/.next
+admin-console/node_modules
+admin-console/.next
+Analytics/node_modules
+Analytics/.next
+test
