@@ -71,8 +71,8 @@
 | INFRA-04 | Phase 2 | Complete |
 | INFRA-05 | Phase 2 | Complete |
 | INFRA-06 | Phase 2 | Complete |
-| INFRA-07 | Phase 3 | Pending |
-| INFRA-08 | Phase 3 | Pending |
+| INFRA-07 | Phase 3 | Complete |
+| INFRA-08 | Phase 3 | Complete |
 
 **Coverage:**
 - v1 requirements: 15 total
@@ -81,4 +81,4 @@
 
 ---
 *Requirements defined: 2026-03-21*
-*Last updated: 2026-03-21 after Phase 2 completion*
+*Last updated: 2026-03-21 after Phase 3 completion — all v1 requirements complete*

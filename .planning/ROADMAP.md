@@ -8,7 +8,7 @@ Brownfield project with working NestJS + Next.js codebase that needs security fi
 
 - [x] **Phase 1: Security + Quality** - Fix known vulnerabilities and ensure clean build + tests
 - [x] **Phase 2: Dockerize** - Package all 4 services in Docker and wire up with Compose + Nginx
-- [ ] **Phase 3: Deploy + CI/CD** - Ship to VPS and automate future deploys via GitHub Actions
+- [x] **Phase 3: Deploy + CI/CD** - Ship to VPS and automate future deploys via GitHub Actions
 
 ## Phase Details
 
@@ -59,8 +59,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 03-01-PLAN.md — Rewrite deploy.sh from PM2 to Docker Compose (INFRA-07, INFRA-08)
-- [ ] 03-02-PLAN.md — Update GitHub Actions workflow for Docker-based deploy (INFRA-07)
+- [x] 03-01-PLAN.md — Rewrite deploy.sh from PM2 to Docker Compose (INFRA-07, INFRA-08)
+- [x] 03-02-PLAN.md — Update GitHub Actions workflow for Docker-based deploy (INFRA-07)
 
 ---
 
@@ -72,7 +72,7 @@ Plans:
 |-------|----------------|--------|-----------|
 | 1. Security + Quality | 2/2 | Complete | 2026-03-21 |
 | 2. Dockerize | 2/2 | Complete | 2026-03-21 |
-| 3. Deploy + CI/CD | 0/2 | Not started | - |
+| 3. Deploy + CI/CD | 2/2 | ✓ Complete | 2026-03-21 |
 
 ---
 *Roadmap created: 2026-03-21*
