@@ -1,6 +1,6 @@
 import type { Role } from '@/lib/types';
 
-const allowedRoles: Role[] = ['admin_master', 'platform_admin', 'tenant_admin', 'campaign_manager', 'analyst'];
+const allowedRoles: Role[] = ['admin_master', 'platform_admin', 'tenant_admin', 'campaign_manager', 'analyst', 'interviewer'];
 
 export function canAccessPortal(role?: Role): boolean {
   if (!role) {
