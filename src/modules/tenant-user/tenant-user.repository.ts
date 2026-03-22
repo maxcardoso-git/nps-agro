@@ -97,6 +97,34 @@ export class TenantUserRepository extends SqlRepositoryBase {
     );
   }
 
+  async getUserRoles(userId: string, tenantId: string): Promise<string[]> {
+    const rows = await this.many<{ role: string }>(
+      `SELECT role FROM core.user_tenant_role WHERE user_id = $1 AND tenant_id = $2 ORDER BY role`,
+      [userId, tenantId],
+    );
+    return rows.map((r) => r.role);
+  }
+
+  async setUserRoles(userId: string, tenantId: string, roles: string[]): Promise<void> {
+    await this.execute(
+      `DELETE FROM core.user_tenant_role WHERE user_id = $1 AND tenant_id = $2`,
+      [userId, tenantId],
+    );
+    for (const role of roles) {
+      await this.execute(
+        `INSERT INTO core.user_tenant_role (user_id, tenant_id, role) VALUES ($1, $2, $3) ON CONFLICT DO NOTHING`,
+        [userId, tenantId, role],
+      );
+    }
+    // Keep app_user.role in sync with primary role
+    if (roles.length > 0) {
+      await this.execute(
+        `UPDATE core.app_user SET role = $1, updated_at = NOW() WHERE id = $2`,
+        [roles[0], userId],
+      );
+    }
+  }
+
   async countActiveTenantAdmins(tenantId: string, excludeUserId?: string): Promise<number> {
     const values: unknown[] = [tenantId];
     let exclusion = '';

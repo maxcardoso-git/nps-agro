@@ -26,7 +26,10 @@ export class TenantScopeGuard implements CanActivate {
     const headerTenant = Array.isArray(headerTenantId) ? headerTenantId[0] : headerTenantId;
     const candidateTenantIds = this.collectCandidateTenantIds(request);
 
-    if (user.role !== 'platform_admin') {
+    const roles = user.roles ?? [user.role];
+    const isPlatformAdmin = roles.includes('platform_admin');
+
+    if (!isPlatformAdmin) {
       if (headerTenant && headerTenant !== user.tenant_id) {
         throw new ForbiddenException('FORBIDDEN_TENANT_SCOPE');
       }

@@ -63,6 +63,22 @@ export class AuthRepository extends SqlRepositoryBase {
     );
   }
 
+  async getUserRoles(userId: string, tenantId: string): Promise<string[]> {
+    const rows = await this.many<{ role: string }>(
+      `SELECT role FROM core.user_tenant_role WHERE user_id = $1 AND tenant_id = $2`,
+      [userId, tenantId],
+    );
+    if (rows.length > 0) {
+      return rows.map((r) => r.role);
+    }
+    // Fallback: read from app_user.role (backward compat)
+    const user = await this.one<{ role: string }>(
+      `SELECT role FROM core.app_user WHERE id = $1`,
+      [userId],
+    );
+    return user ? [user.role] : [];
+  }
+
   async updateLastLogin(userId: string): Promise<void> {
     await this.execute(
       `

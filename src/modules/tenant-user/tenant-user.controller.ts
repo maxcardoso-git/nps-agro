@@ -36,4 +36,24 @@ export class TenantUserController {
   ) {
     return this.tenantUserService.updateUser(user, tenantId, userId, body);
   }
+
+  @Get(':userId/roles')
+  @Permissions('user.read')
+  getRoles(
+    @Param('tenantId') tenantId: string,
+    @Param('userId') userId: string,
+  ) {
+    return this.tenantUserService.getUserRoles(tenantId, userId);
+  }
+
+  @Patch(':userId/roles')
+  @Permissions('user.update')
+  setRoles(
+    @CurrentUser() user: AuthUserClaims,
+    @Param('tenantId') tenantId: string,
+    @Param('userId') userId: string,
+    @Body() body: { roles: string[] },
+  ) {
+    return this.tenantUserService.setUserRoles(user, tenantId, userId, body.roles);
+  }
 }

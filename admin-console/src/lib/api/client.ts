@@ -206,6 +206,22 @@ export const apiClient = {
         session,
         tenantId
       );
+    },
+    getRoles: async (session: AuthSession, tenantId: string, userId: string): Promise<string[]> => {
+      return request<string[]>(
+        `/tenants/${tenantId}/users/${userId}/roles`,
+        { method: 'GET' },
+        session,
+        tenantId
+      );
+    },
+    setRoles: async (session: AuthSession, tenantId: string, userId: string, roles: string[]): Promise<string[]> => {
+      return request<string[]>(
+        `/tenants/${tenantId}/users/${userId}/roles`,
+        { method: 'PATCH', body: JSON.stringify({ roles }) },
+        session,
+        tenantId
+      );
     }
   },
   campaigns: {

@@ -1,6 +1,7 @@
 import { HttpStatus, Injectable } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import { PlatformRole } from '../../common/constants';
 import { DomainException } from '../../common/errors';
 import { ROLE_PERMISSIONS } from '../../common/role-permissions';
 import { AuthUserClaims } from '../../common/types';
@@ -30,16 +31,24 @@ export class AuthService {
       throw new DomainException('AUTH_USER_INACTIVE', 'Usuário inativo', HttpStatus.FORBIDDEN);
     }
 
-    if (dto.tenant_code && dto.tenant_code !== user.tenant_code && user.role !== 'platform_admin') {
+    // Fetch all roles for this user+tenant
+    const roles = await this.authRepository.getUserRoles(user.id, user.tenant_id) as PlatformRole[];
+    const primaryRole = roles[0] ?? user.role;
+
+    if (dto.tenant_code && dto.tenant_code !== user.tenant_code && !roles.includes('platform_admin')) {
       throw new DomainException('AUTH_TENANT_NOT_ALLOWED', 'Usuário não autorizado para o tenant informado', HttpStatus.FORBIDDEN);
     }
 
-    const permissions = ROLE_PERMISSIONS[user.role as keyof typeof ROLE_PERMISSIONS] ?? [];
+    // Aggregate permissions from all roles
+    const permissions = Array.from(
+      new Set(roles.flatMap((r) => ROLE_PERMISSIONS[r as keyof typeof ROLE_PERMISSIONS] ?? [])),
+    );
 
     const claims: AuthUserClaims = {
       sub: user.id,
       tenant_id: user.tenant_id,
-      role: user.role as AuthUserClaims['role'],
+      role: primaryRole as AuthUserClaims['role'],
+      roles: roles,
       permissions,
       email: user.email,
     };
@@ -55,8 +64,10 @@ export class AuthService {
         id: user.id,
         name: user.name,
         email: user.email,
-        role: user.role,
+        role: primaryRole,
+        roles: roles,
         tenant_id: user.tenant_id,
+        permissions,
       },
     };
   }
@@ -66,6 +77,7 @@ export class AuthService {
       id: user.sub,
       email: user.email,
       role: user.role,
+      roles: user.roles ?? [user.role],
       tenant_id: user.tenant_id,
       permissions: user.permissions ?? [],
     };

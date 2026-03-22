@@ -35,7 +35,10 @@ export class PermissionGuard implements CanActivate {
       throw new ForbiddenException('Missing authenticated user context');
     }
 
-    const permissions = user.permissions ?? ROLE_PERMISSIONS[user.role] ?? [];
+    // Aggregate permissions from all roles (multi-role support)
+    const roles = user.roles ?? [user.role];
+    const permissions = user.permissions ??
+      Array.from(new Set(roles.flatMap((r) => ROLE_PERMISSIONS[r] ?? [])));
     const allowed = required.every((permission) => hasPermission(permissions, permission));
 
     if (!allowed) {

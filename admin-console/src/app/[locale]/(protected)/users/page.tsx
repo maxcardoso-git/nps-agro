@@ -46,7 +46,6 @@ export default function UsersPage() {
   const isPlatformAdmin =
     session?.user.role === 'platform_admin' || session?.user.role === 'admin_master';
 
-  // For platform_admin: load all tenants for dropdown
   const tenantsQuery = useQuery({
     queryKey: ['tenants'],
     queryFn: () => apiClient.tenants.list(session!, { page_size: 200 }),
@@ -54,7 +53,6 @@ export default function UsersPage() {
   });
   const tenants = extractItems(tenantsQuery.data);
 
-  // Selected tenant: default to user's own tenant
   const [selectedTenantId, setSelectedTenantId] = useState('');
 
   useEffect(() => {
@@ -63,22 +61,39 @@ export default function UsersPage() {
     }
   }, [session?.user.tenant_id, selectedTenantId]);
 
-  // Resolve current tenant name
   const currentTenantName = useMemo(() => {
-    if (!isPlatformAdmin) {
-      return null; // will show from session context
-    }
+    if (!isPlatformAdmin) return null;
     return tenants.find((t) => t.id === selectedTenantId)?.name ?? selectedTenantId;
   }, [isPlatformAdmin, tenants, selectedTenantId]);
 
-  // Load users for selected tenant
   const usersQuery = useQuery({
     queryKey: ['tenant-users', selectedTenantId],
     queryFn: () => apiClient.users.listByTenant(session!, selectedTenantId),
     enabled: Boolean(session && selectedTenantId),
   });
 
+  // Fetch roles for all users
   const users = usersQuery.data || [];
+  const [userRolesMap, setUserRolesMap] = useState<Record<string, string[]>>({});
+
+  useEffect(() => {
+    if (!session || !selectedTenantId || users.length === 0) return;
+    // Fetch roles for each user
+    Promise.all(
+      users.map(async (u) => {
+        try {
+          const roles = await apiClient.users.getRoles(session, selectedTenantId, u.id);
+          return { userId: u.id, roles: Array.isArray(roles) ? roles : [u.role] };
+        } catch {
+          return { userId: u.id, roles: [u.role] };
+        }
+      }),
+    ).then((results) => {
+      const map: Record<string, string[]> = {};
+      for (const r of results) map[r.userId] = r.roles;
+      setUserRolesMap(map);
+    });
+  }, [users, session, selectedTenantId]);
 
   const createMutation = useMutation({
     mutationFn: () => apiClient.users.create(session!, selectedTenantId, form),
@@ -92,33 +107,39 @@ export default function UsersPage() {
     },
   });
 
-  const updateMutation = useMutation({
-    mutationFn: ({
-      userId,
-      role,
-      is_active,
-    }: {
-      userId: string;
-      role: string;
-      is_active: boolean;
-    }) => apiClient.users.update(session!, selectedTenantId, userId, { role, is_active }),
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ userId, is_active }: { userId: string; is_active: boolean }) =>
+      apiClient.users.update(session!, selectedTenantId, userId, { is_active }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tenant-users', selectedTenantId] });
     },
   });
+
+  const toggleRole = async (userId: string, role: string, checked: boolean) => {
+    const current = userRolesMap[userId] ?? [];
+    const newRoles = checked
+      ? [...current, role]
+      : current.filter((r) => r !== role);
+
+    if (newRoles.length === 0) return; // Must have at least one role
+
+    try {
+      await apiClient.users.setRoles(session!, selectedTenantId, userId, newRoles);
+      setUserRolesMap((prev) => ({ ...prev, [userId]: newRoles }));
+    } catch {
+      // Revert on error
+    }
+  };
 
   return (
     <PermissionGate permission="user.read">
       <div className="space-y-4">
         <h1 className="text-2xl font-semibold text-slate-900">{t('title')}</h1>
 
-        {/* Tenant selector — only for platform_admin */}
+        {/* Tenant selector */}
         {isPlatformAdmin ? (
           <Card title={t('tenantScopeTitle')}>
-            <Select
-              value={selectedTenantId}
-              onChange={(e) => setSelectedTenantId(e.target.value)}
-            >
+            <Select value={selectedTenantId} onChange={(e) => setSelectedTenantId(e.target.value)}>
               {tenants.map((tenant) => (
                 <option key={tenant.id} value={tenant.id}>
                   {tenant.name} ({tenant.code})
@@ -159,16 +180,12 @@ export default function UsersPage() {
               onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value }))}
             >
               {ROLES.map((r) => (
-                <option key={r} value={r}>
-                  {ROLE_LABELS[r]}
-                </option>
+                <option key={r} value={r}>{ROLE_LABELS[r]}</option>
               ))}
             </Select>
             <Select
               value={String(form.is_active)}
-              onChange={(e) =>
-                setForm((prev) => ({ ...prev, is_active: e.target.value === 'true' }))
-              }
+              onChange={(e) => setForm((prev) => ({ ...prev, is_active: e.target.value === 'true' }))}
             >
               <option value="true">{t('statusActive')}</option>
               <option value="false">{t('statusInactive')}</option>
@@ -185,45 +202,43 @@ export default function UsersPage() {
           {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
         </Card>
 
-        {/* User list */}
+        {/* User list with role checkboxes */}
         <Card title={isPlatformAdmin && currentTenantName ? `${t('listTitle')} — ${currentTenantName}` : t('listTitle')}>
           <Table
             headers={[t('table.name'), t('table.email'), t('table.role'), t('table.active')]}
-            rows={users.map((user) => [
-              user.name,
-              user.email,
-              <Select
-                key={`role-${user.id}`}
-                value={user.role}
-                onChange={(e) =>
-                  updateMutation.mutate({
-                    userId: user.id,
-                    role: e.target.value,
-                    is_active: user.is_active,
-                  })
-                }
-              >
-                {ROLES.map((r) => (
-                  <option key={r} value={r}>
-                    {ROLE_LABELS[r]}
-                  </option>
-                ))}
-              </Select>,
-              <Select
-                key={`active-${user.id}`}
-                value={String(user.is_active)}
-                onChange={(e) =>
-                  updateMutation.mutate({
-                    userId: user.id,
-                    role: user.role,
-                    is_active: e.target.value === 'true',
-                  })
-                }
-              >
-                <option value="true">{t('statusActive')}</option>
-                <option value="false">{t('statusInactive')}</option>
-              </Select>,
-            ])}
+            rows={users.map((user) => {
+              const roles = userRolesMap[user.id] ?? [user.role];
+              return [
+                user.name,
+                user.email,
+                <div key={`roles-${user.id}`} className="flex flex-wrap gap-x-3 gap-y-1">
+                  {ROLES.map((r) => (
+                    <label key={r} className="flex items-center gap-1 text-xs">
+                      <input
+                        type="checkbox"
+                        checked={roles.includes(r)}
+                        onChange={(e) => toggleRole(user.id, r, e.target.checked)}
+                        className="h-3.5 w-3.5 rounded text-primary"
+                      />
+                      {ROLE_LABELS[r]}
+                    </label>
+                  ))}
+                </div>,
+                <Select
+                  key={`active-${user.id}`}
+                  value={String(user.is_active)}
+                  onChange={(e) =>
+                    updateStatusMutation.mutate({
+                      userId: user.id,
+                      is_active: e.target.value === 'true',
+                    })
+                  }
+                >
+                  <option value="true">{t('statusActive')}</option>
+                  <option value="false">{t('statusInactive')}</option>
+                </Select>,
+              ];
+            })}
           />
         </Card>
       </div>

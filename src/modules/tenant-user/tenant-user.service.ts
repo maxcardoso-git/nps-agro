@@ -97,8 +97,19 @@ export class TenantUserService {
     }
   }
 
+  async getUserRoles(tenantId: string, userId: string) {
+    return this.tenantUserRepository.getUserRoles(userId, tenantId);
+  }
+
+  async setUserRoles(actor: AuthUserClaims, tenantId: string, userId: string, roles: string[]) {
+    this.assertTenantScope(actor, tenantId);
+    await this.tenantUserRepository.setUserRoles(userId, tenantId, roles);
+    return this.tenantUserRepository.getUserRoles(userId, tenantId);
+  }
+
   private assertTenantScope(actor: AuthUserClaims, tenantId: string): void {
-    if (actor.role !== 'platform_admin' && actor.tenant_id !== tenantId) {
+    const actorRoles = actor.roles ?? [actor.role];
+    if (!actorRoles.includes('platform_admin') && actor.tenant_id !== tenantId) {
       throw new DomainException('FORBIDDEN_TENANT_SCOPE', 'Acesso negado ao tenant solicitado', HttpStatus.FORBIDDEN);
     }
   }

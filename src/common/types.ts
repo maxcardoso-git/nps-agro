@@ -5,6 +5,7 @@ export interface AuthUserClaims {
   sub: string;
   tenant_id: string;
   role: PlatformRole;
+  roles: PlatformRole[];
   permissions?: string[];
   email: string;
 }
