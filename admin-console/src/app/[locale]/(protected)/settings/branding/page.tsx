@@ -66,41 +66,10 @@ export default function BrandingPage() {
               onChange={(event) => setForm((prev) => ({ ...prev, logo_url: event.target.value }))}
             />
 
-            <label className="text-sm">
-              {t('branding.fields.primary_color')}
-              <Input
-                type="color"
-                value={form.primary_color}
-                onChange={(event) => setForm((prev) => ({ ...prev, primary_color: event.target.value }))}
-              />
-            </label>
-
-            <label className="text-sm">
-              {t('branding.fields.secondary_color')}
-              <Input
-                type="color"
-                value={form.secondary_color}
-                onChange={(event) => setForm((prev) => ({ ...prev, secondary_color: event.target.value }))}
-              />
-            </label>
-
-            <label className="text-sm">
-              {t('branding.fields.background_color')}
-              <Input
-                type="color"
-                value={form.background_color}
-                onChange={(event) => setForm((prev) => ({ ...prev, background_color: event.target.value }))}
-              />
-            </label>
-
-            <label className="text-sm">
-              {t('branding.fields.text_color')}
-              <Input
-                type="color"
-                value={form.text_color}
-                onChange={(event) => setForm((prev) => ({ ...prev, text_color: event.target.value }))}
-              />
-            </label>
+            <ColorField label={t('branding.fields.primary_color')} value={form.primary_color} onChange={(v) => setForm((p) => ({ ...p, primary_color: v }))} />
+            <ColorField label={t('branding.fields.secondary_color')} value={form.secondary_color} onChange={(v) => setForm((p) => ({ ...p, secondary_color: v }))} />
+            <ColorField label={t('branding.fields.background_color')} value={form.background_color} onChange={(v) => setForm((p) => ({ ...p, background_color: v }))} />
+            <ColorField label={t('branding.fields.text_color')} value={form.text_color} onChange={(v) => setForm((p) => ({ ...p, text_color: v }))} />
           </div>
 
           <div className="mt-4 flex gap-2">
@@ -128,19 +97,48 @@ export default function BrandingPage() {
                 <img
                   src={form.logo_url}
                   alt={form.app_name}
-                  className="h-10 w-auto object-contain"
-                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                  className="h-12 w-auto max-w-[120px] object-contain"
+                  onError={(e) => {
+                    const img = e.target as HTMLImageElement;
+                    img.style.display = 'none';
+                  }}
                 />
               )}
               <h2 style={{ color: form.primary_color }} className="text-xl font-bold">
                 {form.app_name}
               </h2>
             </div>
+            {form.logo_url && (
+              <p className="mt-1 text-xs text-slate-400 truncate">Logo: {form.logo_url}</p>
+            )}
             <p className="mt-2 text-sm">{t('branding.previewText')}</p>
             <div className="mt-3 h-2 rounded" style={{ backgroundColor: form.secondary_color }} />
           </div>
         </Card>
       </div>
     </PermissionGate>
+  );
+}
+
+function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const hex = value || '#000000';
+  return (
+    <div>
+      <label className="mb-1 block text-xs font-medium text-slate-600">{label}</label>
+      <div className="flex items-center gap-2">
+        <input
+          type="color"
+          value={hex}
+          onChange={(e) => onChange(e.target.value)}
+          className="h-9 w-12 cursor-pointer rounded border border-slate-300 p-0.5"
+        />
+        <div
+          className="h-9 flex-1 rounded-lg border border-slate-200 px-3 flex items-center text-sm font-mono"
+          style={{ backgroundColor: hex + '15', color: hex, borderColor: hex + '40' }}
+        >
+          {hex}
+        </div>
+      </div>
+    </div>
   );
 }
