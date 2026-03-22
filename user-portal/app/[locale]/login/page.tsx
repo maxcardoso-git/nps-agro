@@ -14,7 +14,7 @@ import { useAuth } from '@/lib/auth/auth-context';
 
 const schema = z.object({
   email: z.string().email(),
-  password: z.string().min(1),
+  password: z.string().trim().min(1, 'Password is required'),
   tenant_code: z.string().optional()
 });
 

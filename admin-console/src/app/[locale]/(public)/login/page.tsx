@@ -14,7 +14,7 @@ import { useSessionContext } from '@/contexts/session-context';
 
 const loginSchema = z.object({
   email: z.string().email(),
-  password: z.string().min(1),
+  password: z.string().trim().min(1, 'Password is required'),
   tenant_code: z.string().optional()
 });
 

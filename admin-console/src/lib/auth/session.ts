@@ -22,7 +22,6 @@ export function saveSession(session: AuthSession): void {
   const encoded = encodeSession(session);
   const maxAge = session.expires_in || 3600;
   document.cookie = `${SESSION_COOKIE_NAME}=${encoded}; Path=/; Max-Age=${maxAge}; SameSite=Lax`;
-  localStorage.setItem(SESSION_COOKIE_NAME, encoded);
 }
 
 export function readSession(): AuthSession | null {
@@ -42,12 +41,7 @@ export function readSession(): AuthSession | null {
     }
   }
 
-  const fromStorage = localStorage.getItem(SESSION_COOKIE_NAME);
-  if (!fromStorage) {
-    return null;
-  }
-
-  return decodeSession(fromStorage);
+  return null;
 }
 
 export function clearSession(): void {
@@ -56,5 +50,4 @@ export function clearSession(): void {
   }
 
   document.cookie = `${SESSION_COOKIE_NAME}=; Path=/; Max-Age=0; SameSite=Lax`;
-  localStorage.removeItem(SESSION_COOKIE_NAME);
 }
