@@ -25,11 +25,13 @@ export default function CampaignDetailPage() {
 
   const [showCreate, setShowCreate] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [showEditCampaign, setShowEditCampaign] = useState(false);
   const [showImport, setShowImport] = useState(false);
   const [importActionId, setImportActionId] = useState<string | null>(null);
   const [importResult, setImportResult] = useState<string | null>(null);
   const [editingActionId, setEditingActionId] = useState<string | null>(null);
   const [actionForm, setActionForm] = useState({ name: '', questionnaire_version_id: '', description: '' });
+  const [campaignForm, setCampaignForm] = useState({ name: '', description: '', segment: '', start_date: '', end_date: '' });
   const [error, setError] = useState<string | null>(null);
 
   // Fetch campaign
@@ -106,6 +108,38 @@ export default function CampaignDetailPage() {
     },
   });
 
+  const editCampaignMutation = useMutation({
+    mutationFn: () =>
+      apiClient.campaigns.update(session!, campaignId, {
+        name: campaignForm.name,
+        description: campaignForm.description || undefined,
+        segment: campaignForm.segment || undefined,
+        start_date: campaignForm.start_date || undefined,
+        end_date: campaignForm.end_date || undefined,
+      }),
+    onSuccess: () => {
+      setShowEditCampaign(false);
+      setError(null);
+      queryClient.invalidateQueries({ queryKey: ['campaign', campaignId] });
+    },
+    onError: (cause) => {
+      setError(cause instanceof ApiError ? cause.message : t('errors.generic'));
+    },
+  });
+
+  const openEditCampaign = () => {
+    if (!campaign) return;
+    setCampaignForm({
+      name: campaign.name,
+      description: campaign.description || '',
+      segment: campaign.segment || '',
+      start_date: campaign.start_date || '',
+      end_date: campaign.end_date || '',
+    });
+    setError(null);
+    setShowEditCampaign(true);
+  };
+
   const openEdit = (a: { id: string; name: string; description: string | null }) => {
     setEditingActionId(a.id);
     setActionForm({ name: a.name, description: a.description || '', questionnaire_version_id: '' });
@@ -129,9 +163,23 @@ export default function CampaignDetailPage() {
 
         {campaign && (
           <Card>
-            <div className="flex items-center gap-3 text-sm text-slate-600">
-              <Badge tone={statusTone(campaign.status)}>{campaign.status}</Badge>
-              {campaign.segment && <span>{campaign.segment}</span>}
+            <div className="flex items-start justify-between">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <Badge tone={statusTone(campaign.status)}>{campaign.status}</Badge>
+                  {campaign.segment && <Badge tone="neutral">{campaign.segment}</Badge>}
+                </div>
+                {campaign.description && (
+                  <p className="text-sm text-slate-600">{campaign.description}</p>
+                )}
+                <div className="flex gap-4 text-xs text-slate-500">
+                  {campaign.start_date && <span>{t('startDate')}: {campaign.start_date}</span>}
+                  {campaign.end_date && <span>{t('endDate')}: {campaign.end_date}</span>}
+                </div>
+              </div>
+              <Button variant="ghost" className="h-7 px-2 text-xs" onClick={openEditCampaign}>
+                {t('editCampaign')}
+              </Button>
             </div>
           </Card>
         )}
@@ -317,6 +365,57 @@ export default function CampaignDetailPage() {
             </div>
             <DialogFooter>
               <Button variant="ghost" onClick={() => setShowImport(false)}>{t('cancel')}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        {/* Edit Campaign Dialog */}
+        <Dialog open={showEditCampaign} onOpenChange={setShowEditCampaign}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t('editCampaignTitle')}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <Input
+                placeholder={t('campaignName')}
+                value={campaignForm.name}
+                onChange={(e) => setCampaignForm((p) => ({ ...p, name: e.target.value }))}
+              />
+              <Input
+                placeholder={t('campaignDescription')}
+                value={campaignForm.description}
+                onChange={(e) => setCampaignForm((p) => ({ ...p, description: e.target.value }))}
+              />
+              <Select
+                value={campaignForm.segment}
+                onChange={(e) => setCampaignForm((p) => ({ ...p, segment: e.target.value }))}
+              >
+                <option value="">{t('segmentSelect')}</option>
+                <option value="cooperativa">Cooperativa</option>
+                <option value="revenda">Revenda</option>
+                <option value="produtor">Produtor</option>
+                <option value="venda_direta">Venda Direta</option>
+                <option value="kam">KAM</option>
+              </Select>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <label className="mb-1 block text-xs text-slate-500">{t('startDate')}</label>
+                  <Input type="date" value={campaignForm.start_date} onChange={(e) => setCampaignForm((p) => ({ ...p, start_date: e.target.value }))} />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs text-slate-500">{t('endDate')}</label>
+                  <Input type="date" value={campaignForm.end_date} onChange={(e) => setCampaignForm((p) => ({ ...p, end_date: e.target.value }))} />
+                </div>
+              </div>
+              {error && <p className="text-sm text-red-600">{error}</p>}
+            </div>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setShowEditCampaign(false)}>{t('cancel')}</Button>
+              <Button
+                onClick={() => editCampaignMutation.mutate()}
+                disabled={!campaignForm.name || editCampaignMutation.isPending}
+              >
+                {t('save')}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

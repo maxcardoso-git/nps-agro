@@ -8,6 +8,7 @@ import { PermissionGate } from '@/components/layout/permission-gate';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { Select } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
@@ -153,11 +154,17 @@ export default function CampaignsPage() {
                 value={form.description}
                 onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
               />
-              <Input
-                placeholder={t('fields.segment')}
+              <Select
                 value={form.segment}
                 onChange={(e) => setForm((p) => ({ ...p, segment: e.target.value }))}
-              />
+              >
+                <option value="">{t('fields.segment')}</option>
+                <option value="cooperativa">Cooperativa</option>
+                <option value="revenda">Revenda</option>
+                <option value="produtor">Produtor</option>
+                <option value="venda_direta">Venda Direta</option>
+                <option value="kam">KAM</option>
+              </Select>
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <label className="mb-1 block text-xs text-slate-500">{t('fields.startDate')}</label>
