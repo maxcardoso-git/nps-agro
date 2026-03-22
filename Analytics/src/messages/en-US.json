@@ -5,8 +5,10 @@
     "language": "Language",
     "menu": {
       "dashboard": "Executive Dashboard",
-      "campaignAnalytics": "Campaign Analytics",
-      "interviewExplorer": "Interview Explorer"
+      "campaignAnalytics": "Campaigns",
+      "segmentAnalytics": "By Segment",
+      "accountAnalytics": "By Account",
+      "interviewExplorer": "Interviews"
     },
     "restricted": {
       "title": "Access denied",
@@ -132,6 +134,39 @@
       "metrics": "Metrics",
       "summary": "Summary",
       "topics": "Topics"
+    },
+    "segments": {
+      "title": "NPS by Segment",
+      "description": "NPS analysis by agro business segment",
+      "empty": "No segment data available",
+      "filterCampaign": "Filter by campaign",
+      "allCampaigns": "All campaigns",
+      "colSegment": "Segment",
+      "colInterviews": "Interviews",
+      "colNps": "NPS",
+      "colPromoters": "Promoters",
+      "colNeutrals": "Neutrals",
+      "colDetractors": "Detractors",
+      "chartTitle": "NPS by Segment"
+    },
+    "accounts": {
+      "title": "NPS by Account",
+      "description": "NPS analysis by company/account",
+      "empty": "No account data available",
+      "filterCampaign": "Filter by campaign",
+      "allCampaigns": "All campaigns",
+      "colAccount": "Account",
+      "colInterviews": "Interviews",
+      "colNps": "NPS",
+      "chartTitle": "Top Accounts by NPS",
+      "top": "Top 20"
+    },
+    "regions": {
+      "title": "NPS by Region",
+      "colRegion": "Region",
+      "colState": "State",
+      "colInterviews": "Interviews",
+      "colNps": "NPS"
     }
   }
 }

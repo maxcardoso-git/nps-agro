@@ -5,8 +5,10 @@
     "language": "Idioma",
     "menu": {
       "dashboard": "Dashboard Executivo",
-      "campaignAnalytics": "Campaign Analytics",
-      "interviewExplorer": "Interview Explorer"
+      "campaignAnalytics": "Campanhas",
+      "segmentAnalytics": "Por Segmento",
+      "accountAnalytics": "Por Conta",
+      "interviewExplorer": "Entrevistas"
     },
     "restricted": {
       "title": "Acesso não permitido",
@@ -132,6 +134,39 @@
       "metrics": "Indicadores",
       "summary": "Resumo",
       "topics": "Tópicos"
+    },
+    "segments": {
+      "title": "NPS por Segmento",
+      "description": "Análise de NPS por segmento de negócio agro",
+      "empty": "Sem dados de segmento disponíveis",
+      "filterCampaign": "Filtrar por campanha",
+      "allCampaigns": "Todas as campanhas",
+      "colSegment": "Segmento",
+      "colInterviews": "Entrevistas",
+      "colNps": "NPS",
+      "colPromoters": "Promotores",
+      "colNeutrals": "Neutros",
+      "colDetractors": "Detratores",
+      "chartTitle": "NPS por Segmento"
+    },
+    "accounts": {
+      "title": "NPS por Conta",
+      "description": "Análise de NPS por empresa/conta",
+      "empty": "Sem dados de conta disponíveis",
+      "filterCampaign": "Filtrar por campanha",
+      "allCampaigns": "Todas as campanhas",
+      "colAccount": "Conta",
+      "colInterviews": "Entrevistas",
+      "colNps": "NPS",
+      "chartTitle": "Top Contas por NPS",
+      "top": "Top 20"
+    },
+    "regions": {
+      "title": "NPS por Região",
+      "colRegion": "Região",
+      "colState": "UF",
+      "colInterviews": "Entrevistas",
+      "colNps": "NPS"
     }
   }
 }

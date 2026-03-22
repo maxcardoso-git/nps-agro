@@ -89,6 +89,65 @@ export class ReportingRepository extends SqlRepositoryBase {
     );
   }
 
+  getNpsBySegment(tenantId: string, campaignId?: string) {
+    const conditions = ['1=1'];
+    const values: unknown[] = [];
+    if (campaignId) {
+      values.push(campaignId);
+      conditions.push(`campaign_id = $${values.length}`);
+    }
+    return this.many<{
+      segment: string;
+      campaign_id: string;
+      total_interviews: number;
+      promoters: number;
+      neutrals: number;
+      detractors: number;
+      nps_score: number;
+    }>(
+      `SELECT * FROM analytics.vw_nps_by_segment WHERE ${conditions.join(' AND ')} ORDER BY segment`,
+      values,
+    );
+  }
+
+  getNpsByRegion(tenantId: string, campaignId?: string) {
+    const conditions = ['1=1'];
+    const values: unknown[] = [];
+    if (campaignId) {
+      values.push(campaignId);
+      conditions.push(`campaign_id = $${values.length}`);
+    }
+    return this.many<{
+      region: string;
+      state: string;
+      campaign_id: string;
+      total_interviews: number;
+      nps_score: number;
+    }>(
+      `SELECT * FROM analytics.vw_nps_by_region WHERE ${conditions.join(' AND ')} ORDER BY total_interviews DESC`,
+      values,
+    );
+  }
+
+  getNpsByAccount(tenantId: string, campaignId?: string) {
+    const conditions = ['1=1'];
+    const values: unknown[] = [];
+    if (campaignId) {
+      values.push(campaignId);
+      conditions.push(`campaign_id = $${values.length}`);
+    }
+    return this.many<{
+      account_id: string;
+      account_name: string;
+      campaign_id: string;
+      total_interviews: number;
+      nps_score: number;
+    }>(
+      `SELECT * FROM analytics.vw_nps_by_account WHERE ${conditions.join(' AND ')} ORDER BY total_interviews DESC LIMIT 50`,
+      values,
+    );
+  }
+
   listInterviewSummaries(params: {
     campaignId: string;
     region?: string;

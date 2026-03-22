@@ -75,6 +75,18 @@ export class ReportingService {
     });
   }
 
+  async getNpsBySegment(actor: AuthUserClaims, campaignId?: string) {
+    return this.reportingRepository.getNpsBySegment(actor.tenant_id, campaignId);
+  }
+
+  async getNpsByRegion(actor: AuthUserClaims, campaignId?: string) {
+    return this.reportingRepository.getNpsByRegion(actor.tenant_id, campaignId);
+  }
+
+  async getNpsByAccount(actor: AuthUserClaims, campaignId?: string) {
+    return this.reportingRepository.getNpsByAccount(actor.tenant_id, campaignId);
+  }
+
   private assertScope(actor: AuthUserClaims, tenantId: string): void {
     if (actor.role !== 'platform_admin' && actor.tenant_id !== tenantId) {
       throw new DomainException('FORBIDDEN_TENANT_SCOPE', 'Acesso negado ao tenant solicitado', HttpStatus.FORBIDDEN);

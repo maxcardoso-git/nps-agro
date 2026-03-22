@@ -14,6 +14,24 @@ export class ReportingController {
     return this.reportingService.getExecutiveSummary(user, campaignId);
   }
 
+  @Get('nps-by-segment')
+  @Permissions('report.read')
+  getNpsBySegment(@CurrentUser() user: AuthUserClaims, @Query('campaign_id') campaignId?: string) {
+    return this.reportingService.getNpsBySegment(user, campaignId);
+  }
+
+  @Get('nps-by-region')
+  @Permissions('report.read')
+  getNpsByRegion(@CurrentUser() user: AuthUserClaims, @Query('campaign_id') campaignId?: string) {
+    return this.reportingService.getNpsByRegion(user, campaignId);
+  }
+
+  @Get('nps-by-account')
+  @Permissions('report.read')
+  getNpsByAccount(@CurrentUser() user: AuthUserClaims, @Query('campaign_id') campaignId?: string) {
+    return this.reportingService.getNpsByAccount(user, campaignId);
+  }
+
   @Get('campaigns/:campaignId/interviews')
   @Permissions('report.read')
   listInterviewSummaries(

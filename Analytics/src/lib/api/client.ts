@@ -163,6 +163,36 @@ export const apiClient = {
         { method: 'GET' },
         session
       );
+    },
+    npsBySegment: async (
+      session: AuthSession,
+      campaignId?: string
+    ): Promise<{ segment: string; total_interviews: number; nps_score: number }[]> => {
+      return request<{ segment: string; total_interviews: number; nps_score: number }[]>(
+        `/reports/nps-by-segment${toQueryString({ campaign_id: campaignId })}`,
+        { method: 'GET' },
+        session
+      );
+    },
+    npsByRegion: async (
+      session: AuthSession,
+      campaignId?: string
+    ): Promise<{ region: string; state: string; total_interviews: number; nps_score: number }[]> => {
+      return request<{ region: string; state: string; total_interviews: number; nps_score: number }[]>(
+        `/reports/nps-by-region${toQueryString({ campaign_id: campaignId })}`,
+        { method: 'GET' },
+        session
+      );
+    },
+    npsByAccount: async (
+      session: AuthSession,
+      campaignId?: string
+    ): Promise<{ account_id: string; account_name: string; total_interviews: number; nps_score: number }[]> => {
+      return request<{ account_id: string; account_name: string; total_interviews: number; nps_score: number }[]>(
+        `/reports/nps-by-account${toQueryString({ campaign_id: campaignId })}`,
+        { method: 'GET' },
+        session
+      );
     }
   }
 };
