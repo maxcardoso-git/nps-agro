@@ -39,6 +39,7 @@ export default function CampaignsListPage() {
         <p className="py-8 text-center text-sm text-slate-400">{t('empty')}</p>
       ) : (
         <Table
+          emptyLabel={t('empty')}
           headers={[t('colName'), t('colSegment'), t('colStatus'), '']}
           rows={campaigns.map((c) => [
             c.name,

@@ -72,6 +72,7 @@ export default function DashboardPage() {
           <p className="text-sm text-slate-400">{t('dashboard.noCallbacks')}</p>
         ) : (
           <Table
+            emptyLabel={t('dashboard.noCallbacks')}
             headers={[t('dashboard.colTime'), t('dashboard.colName'), t('dashboard.colPhone'), t('dashboard.colCampaign'), '']}
             rows={callbacks.map((cb) => [
               cb.scheduled_at

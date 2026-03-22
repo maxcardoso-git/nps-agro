@@ -160,6 +160,7 @@ export default function CampaignContactsPage() {
         <p className="py-8 text-center text-sm text-slate-400">{t('empty')}</p>
       ) : (
         <Table
+          emptyLabel={t('empty')}
           headers={[t('colName'), t('colAccount'), t('colPhone'), t('colStatus'), '']}
           rows={respondents.map((r) => [
             <div key={`n-${r.id}`}>
