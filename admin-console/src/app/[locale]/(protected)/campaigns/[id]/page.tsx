@@ -62,7 +62,7 @@ export default function CampaignDetailPage() {
           .map((v) => ({ id: v.id, label: `${d.name} (v${v.version_number})`, name: d.name })),
       );
     },
-    enabled: Boolean(session && (showCreate || showEdit)),
+    enabled: Boolean(session),
   });
 
   const campaign = campaignQuery.data;
