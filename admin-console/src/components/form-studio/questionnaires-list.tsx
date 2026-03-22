@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -74,6 +74,38 @@ export function QuestionnairesList({ session, onSelect }: QuestionnairesListProp
     },
   });
 
+  const cloneMutation = useMutation({
+    mutationFn: async (source: Questionnaire) => {
+      // 1. Fetch the source questionnaire with versions to get schema
+      const detail = await apiClient.questionnaires.getById(session, source.id);
+      const latestVersion = detail.versions?.find((v) => v.status === 'published') ?? detail.versions?.[0];
+
+      // 2. Create new questionnaire
+      const cloned = await apiClient.questionnaires.create(session, {
+        tenant_id: session.user.tenant_id,
+        name: `${source.name} (${t('copy')})`,
+        description: source.description || undefined,
+      });
+
+      // 3. If source had a version with schema, create a draft version with same schema
+      if (latestVersion?.schema_json) {
+        await apiClient.questionnaires.createVersion(session, cloned.id, {
+          schema_json: latestVersion.schema_json as unknown as Record<string, unknown>,
+        });
+      }
+
+      return cloned;
+    },
+    onSuccess: (result) => {
+      setError(null);
+      queryClient.invalidateQueries({ queryKey: ['questionnaires'] });
+      onSelect(result);
+    },
+    onError: (cause) => {
+      setError(cause instanceof ApiError ? cause.message : t('cloneError'));
+    },
+  });
+
   const statusTone = (s: string) => {
     if (s === 'published') return 'success' as const;
     if (s === 'archived') return 'danger' as const;
@@ -135,14 +167,27 @@ export function QuestionnairesList({ session, onSelect }: QuestionnairesListProp
             q.created_at
               ? new Date(q.created_at).toLocaleDateString()
               : '—',
-            <Button
-              key={`a-${q.id}`}
-              variant="ghost"
-              className="h-7 px-2 text-xs"
-              onClick={() => onSelect(q)}
-            >
-              {t('edit')}
-            </Button>,
+            <div key={`a-${q.id}`} className="flex gap-1">
+              <Button
+                variant="ghost"
+                className="h-7 px-2 text-xs"
+                onClick={() => onSelect(q)}
+              >
+                {t('edit')}
+              </Button>
+              <Button
+                variant="ghost"
+                className="h-7 px-2 text-xs gap-1"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  cloneMutation.mutate(q);
+                }}
+                disabled={cloneMutation.isPending}
+              >
+                <Copy className="h-3 w-3" />
+                {t('clone')}
+              </Button>
+            </div>,
           ])}
         />
       )}

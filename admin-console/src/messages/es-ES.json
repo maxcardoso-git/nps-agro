@@ -283,7 +283,10 @@
       "descriptionPlaceholder": "Descripción (opcional)",
       "cancel": "Cancelar",
       "creating": "Creando...",
-      "createError": "No se pudo crear el cuestionario"
+      "createError": "No se pudo crear el cuestionario",
+      "clone": "Clonar",
+      "copy": "copia",
+      "cloneError": "No se pudo clonar el cuestionario"
     }
   },
   "errors": {
