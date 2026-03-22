@@ -4,6 +4,7 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts');
 
 const nextConfig = {
   output: 'standalone',
+  basePath: '/analytics',
   reactStrictMode: true,
   typedRoutes: true,
   images: {
