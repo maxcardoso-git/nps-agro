@@ -122,7 +122,7 @@ export default function DashboardPage() {
           {selectedCampaign && (
             <p className="mt-1 text-sm text-slate-500">
               {selectedCampaign.name}
-              {selectedCampaign.segment && <Badge tone="neutral" className="ml-2">{selectedCampaign.segment}</Badge>}
+              {selectedCampaign.segment && <span className="ml-2"><Badge tone="neutral">{selectedCampaign.segment}</Badge></span>}
             </p>
           )}
         </div>
