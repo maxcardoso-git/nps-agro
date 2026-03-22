@@ -25,6 +25,9 @@ export default function CampaignDetailPage() {
 
   const [showCreate, setShowCreate] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [showImport, setShowImport] = useState(false);
+  const [importActionId, setImportActionId] = useState<string | null>(null);
+  const [importResult, setImportResult] = useState<string | null>(null);
   const [editingActionId, setEditingActionId] = useState<string | null>(null);
   const [actionForm, setActionForm] = useState({ name: '', questionnaire_version_id: '', description: '' });
   const [error, setError] = useState<string | null>(null);
@@ -158,6 +161,9 @@ export default function CampaignDetailPage() {
                 <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => openEdit(a)}>
                   {t('edit')}
                 </Button>
+                <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => { setImportActionId(a.id); setImportResult(null); setShowImport(true); }}>
+                  {t('import')}
+                </Button>
                 {a.status === 'draft' && (
                   <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => activateMutation.mutate(a.id)}>
                     {t('activate')}
@@ -246,6 +252,71 @@ export default function CampaignDetailPage() {
               >
                 {t('save')}
               </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        {/* Import CSV Dialog */}
+        <Dialog open={showImport} onOpenChange={setShowImport}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t('importTitle')}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <p className="text-sm text-slate-600">{t('importHint')}</p>
+              <input
+                type="file"
+                accept=".csv,.txt"
+                className="block w-full text-sm text-slate-500 file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-2 file:text-sm file:text-white"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file || !importActionId) return;
+
+                  setImportResult(null);
+                  setError(null);
+
+                  try {
+                    const text = await file.text();
+                    const lines = text.split('\n').filter((l) => l.trim());
+                    if (lines.length < 2) { setError(t('importEmpty')); return; }
+
+                    const header = lines[0].split(';').map((h) => h.trim().toLowerCase());
+                    const iNome = header.indexOf('nome');
+                    const iCelular = header.indexOf('celular');
+                    const iConta = header.indexOf('conta');
+                    const iCargo = header.indexOf('cargo');
+                    const iTipo = header.indexOf('tipo_persona');
+                    const iCodigo = header.indexOf('codigo');
+
+                    if (iNome < 0) { setError(t('importMissingName')); return; }
+
+                    const contacts = lines.slice(1).map((line) => {
+                      const cols = line.split(';').map((c) => c.trim());
+                      return {
+                        nome: cols[iNome] || '',
+                        celular: iCelular >= 0 ? cols[iCelular] : undefined,
+                        conta: iConta >= 0 ? cols[iConta] : undefined,
+                        cargo: iCargo >= 0 ? cols[iCargo] : undefined,
+                        tipo_persona: iTipo >= 0 ? cols[iTipo] : undefined,
+                        codigo: iCodigo >= 0 ? cols[iCodigo] : undefined,
+                      };
+                    }).filter((c) => c.nome);
+
+                    const result = await apiClient.campaignActions.importContacts(
+                      session!, campaignId, importActionId, contacts,
+                    );
+
+                    setImportResult(`${result.imported} ${t('importedContacts')}, ${result.accounts_created} ${t('importedAccounts')}`);
+                    queryClient.invalidateQueries({ queryKey: ['campaign-actions', campaignId] });
+                  } catch (cause) {
+                    setError(cause instanceof ApiError ? cause.message : t('errors.generic'));
+                  }
+                }}
+              />
+              {error && <p className="text-sm text-red-600">{error}</p>}
+              {importResult && <p className="text-sm text-emerald-600">{importResult}</p>}
+            </div>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setShowImport(false)}>{t('cancel')}</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

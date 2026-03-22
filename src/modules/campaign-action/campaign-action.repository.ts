@@ -119,4 +119,42 @@ export class CampaignActionRepository extends SqlRepositoryBase {
       [actionId],
     );
   }
+
+  async upsertAccount(tenantId: string, name: string): Promise<{ id: string; created: boolean }> {
+    const existing = await this.one<{ id: string }>(
+      `SELECT id FROM core.account WHERE tenant_id = $1 AND name = $2`,
+      [tenantId, name],
+    );
+    if (existing) return { id: existing.id, created: false };
+
+    const row = await this.one<{ id: string }>(
+      `INSERT INTO core.account (tenant_id, name) VALUES ($1, $2)
+       ON CONFLICT (tenant_id, name) DO UPDATE SET updated_at = NOW()
+       RETURNING id`,
+      [tenantId, name],
+    );
+    return { id: row!.id, created: true };
+  }
+
+  async insertRespondent(params: {
+    tenant_id: string;
+    campaign_id: string;
+    action_id: string;
+    account_id: string | null;
+    external_id: string | null;
+    name: string;
+    phone: string | null;
+    job_title: string | null;
+    persona_type: string | null;
+  }): Promise<void> {
+    await this.execute(
+      `INSERT INTO core.respondent (tenant_id, campaign_id, action_id, account_id, external_id, name, phone, job_title, persona_type)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
+      [
+        params.tenant_id, params.campaign_id, params.action_id,
+        params.account_id, params.external_id, params.name,
+        params.phone, params.job_title, params.persona_type,
+      ],
+    );
+  }
 }

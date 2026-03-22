@@ -378,6 +378,18 @@ export const apiClient = {
     getInterviewers: async (session: AuthSession, campaignId: string, actionId: string) => {
       return request<{ user_id: string; name: string; email: string }[]>(`/campaigns/${campaignId}/actions/${actionId}/interviewers`, { method: 'GET' }, session);
     },
+    importContacts: async (
+      session: AuthSession,
+      campaignId: string,
+      actionId: string,
+      contacts: Array<{ nome: string; celular?: string; conta?: string; cargo?: string; tipo_persona?: string; codigo?: string }>
+    ): Promise<{ imported: number; accounts_created: number }> => {
+      return request<{ imported: number; accounts_created: number }>(
+        `/campaigns/${campaignId}/actions/${actionId}/import-contacts`,
+        { method: 'POST', body: JSON.stringify({ contacts }) },
+        session
+      );
+    },
     getRespondents: async (
       session: AuthSession,
       actionId: string,

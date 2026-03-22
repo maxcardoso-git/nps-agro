@@ -69,4 +69,15 @@ export class CampaignActionController {
   getInterviewers(@CurrentUser() user: AuthUserClaims, @Param('actionId') actionId: string) {
     return this.actionService.getInterviewers(user, actionId);
   }
+
+  @Post(':actionId/import-contacts')
+  @Permissions('campaign.update')
+  importContacts(
+    @CurrentUser() user: AuthUserClaims,
+    @Param('campaignId') campaignId: string,
+    @Param('actionId') actionId: string,
+    @Body() body: { contacts: Array<{ nome: string; celular?: string; conta?: string; cargo?: string; tipo_persona?: string; codigo?: string }> },
+  ) {
+    return this.actionService.importContacts(user, campaignId, actionId, body.contacts);
+  }
 }

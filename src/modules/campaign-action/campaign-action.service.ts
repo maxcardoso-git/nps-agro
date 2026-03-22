@@ -65,4 +65,41 @@ export class CampaignActionService {
   async getInterviewers(actor: AuthUserClaims, actionId: string) {
     return this.actionRepository.getInterviewers(actionId);
   }
+
+  async importContacts(
+    actor: AuthUserClaims,
+    campaignId: string,
+    actionId: string,
+    contacts: Array<{ nome: string; celular?: string; conta?: string; cargo?: string; tipo_persona?: string; codigo?: string }>,
+  ) {
+    const tenantId = actor.tenant_id;
+    let imported = 0;
+    let accountsCreated = 0;
+
+    for (const contact of contacts) {
+      if (!contact.nome?.trim()) continue;
+
+      let accountId: string | null = null;
+      if (contact.conta?.trim()) {
+        const result = await this.actionRepository.upsertAccount(tenantId, contact.conta.trim());
+        accountId = result.id;
+        if (result.created) accountsCreated++;
+      }
+
+      await this.actionRepository.insertRespondent({
+        tenant_id: tenantId,
+        campaign_id: campaignId,
+        action_id: actionId,
+        account_id: accountId,
+        external_id: contact.codigo?.trim() || null,
+        name: contact.nome.trim(),
+        phone: contact.celular?.trim() || null,
+        job_title: contact.cargo?.trim() || null,
+        persona_type: contact.tipo_persona?.trim() || null,
+      });
+      imported++;
+    }
+
+    return { imported, accounts_created: accountsCreated };
+  }
 }

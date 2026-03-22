@@ -250,6 +250,13 @@
     "colContacts": "Contactos",
     "colStatus": "Estado",
     "colActions": "Acciones",
+    "import": "Importar CSV",
+    "importTitle": "Importar Contactos (CSV)",
+    "importHint": "Seleccione un archivo CSV con columnas: nome;celular;conta;cargo;tipo_persona;codigo (separado por ;)",
+    "importEmpty": "Archivo vacío o inválido",
+    "importMissingName": "Columna 'nome' no encontrada en el encabezado",
+    "importedContacts": "contactos importados",
+    "importedAccounts": "cuentas creadas",
     "errors": { "generic": "No se pudo procesar la acción" }
   },
   "account": {
