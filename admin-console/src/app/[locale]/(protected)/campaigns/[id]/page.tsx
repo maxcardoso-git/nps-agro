@@ -48,9 +48,20 @@ export default function CampaignDetailPage() {
     enabled: Boolean(session && campaignId),
   });
 
-  const questionnairesQuery = useQuery({
-    queryKey: ['questionnaires-for-actions'],
-    queryFn: () => apiClient.questionnaires.list(session!, { page_size: 200 }),
+  // Load published questionnaire versions for action create/edit
+  const publishedVersionsQuery = useQuery({
+    queryKey: ['published-versions-for-actions'],
+    queryFn: async () => {
+      const questionnaires = extractItems(await apiClient.questionnaires.list(session!, { page_size: 200 }));
+      const details = await Promise.all(
+        questionnaires.map((q) => apiClient.questionnaires.getById(session!, q.id)),
+      );
+      return details.flatMap((d) =>
+        (d.versions ?? [])
+          .filter((v) => v.status === 'published')
+          .map((v) => ({ id: v.id, label: `${d.name} (v${v.version_number})`, name: d.name })),
+      );
+    },
     enabled: Boolean(session && (showCreate || showEdit)),
   });
 
@@ -60,7 +71,7 @@ export default function CampaignDetailPage() {
     questionnaire_version_id: string; questionnaire_name: string | null; status: string;
     respondent_count: number; interviewer_count: number;
   }>;
-  const questionnaires = extractItems(questionnairesQuery.data);
+  const publishedVersions = publishedVersionsQuery.data ?? [];
 
   const createMutation = useMutation({
     mutationFn: () =>
@@ -89,14 +100,6 @@ export default function CampaignDetailPage() {
     mutationFn: (actionId: string) => apiClient.campaignActions.pause(session!, campaignId, actionId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['campaign-actions', campaignId] }),
   });
-
-  // Fetch questionnaires for edit dialog too
-  const questionnairesEditQuery = useQuery({
-    queryKey: ['questionnaires-for-edit'],
-    queryFn: () => apiClient.questionnaires.list(session!, { page_size: 200 }),
-    enabled: Boolean(session && showEdit),
-  });
-  const questionnairesForEdit = extractItems(questionnairesEditQuery.data);
 
   const editMutation = useMutation({
     mutationFn: () => {
@@ -146,8 +149,8 @@ export default function CampaignDetailPage() {
       name: campaign.name,
       description: campaign.description || '',
       segment: campaign.segment || '',
-      start_date: campaign.start_date || '',
-      end_date: campaign.end_date || '',
+      start_date: campaign.start_date ? campaign.start_date.split('T')[0] : '',
+      end_date: campaign.end_date ? campaign.end_date.split('T')[0] : '',
     });
     setError(null);
     setShowEditCampaign(true);
@@ -190,8 +193,8 @@ export default function CampaignDetailPage() {
                   <p className="text-sm text-slate-600">{campaign.description}</p>
                 )}
                 <div className="flex gap-4 text-xs text-slate-500">
-                  {campaign.start_date && <span>{t('startDate')}: {campaign.start_date}</span>}
-                  {campaign.end_date && <span>{t('endDate')}: {campaign.end_date}</span>}
+                  {campaign.start_date && <span>{t('startDate')}: {new Date(campaign.start_date).toLocaleDateString()}</span>}
+                  {campaign.end_date && <span>{t('endDate')}: {new Date(campaign.end_date).toLocaleDateString()}</span>}
                 </div>
               </div>
               <Button variant="ghost" className="h-7 px-2 text-xs" onClick={openEditCampaign}>
@@ -271,9 +274,9 @@ export default function CampaignDetailPage() {
                 onChange={(e) => setActionForm((p) => ({ ...p, questionnaire_version_id: e.target.value }))}
               >
                 <option value="">{t('selectForm')}</option>
-                {questionnaires.map((q) => (
-                  <option key={q.id} value={q.id}>
-                    {q.name}
+                {publishedVersions.map((v) => (
+                  <option key={v.id} value={v.id}>
+                    {v.label}
                   </option>
                 ))}
               </Select>
@@ -312,8 +315,8 @@ export default function CampaignDetailPage() {
                 onChange={(e) => setActionForm((p) => ({ ...p, questionnaire_version_id: e.target.value }))}
               >
                 <option value="">{t('selectForm')}</option>
-                {questionnairesForEdit.map((q) => (
-                  <option key={q.id} value={q.id}>{q.name}</option>
+                {publishedVersions.map((v) => (
+                  <option key={v.id} value={v.id}>{v.label}</option>
                 ))}
               </Select>
               {error && <p className="text-sm text-red-600">{error}</p>}
