@@ -5,34 +5,34 @@
 See: .planning/PROJECT.md (updated 2026-03-21)
 
 **Core value:** Permitir que empresas do agro coletem e analisem feedback NPS de forma simples e confiável
-**Current focus:** Phase 2 - Dockerize
+**Current focus:** Phase 3 - Deploy (Phase 2 complete)
 
 ## Current Position
 
-Phase: 2 of 3 (Dockerize)
-Plan: 1 of 2 in current phase
-Status: In progress
-Last activity: 2026-03-21 — Completed 02-01-PLAN.md (Docker Images — Dockerfiles for backend and all 3 frontends)
+Phase: 2 of 3 (Dockerize) — COMPLETE
+Plan: 2 of 2 in current phase
+Status: Phase complete — ready for Phase 3
+Last activity: 2026-03-22 — Completed 02-02-PLAN.md (Docker Compose + Nginx — full stack orchestration)
 
-Progress: [████████░░] 50% (3/6 plans complete)
+Progress: [██████████░░] 67% (4/6 plans complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 3
-- Average duration: ~7 min
-- Total execution time: ~23 min
+- Total plans completed: 4
+- Average duration: ~6.5 min
+- Total execution time: ~28 min
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-security-quality | 2/2 | ~20 min | ~10 min |
-| 02-dockerize | 1/2 | ~3 min | ~3 min |
+| 02-dockerize | 2/2 | ~8 min | ~4 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (~13 min), 01-02 (~7 min), 02-01 (~3 min)
-- Trend: Accelerating
+- Last 5 plans: 01-01 (~13 min), 01-02 (~7 min), 02-01 (~3 min), 02-02 (~5 min)
+- Trend: Stable, fast
 
 *Updated after each plan completion*
 
@@ -54,18 +54,22 @@ Progress: [████████░░] 50% (3/6 plans complete)
 - [02-01]: NEXT_PUBLIC_* vars passadas como ARG no build stage — Next.js inlina em compile time, não runtime
 - [02-01]: Nenhum .env copiado para imagens — todas as env vars vêm do docker-compose em runtime
 - [02-01]: Sem PM2 nas imagens Docker — Docker substitui PM2 como process manager
+- [02-02]: db-net declarada como external network com nome configurável via DB_NETWORK env var (default: nps-db-net)
+- [02-02]: Nginx usa container_name como upstream (nps-backend:3310, etc.) — mais explícito que service names
+- [02-02]: /api/ usa trailing-slash proxy_pass (http://backend/) para strip do prefix — NestJS routes não têm /api prefix
+- [02-02]: Backend expõe porta 3310 diretamente E via Nginx /api/ — frontends usam URL direta para SSR
 
 ### Pending Todos
 
-None.
+- VPS operator: criar .env a partir de .env.example antes do `docker compose up`
+- VPS operator: garantir que external network existe (`docker network create nps-db-net`) e PostgreSQL está na network
 
 ### Blockers/Concerns
 
-- PostgreSQL no VPS roda em container Docker — confirmar nome da network e credenciais antes de Phase 2 Plan 2
 - Verificar se GitHub Actions tem SSH key configurada para o VPS antes de Phase 3
 
 ## Session Continuity
 
-Last session: 2026-03-21
-Stopped at: Completed 02-01-PLAN.md — Dockerfiles criados para backend (INFRA-01) e 3 frontends (INFRA-02, 03, 04)
+Last session: 2026-03-22
+Stopped at: Completed 02-02-PLAN.md — docker-compose.yml, nginx/nginx.conf, nginx/Dockerfile criados
 Resume file: None
