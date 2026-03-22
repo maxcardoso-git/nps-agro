@@ -200,6 +200,92 @@
       "generic": "Não foi possível processar o usuário"
     }
   },
+  "formStudio": {
+    "editor": {
+      "back": "Voltar",
+      "unsaved": "Alterações não salvas",
+      "preview": "Visualizar",
+      "save": "Salvar",
+      "saving": "Salvando...",
+      "saved": "Salvo com sucesso",
+      "saveError": "Não foi possível salvar",
+      "publish": "Publicar",
+      "publishing": "Publicando...",
+      "published": "Publicado com sucesso",
+      "publishError": "Não foi possível publicar",
+      "publishTitle": "Publicar versão",
+      "publishConfirm": "Isso criará uma versão publicada imutável. Tem certeza?",
+      "cancel": "Cancelar",
+      "addField": "Adicionar pergunta",
+      "emptyCanvas": "Clique em um tipo de pergunta para adicioná-lo",
+      "selectField": "Selecione um campo para editar suas propriedades",
+      "fieldTab": "Campo",
+      "formTab": "Formulário",
+      "versionsTab": "Versões"
+    },
+    "config": {
+      "label": "Rótulo",
+      "sectionTitle": "Título da seção",
+      "description": "Descrição",
+      "descriptionPlaceholder": "Texto de ajuda para o respondente",
+      "required": "Obrigatório",
+      "placeholder": "Placeholder",
+      "minValue": "Mín",
+      "maxValue": "Máx",
+      "npsFixed": "Escala NPS é fixa:",
+      "scaleMin": "Mín. escala",
+      "scaleMax": "Máx. escala",
+      "options": "Opções",
+      "optionsPlaceholder": "Uma opção por linha",
+      "optionsHint": "Digite uma opção por linha",
+      "conditionalDisplay": "Exibição condicional",
+      "name": "Nome",
+      "status": "Status",
+      "fieldCount": "Perguntas",
+      "questions": "perguntas"
+    },
+    "preview": {
+      "title": "Pré-visualização",
+      "required": "Este campo é obrigatório",
+      "submit": "Enviar",
+      "reset": "Limpar",
+      "submitSuccess": "Formulário enviado com sucesso (apenas visualização)"
+    },
+    "conditions": {
+      "enable": "Exibir condicionalmente",
+      "dependsOn": "Depende de",
+      "operator": "Condição",
+      "value": "Valor",
+      "noFields": "Adicione mais perguntas primeiro"
+    },
+    "versions": {
+      "empty": "Nenhuma versão ainda",
+      "validate": "Validar",
+      "publish": "Publicar",
+      "validateError": "Falha na validação",
+      "publishError": "Não foi possível publicar"
+    },
+    "list": {
+      "title": "Questionários",
+      "create": "Novo questionário",
+      "createTitle": "Novo questionário",
+      "searchPlaceholder": "Buscar questionários...",
+      "filterAll": "Todos",
+      "filterDraft": "Rascunho",
+      "filterPublished": "Publicados",
+      "loading": "Carregando...",
+      "empty": "Nenhum questionário encontrado",
+      "colName": "Nome",
+      "colStatus": "Status",
+      "colCreated": "Criado em",
+      "edit": "Editar",
+      "namePlaceholder": "Nome do questionário",
+      "descriptionPlaceholder": "Descrição (opcional)",
+      "cancel": "Cancelar",
+      "creating": "Criando...",
+      "createError": "Não foi possível criar o questionário"
+    }
+  },
   "errors": {
     "forbidden": "Você não tem permissão para acessar este recurso."
   }

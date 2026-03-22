@@ -200,6 +200,92 @@
       "generic": "Could not process user"
     }
   },
+  "formStudio": {
+    "editor": {
+      "back": "Back",
+      "unsaved": "Unsaved changes",
+      "preview": "Preview",
+      "save": "Save",
+      "saving": "Saving...",
+      "saved": "Saved successfully",
+      "saveError": "Could not save",
+      "publish": "Publish",
+      "publishing": "Publishing...",
+      "published": "Published successfully",
+      "publishError": "Could not publish",
+      "publishTitle": "Publish version",
+      "publishConfirm": "This will create an immutable published version. Are you sure?",
+      "cancel": "Cancel",
+      "addField": "Add question",
+      "emptyCanvas": "Click a question type to add it",
+      "selectField": "Select a field to edit its properties",
+      "fieldTab": "Field",
+      "formTab": "Form",
+      "versionsTab": "Versions"
+    },
+    "config": {
+      "label": "Label",
+      "sectionTitle": "Section title",
+      "description": "Description",
+      "descriptionPlaceholder": "Help text for respondent",
+      "required": "Required",
+      "placeholder": "Placeholder",
+      "minValue": "Min",
+      "maxValue": "Max",
+      "npsFixed": "NPS scale is fixed:",
+      "scaleMin": "Scale min",
+      "scaleMax": "Scale max",
+      "options": "Options",
+      "optionsPlaceholder": "One option per line",
+      "optionsHint": "Enter one option per line",
+      "conditionalDisplay": "Conditional display",
+      "name": "Name",
+      "status": "Status",
+      "fieldCount": "Questions",
+      "questions": "questions"
+    },
+    "preview": {
+      "title": "Form Preview",
+      "required": "This field is required",
+      "submit": "Submit",
+      "reset": "Reset",
+      "submitSuccess": "Form submitted successfully (preview only)"
+    },
+    "conditions": {
+      "enable": "Show conditionally",
+      "dependsOn": "Depends on",
+      "operator": "Condition",
+      "value": "Value",
+      "noFields": "Add more questions first"
+    },
+    "versions": {
+      "empty": "No versions yet",
+      "validate": "Validate",
+      "publish": "Publish",
+      "validateError": "Validation failed",
+      "publishError": "Could not publish"
+    },
+    "list": {
+      "title": "Questionnaires",
+      "create": "New questionnaire",
+      "createTitle": "New questionnaire",
+      "searchPlaceholder": "Search questionnaires...",
+      "filterAll": "All",
+      "filterDraft": "Draft",
+      "filterPublished": "Published",
+      "loading": "Loading...",
+      "empty": "No questionnaires found",
+      "colName": "Name",
+      "colStatus": "Status",
+      "colCreated": "Created",
+      "edit": "Edit",
+      "namePlaceholder": "Questionnaire name",
+      "descriptionPlaceholder": "Description (optional)",
+      "cancel": "Cancel",
+      "creating": "Creating...",
+      "createError": "Could not create questionnaire"
+    }
+  },
   "errors": {
     "forbidden": "You are not allowed to access this resource."
   }
