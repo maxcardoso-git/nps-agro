@@ -78,6 +78,24 @@ export class ContactAttemptController {
     return this.contactAttemptService.getCampaignContactStats(user, campaignId);
   }
 
+  @Post('actions/:actionId/next-contact')
+  @Permissions('campaign.read')
+  reserveNextContact(
+    @CurrentUser() user: AuthUserClaims,
+    @Param('actionId') actionId: string,
+  ) {
+    return this.contactAttemptService.reserveNextContact(user, actionId);
+  }
+
+  @Post('actions/:actionId/release-contact/:respondentId')
+  @Permissions('campaign.read')
+  releaseContact(
+    @CurrentUser() user: AuthUserClaims,
+    @Param('respondentId') respondentId: string,
+  ) {
+    return this.contactAttemptService.releaseReservation(user, respondentId);
+  }
+
   @Get('contact-attempts/my-scheduled')
   @Permissions('campaign.read')
   getMyScheduledCallbacks(

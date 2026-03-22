@@ -27,6 +27,7 @@ export default function CampaignDetailPage() {
   const [showEdit, setShowEdit] = useState(false);
   const [showEditCampaign, setShowEditCampaign] = useState(false);
   const [showImport, setShowImport] = useState(false);
+  const [actionInterviewers, setActionInterviewers] = useState<string[]>([]);
   const [importActionId, setImportActionId] = useState<string | null>(null);
   const [importResult, setImportResult] = useState<string | null>(null);
   const [editingActionId, setEditingActionId] = useState<string | null>(null);
@@ -65,6 +66,14 @@ export default function CampaignDetailPage() {
     enabled: Boolean(session),
   });
 
+  // Load users for interviewer assignment
+  const usersQuery = useQuery({
+    queryKey: ['tenant-users', session?.user.tenant_id],
+    queryFn: () => apiClient.users.listByTenant(session!, session!.user.tenant_id),
+    enabled: Boolean(session),
+  });
+  const tenantUsers = usersQuery.data ?? [];
+
   const campaign = campaignQuery.data;
   const actions = (actionsQuery.data ?? []) as Array<{
     id: string; name: string; description: string | null;
@@ -102,7 +111,7 @@ export default function CampaignDetailPage() {
   });
 
   const editMutation = useMutation({
-    mutationFn: () => {
+    mutationFn: async () => {
       const payload: Record<string, unknown> = {
         name: actionForm.name,
         description: actionForm.description || undefined,
@@ -110,7 +119,9 @@ export default function CampaignDetailPage() {
       if (actionForm.questionnaire_version_id) {
         payload.questionnaire_version_id = actionForm.questionnaire_version_id;
       }
-      return apiClient.campaignActions.update(session!, campaignId, editingActionId!, payload);
+      await apiClient.campaignActions.update(session!, campaignId, editingActionId!, payload);
+      // Save interviewers
+      await apiClient.campaignActions.setInterviewers(session!, campaignId, editingActionId!, actionInterviewers);
     },
     onSuccess: () => {
       setShowEdit(false);
@@ -156,7 +167,7 @@ export default function CampaignDetailPage() {
     setShowEditCampaign(true);
   };
 
-  const openEdit = (a: { id: string; name: string; description: string | null; questionnaire_version_id?: string }) => {
+  const openEdit = async (a: { id: string; name: string; description: string | null; questionnaire_version_id?: string }) => {
     setEditingActionId(a.id);
     setActionForm({
       name: a.name,
@@ -164,6 +175,13 @@ export default function CampaignDetailPage() {
       questionnaire_version_id: a.questionnaire_version_id || '',
     });
     setError(null);
+    // Load current interviewers
+    try {
+      const interviewers = await apiClient.campaignActions.getInterviewers(session!, campaignId, a.id);
+      setActionInterviewers(interviewers.map((i) => i.user_id));
+    } catch {
+      setActionInterviewers([]);
+    }
     setShowEdit(true);
   };
 
@@ -216,7 +234,7 @@ export default function CampaignDetailPage() {
           <p className="py-4 text-center text-sm text-slate-400">{t('noActions')}</p>
         ) : (
           <Table
-            headers={[t('colName'), t('colForm'), t('colContacts'), t('colStatus'), t('colActions')]}
+            headers={[t('colName'), t('colForm'), t('colContacts'), t('colInterviewers'), t('colStatus'), t('colActions')]}
             rows={actions.map((a) => [
               <div key={`n-${a.id}`}>
                 <span className="font-medium">{a.name}</span>
@@ -224,6 +242,7 @@ export default function CampaignDetailPage() {
               </div>,
               a.questionnaire_name || '—',
               a.respondent_count,
+              a.interviewer_count,
               <Badge key={`s-${a.id}`} tone={statusTone(a.status)}>{a.status}</Badge>,
               <div key={`a-${a.id}`} className="flex gap-1">
                 <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => openEdit(a)}>
@@ -337,6 +356,27 @@ export default function CampaignDetailPage() {
                   <option key={v.id} value={v.id}>{v.label}</option>
                 ))}
               </Select>
+              {/* Interviewers */}
+              <div>
+                <p className="mb-1 text-xs font-medium text-slate-600">{t('interviewers')}</p>
+                <div className="max-h-32 overflow-y-auto rounded-lg border border-slate-200 p-2">
+                  {tenantUsers.filter((u) => u.is_active).map((u) => (
+                    <label key={u.id} className="flex items-center gap-2 py-0.5 text-xs">
+                      <input
+                        type="checkbox"
+                        checked={actionInterviewers.includes(u.id)}
+                        onChange={(e) => {
+                          if (e.target.checked) setActionInterviewers((p) => [...p, u.id]);
+                          else setActionInterviewers((p) => p.filter((id) => id !== u.id));
+                        }}
+                        className="h-3.5 w-3.5 rounded text-primary"
+                      />
+                      {u.name} <span className="text-slate-400">({u.email})</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+
               {error && <p className="text-sm text-red-600">{error}</p>}
             </div>
             <DialogFooter>

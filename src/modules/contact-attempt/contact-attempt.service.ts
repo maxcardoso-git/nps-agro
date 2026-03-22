@@ -97,6 +97,18 @@ export class ContactAttemptService {
     );
   }
 
+  async reserveNextContact(actor: AuthUserClaims, actionId: string) {
+    const contact = await this.contactAttemptRepository.reserveNextContact(
+      actor.tenant_id, actionId, actor.sub,
+    );
+    return contact ? { contact } : { contact: null };
+  }
+
+  async releaseReservation(actor: AuthUserClaims, respondentId: string) {
+    await this.contactAttemptRepository.releaseReservation(respondentId, actor.sub);
+    return { released: true };
+  }
+
   async getCampaignContactStats(actor: AuthUserClaims, campaignId: string) {
     return this.contactAttemptRepository.getCampaignContactStats(actor.tenant_id, campaignId);
   }

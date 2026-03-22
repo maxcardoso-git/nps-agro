@@ -285,4 +285,70 @@ export class ContactAttemptRepository extends SqlRepositoryBase {
       [tenantId, interviewerUserId, targetDate],
     );
   }
+
+  // Reserve the next available contact for an interviewer (FIFO queue)
+  async reserveNextContact(
+    tenantId: string,
+    actionId: string,
+    userId: string,
+    reservationMinutes: number = 30,
+  ): Promise<RespondentWithStatusRow | null> {
+    // Release expired reservations first
+    await this.execute(
+      `UPDATE core.respondent
+       SET reserved_by = NULL, reserved_at = NULL
+       WHERE action_id = $1 AND reserved_at < NOW() - INTERVAL '1 minute' * $2`,
+      [actionId, reservationMinutes],
+    );
+
+    // Find next unreserved pending contact (no contact_attempt or last attempt was no_answer/busy)
+    const row = await this.one<{ id: string }>(
+      `SELECT r.id
+       FROM core.respondent r
+       LEFT JOIN LATERAL (
+         SELECT outcome FROM core.contact_attempt
+         WHERE respondent_id = r.id AND action_id = $1
+         ORDER BY created_at DESC LIMIT 1
+       ) ca ON true
+       LEFT JOIN core.interview i ON i.respondent_id = r.id AND i.action_id = $1 AND i.status = 'completed'
+       WHERE r.action_id = $1
+         AND r.tenant_id = $2
+         AND (r.reserved_by IS NULL OR r.reserved_by = $3)
+         AND i.id IS NULL
+         AND (ca.outcome IS NULL OR ca.outcome IN ('no_answer', 'busy'))
+       ORDER BY r.created_at
+       LIMIT 1
+       FOR UPDATE SKIP LOCKED`,
+      [actionId, tenantId, userId],
+    );
+
+    if (!row) return null;
+
+    // Reserve it
+    await this.execute(
+      `UPDATE core.respondent SET reserved_by = $1, reserved_at = NOW() WHERE id = $2`,
+      [userId, row.id],
+    );
+
+    // Return full respondent with status
+    const result = await this.one<RespondentWithStatusRow>(
+      `SELECT r.*,
+        acc.name AS account_name,
+        'pending' AS contact_status,
+        NULL::timestamp AS scheduled_at
+       FROM core.respondent r
+       LEFT JOIN core.account acc ON acc.id = r.account_id
+       WHERE r.id = $1`,
+      [row.id],
+    );
+
+    return result;
+  }
+
+  async releaseReservation(respondentId: string, userId: string): Promise<void> {
+    await this.execute(
+      `UPDATE core.respondent SET reserved_by = NULL, reserved_at = NULL WHERE id = $1 AND reserved_by = $2`,
+      [respondentId, userId],
+    );
+  }
 }

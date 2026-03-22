@@ -173,6 +173,16 @@ export const api = {
         session
       );
     },
+    nextContact: async (
+      session: AuthSession,
+      actionId: string
+    ): Promise<{ contact: RespondentWithStatus | null }> => {
+      return request<{ contact: RespondentWithStatus | null }>(
+        `/actions/${actionId}/next-contact`,
+        { method: 'POST' },
+        session
+      );
+    },
     getRespondents: async (
       session: AuthSession,
       actionId: string,

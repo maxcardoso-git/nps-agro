@@ -74,6 +74,8 @@
       "colStatus": "Status",
       "contact": "Contatar",
       "resume": "Retomar",
+      "nextContact": "Próximo Contato",
+      "noMoreContacts": "Não há mais contatos disponíveis na fila",
       "attemptTitle": "Registrar Contato",
       "outcome": "Resultado",
       "outcomes": {

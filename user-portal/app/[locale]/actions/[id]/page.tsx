@@ -125,6 +125,19 @@ export default function ActionContactsPage() {
     setError(null);
   };
 
+  const handleNextContact = async () => {
+    try {
+      const result = await api.actions.nextContact(session!, actionId);
+      if (result.contact) {
+        openModal(result.contact);
+      } else {
+        setError(t('noMoreContacts'));
+      }
+    } catch (cause) {
+      setError(cause instanceof ApiError ? cause.message : t('error'));
+    }
+  };
+
   const openModal = (respondent: RespondentWithStatus) => {
     setSelectedRespondent(respondent);
     resetForm();
@@ -140,12 +153,24 @@ export default function ActionContactsPage() {
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2">
-        <Button variant="ghost" onClick={() => router.back()}>
-          ← {t('back')}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" onClick={() => router.back()}>
+            ← {t('back')}
         </Button>
         <h1 className="text-2xl font-semibold text-slate-900">{t('title')}</h1>
+        </div>
+        <Button onClick={handleNextContact} className="gap-1">
+          {t('nextContact')}
+        </Button>
       </div>
+
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {error}
+          <button type="button" className="ml-2 underline" onClick={() => setError(null)}>✕</button>
+        </div>
+      )}
 
       <div className="flex items-center gap-3">
         <Input
