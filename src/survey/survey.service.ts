@@ -17,7 +17,7 @@ import {
   TenantScopedInput,
 } from './survey.types';
 
-interface SurveyRuntimeResponse {
+export interface SurveyRuntimeResponse {
   next_question: Question | null;
   interview_state: InterviewSession;
 }
