@@ -8,10 +8,7 @@ import type {
   Tenant
 } from '@/lib/types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
-if (!API_URL) {
-  throw new Error('NEXT_PUBLIC_API_URL environment variable is required');
-}
+const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 export class ApiError extends Error {
   code: string;
