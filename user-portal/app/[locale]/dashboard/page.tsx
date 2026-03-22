@@ -178,7 +178,7 @@ function CampaignProgressCard({ campaign, locale }: { campaign: Campaign; locale
   const completedCount = stats.find((s) => s.status === 'completed')?.count ?? 0;
   const pendingCount = stats.find((s) => s.status === 'pending')?.count ?? 0;
   const contactedCount = total - pendingCount;
-  const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+  const pct = total > 0 ? ((completedCount / total) * 100).toFixed(2) : '0.00';
 
   return (
     <Card className="group cursor-pointer transition hover:border-primary/50 hover:shadow-md">
