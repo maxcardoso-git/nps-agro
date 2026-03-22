@@ -9,12 +9,12 @@ See: .planning/PROJECT.md (updated 2026-03-21)
 
 ## Current Position
 
-Phase: 2 of 3 (Dockerize) — COMPLETE
+Phase: 3 of 3 (Deploy/CI-CD) — COMPLETE
 Plan: 2 of 2 in current phase
-Status: Phase complete — ready for Phase 3
-Last activity: 2026-03-22 — Completed 02-02-PLAN.md (Docker Compose + Nginx — full stack orchestration)
+Status: ALL PHASES COMPLETE
+Last activity: 2026-03-22 — Completed 03-02-PLAN.md (GitHub Actions workflow updated with script_stop + command_timeout)
 
-Progress: [██████████░░] 67% (4/6 plans complete)
+Progress: [████████████] 100% (6/6 plans complete)
 
 ## Performance Metrics
 
@@ -31,7 +31,7 @@ Progress: [██████████░░] 67% (4/6 plans complete)
 | 02-dockerize | 2/2 | ~8 min | ~4 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (~13 min), 01-02 (~7 min), 02-01 (~3 min), 02-02 (~5 min)
+- Last 5 plans: 01-01 (~13 min), 01-02 (~7 min), 02-01 (~3 min), 02-02 (~5 min), 03-02 (~3 min)
 - Trend: Stable, fast
 
 *Updated after each plan completion*
@@ -58,6 +58,8 @@ Progress: [██████████░░] 67% (4/6 plans complete)
 - [02-02]: Nginx usa container_name como upstream (nps-backend:3310, etc.) — mais explícito que service names
 - [02-02]: /api/ usa trailing-slash proxy_pass (http://backend/) para strip do prefix — NestJS routes não têm /api prefix
 - [02-02]: Backend expõe porta 3310 diretamente E via Nginx /api/ — frontends usam URL direta para SSR
+- [03-02]: script_stop: true adicionado ao appleboy/ssh-action — workflow falha se deploy.sh sair com erro
+- [03-02]: command_timeout: 10m — timeout padrão de 10s é muito curto para Docker builds no VPS
 
 ### Pending Todos
 
@@ -66,10 +68,12 @@ Progress: [██████████░░] 67% (4/6 plans complete)
 
 ### Blockers/Concerns
 
-- Verificar se GitHub Actions tem SSH key configurada para o VPS antes de Phase 3
+- Nenhum blocker ativo — todos os 3 phases completos
+- VPS operator: criar .env a partir de .env.example antes do `docker compose up`
+- VPS operator: garantir que external network existe (`docker network create nps-db-net`) e PostgreSQL está na network
 
 ## Session Continuity
 
 Last session: 2026-03-22
-Stopped at: Completed 02-02-PLAN.md — docker-compose.yml, nginx/nginx.conf, nginx/Dockerfile criados
+Stopped at: Completed 03-02-PLAN.md — .github/workflows/deploy.yml atualizado (script_stop + command_timeout)
 Resume file: None
