@@ -4,144 +4,102 @@
     "logout": "Salir",
     "language": "Idioma",
     "menu": {
-      "dashboard": "Dashboard"
+      "dashboard": "Dashboard",
+      "campaigns": "Campañas"
     },
     "forbidden": {
       "title": "Acceso denegado",
-      "description": "Tu rol no tiene permiso para este portal.",
-      "roleLabel": "Rol"
+      "description": "Tu perfil no tiene permiso para acceder a este portal.",
+      "roleLabel": "Perfil"
     }
   },
   "auth": {
-    "title": "Ingresar al User Portal",
+    "title": "Ingresar — Portal del Entrevistador",
     "email": "Correo",
     "password": "Contraseña",
-    "tenantCode": "Código del tenant (opcional)",
     "submit": "Ingresar",
     "loading": "Ingresando...",
-    "genericError": "Falló la autenticación"
+    "genericError": "Error de autenticación"
   },
-  "dashboard": {
-    "title": "Dashboard Ejecutivo",
-    "empty": "Seleccione una campaña para ver datos.",
-    "filters": {
-      "title": "Filtros",
-      "campaign": "Campaña",
-      "dateRangeStart": "Fecha inicial",
-      "dateRangeEnd": "Fecha final",
-      "region": "Región",
-      "sentiment": "Sentimiento",
-      "npsMin": "NPS mínimo",
-      "npsMax": "NPS máximo",
-      "allCampaigns": "Todas las campañas",
-      "allSentiments": "Todos los sentimientos"
+  "interviewer": {
+    "dashboard": {
+      "title": "Dashboard",
+      "activeCampaigns": "Campañas Activas",
+      "scheduledCallbacks": "Callbacks de Hoy",
+      "loading": "Cargando...",
+      "noCampaigns": "No hay campañas activas",
+      "noCallbacks": "No hay callbacks programados para hoy",
+      "colTime": "Hora",
+      "colName": "Nombre",
+      "colPhone": "Teléfono",
+      "colCampaign": "Campaña",
+      "call": "Llamar"
     },
-    "kpis": {
-      "nps": "NPS",
-      "totalInterviews": "Total entrevistas",
-      "promoters": "Promotores",
-      "neutrals": "Neutros",
-      "detractors": "Detractores"
+    "campaigns": {
+      "title": "Campañas",
+      "loading": "Cargando...",
+      "empty": "No hay campañas disponibles",
+      "colName": "Nombre",
+      "colSegment": "Segmento",
+      "colStatus": "Estado",
+      "open": "Abrir"
     },
-    "sentiments": {
-      "positive": "Positivo",
-      "neutral": "Neutro",
-      "negative": "Negativo",
-      "mixed": "Mixto",
-      "unknown": "Desconocido"
-    },
-    "campaign": {
-      "title": "Campaña",
-      "open": "Abrir detalle"
-    },
-    "charts": {
-      "trend": "Tendencia NPS",
-      "sentiment": "Distribución de sentimiento",
-      "regional": "Desglose regional"
-    },
-    "insights": {
-      "topTopics": "Top insights",
-      "empty": "Sin tópicos para los filtros actuales.",
-      "alerts": "Alertas",
-      "noAlerts": "No hay detractores recientes para los filtros."
-    },
-    "interviews": {
-      "title": "Entrevistas",
-      "empty": "No se encontraron entrevistas.",
-      "open": "Abrir",
-      "headers": {
-        "id": "ID",
-        "respondent": "Respondente",
-        "region": "Región",
-        "nps": "NPS",
-        "sentiment": "Sentimiento",
-        "action": "Acción"
+    "contacts": {
+      "title": "Contactos de la Campaña",
+      "back": "Volver",
+      "searchPlaceholder": "Buscar por nombre o teléfono...",
+      "allStatuses": "Todos los estados",
+      "loading": "Cargando...",
+      "empty": "No se encontraron contactos",
+      "colName": "Nombre",
+      "colAccount": "Cuenta",
+      "colPhone": "Teléfono",
+      "colStatus": "Estado",
+      "contact": "Contactar",
+      "resume": "Reanudar",
+      "attemptTitle": "Registrar Contacto",
+      "outcome": "Resultado",
+      "outcomes": {
+        "success": "Éxito — iniciar entrevista",
+        "no_answer": "No contestó",
+        "wrong_number": "Número equivocado",
+        "busy": "Ocupado",
+        "scheduled": "Programar retorno",
+        "refused": "Rechazó"
+      },
+      "scheduleDate": "Fecha y hora del callback",
+      "notes": "Notas",
+      "notesPlaceholder": "Notas opcionales...",
+      "cancel": "Cancelar",
+      "save": "Guardar",
+      "saving": "Guardando...",
+      "error": "No se pudo registrar el contacto",
+      "status": {
+        "pending": "Pendiente",
+        "success": "Contactado",
+        "no_answer": "No contestó",
+        "wrong_number": "Nº equivocado",
+        "busy": "Ocupado",
+        "scheduled": "Programado",
+        "refused": "Rechazó",
+        "in_progress": "En progreso",
+        "completed": "Completado"
       }
     },
-    "errors": {
-      "forbidden": "No tienes permiso para ver este dashboard.",
-      "generic": "Error al cargar el dashboard."
-    }
-  },
-  "reports": {
-    "empty": "No hay datos disponibles.",
-    "filters": {
-      "title": "Filtros",
-      "campaign": "Campaña",
-      "dateRangeStart": "Fecha inicial",
-      "dateRangeEnd": "Fecha final",
-      "region": "Región",
-      "sentiment": "Sentimiento",
-      "npsMin": "NPS mínimo",
-      "npsMax": "NPS máximo",
-      "allCampaigns": "Todas las campañas",
-      "allSentiments": "Todos los sentimientos"
-    },
-    "kpis": {
-      "nps": "NPS",
-      "totalInterviews": "Total entrevistas",
-      "promoters": "Promotores",
-      "neutrals": "Neutros",
-      "detractors": "Detractores"
-    },
-    "sentiments": {
-      "positive": "Positivo",
-      "neutral": "Neutro",
-      "negative": "Negativo",
-      "mixed": "Mixto",
-      "unknown": "Desconocido"
-    },
-    "charts": {
-      "trend": "Evolución temporal",
-      "sentiment": "Sentimiento"
-    },
-    "campaignDetail": {
-      "title": "Analítica de Campaña",
-      "interviews": "Tabla de entrevistas"
-    },
-    "interviews": {
-      "empty": "No se encontraron entrevistas.",
-      "open": "Abrir",
-      "missingCampaign": "campaignId es obligatorio.",
-      "notFound": "Entrevista no encontrada para la campaña.",
-      "headers": {
-        "id": "ID",
-        "respondent": "Respondente",
-        "region": "Región",
-        "nps": "NPS",
-        "sentiment": "Sentimiento",
-        "action": "Acción"
-      }
-    },
-    "interviewDetail": {
-      "title": "Detalle de entrevista",
-      "respondent": "Respondente",
-      "metrics": "Métricas",
-      "summary": "Resumen",
-      "topics": "Tópicos"
-    },
-    "errors": {
-      "generic": "Error al cargar los datos del reporte."
+    "interview": {
+      "loading": "Cargando entrevista...",
+      "saveExit": "Guardar y Salir",
+      "required": "Obligatorio",
+      "next": "Siguiente",
+      "submitting": "Enviando...",
+      "answerError": "No se pudo enviar la respuesta",
+      "allAnswered": "Todas las preguntas fueron respondidas. ¿Finalizar la entrevista?",
+      "complete": "Finalizar Entrevista",
+      "completing": "Finalizando...",
+      "completeError": "No se pudo finalizar la entrevista",
+      "completedTitle": "Entrevista Completada",
+      "completedMessage": "Todas las respuestas fueron registradas correctamente.",
+      "backToCampaign": "Volver a la Campaña"
     }
   }
 }

@@ -5,7 +5,10 @@ import { usePathname } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
-const items = [{ key: 'dashboard', href: '/dashboard' }];
+const items = [
+  { key: 'dashboard', href: '/dashboard' },
+  { key: 'campaigns', href: '/campaigns' },
+];
 
 export function Sidebar() {
   const t = useTranslations('common.menu');

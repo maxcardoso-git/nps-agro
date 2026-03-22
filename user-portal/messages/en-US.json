@@ -4,7 +4,8 @@
     "logout": "Logout",
     "language": "Language",
     "menu": {
-      "dashboard": "Dashboard"
+      "dashboard": "Dashboard",
+      "campaigns": "Campaigns"
     },
     "forbidden": {
       "title": "Access denied",
@@ -13,135 +14,92 @@
     }
   },
   "auth": {
-    "title": "Sign in to User Portal",
+    "title": "Sign in — Interviewer Portal",
     "email": "Email",
     "password": "Password",
-    "tenantCode": "Tenant code (optional)",
     "submit": "Sign in",
     "loading": "Signing in...",
     "genericError": "Authentication failed"
   },
-  "dashboard": {
-    "title": "Executive Dashboard",
-    "empty": "Select a campaign to view data.",
-    "filters": {
-      "title": "Filters",
-      "campaign": "Campaign",
-      "dateRangeStart": "Date start",
-      "dateRangeEnd": "Date end",
-      "region": "Region",
-      "sentiment": "Sentiment",
-      "npsMin": "NPS min",
-      "npsMax": "NPS max",
-      "allCampaigns": "All campaigns",
-      "allSentiments": "All sentiments"
+  "interviewer": {
+    "dashboard": {
+      "title": "Dashboard",
+      "activeCampaigns": "Active Campaigns",
+      "scheduledCallbacks": "Today's Callbacks",
+      "loading": "Loading...",
+      "noCampaigns": "No active campaigns",
+      "noCallbacks": "No callbacks scheduled for today",
+      "colTime": "Time",
+      "colName": "Name",
+      "colPhone": "Phone",
+      "colCampaign": "Campaign",
+      "call": "Call"
     },
-    "kpis": {
-      "nps": "NPS",
-      "totalInterviews": "Total interviews",
-      "promoters": "Promoters",
-      "neutrals": "Neutrals",
-      "detractors": "Detractors"
+    "campaigns": {
+      "title": "Campaigns",
+      "loading": "Loading...",
+      "empty": "No campaigns available",
+      "colName": "Name",
+      "colSegment": "Segment",
+      "colStatus": "Status",
+      "open": "Open"
     },
-    "sentiments": {
-      "positive": "Positive",
-      "neutral": "Neutral",
-      "negative": "Negative",
-      "mixed": "Mixed",
-      "unknown": "Unknown"
-    },
-    "campaign": {
-      "title": "Campaign",
-      "open": "Open details"
-    },
-    "charts": {
-      "trend": "NPS trend",
-      "sentiment": "Sentiment distribution",
-      "regional": "Regional breakdown"
-    },
-    "insights": {
-      "topTopics": "Top insights",
-      "empty": "No topics for current filters.",
-      "alerts": "Alerts",
-      "noAlerts": "No recent detractors for selected filters."
-    },
-    "interviews": {
-      "title": "Interviews",
-      "empty": "No interviews found.",
-      "open": "Open",
-      "headers": {
-        "id": "ID",
-        "respondent": "Respondent",
-        "region": "Region",
-        "nps": "NPS",
-        "sentiment": "Sentiment",
-        "action": "Action"
+    "contacts": {
+      "title": "Campaign Contacts",
+      "back": "Back",
+      "searchPlaceholder": "Search by name or phone...",
+      "allStatuses": "All statuses",
+      "loading": "Loading...",
+      "empty": "No contacts found",
+      "colName": "Name",
+      "colAccount": "Account",
+      "colPhone": "Phone",
+      "colStatus": "Status",
+      "contact": "Contact",
+      "resume": "Resume",
+      "attemptTitle": "Register Contact",
+      "outcome": "Result",
+      "outcomes": {
+        "success": "Success — start interview",
+        "no_answer": "No answer",
+        "wrong_number": "Wrong number",
+        "busy": "Busy",
+        "scheduled": "Schedule callback",
+        "refused": "Refused"
+      },
+      "scheduleDate": "Schedule date and time",
+      "notes": "Notes",
+      "notesPlaceholder": "Optional notes...",
+      "cancel": "Cancel",
+      "save": "Save",
+      "saving": "Saving...",
+      "error": "Could not register contact",
+      "status": {
+        "pending": "Pending",
+        "success": "Contacted",
+        "no_answer": "No answer",
+        "wrong_number": "Wrong number",
+        "busy": "Busy",
+        "scheduled": "Scheduled",
+        "refused": "Refused",
+        "in_progress": "In progress",
+        "completed": "Completed"
       }
     },
-    "errors": {
-      "forbidden": "You are not allowed to view this dashboard.",
-      "generic": "Failed to load dashboard."
-    }
-  },
-  "reports": {
-    "empty": "No data available.",
-    "filters": {
-      "title": "Filters",
-      "campaign": "Campaign",
-      "dateRangeStart": "Date start",
-      "dateRangeEnd": "Date end",
-      "region": "Region",
-      "sentiment": "Sentiment",
-      "npsMin": "NPS min",
-      "npsMax": "NPS max",
-      "allCampaigns": "All campaigns",
-      "allSentiments": "All sentiments"
-    },
-    "kpis": {
-      "nps": "NPS",
-      "totalInterviews": "Total interviews",
-      "promoters": "Promoters",
-      "neutrals": "Neutrals",
-      "detractors": "Detractors"
-    },
-    "sentiments": {
-      "positive": "Positive",
-      "neutral": "Neutral",
-      "negative": "Negative",
-      "mixed": "Mixed",
-      "unknown": "Unknown"
-    },
-    "charts": {
-      "trend": "Time evolution",
-      "sentiment": "Sentiment"
-    },
-    "campaignDetail": {
-      "title": "Campaign Analytics",
-      "interviews": "Interview table"
-    },
-    "interviews": {
-      "empty": "No interviews found.",
-      "open": "Open",
-      "missingCampaign": "campaignId is required.",
-      "notFound": "Interview not found for this campaign.",
-      "headers": {
-        "id": "ID",
-        "respondent": "Respondent",
-        "region": "Region",
-        "nps": "NPS",
-        "sentiment": "Sentiment",
-        "action": "Action"
-      }
-    },
-    "interviewDetail": {
-      "title": "Interview Detail",
-      "respondent": "Respondent",
-      "metrics": "Metrics",
-      "summary": "Summary",
-      "topics": "Topics"
-    },
-    "errors": {
-      "generic": "Failed to load report data."
+    "interview": {
+      "loading": "Loading interview...",
+      "saveExit": "Save & Exit",
+      "required": "Required",
+      "next": "Next",
+      "submitting": "Submitting...",
+      "answerError": "Could not submit answer",
+      "allAnswered": "All questions answered. Complete the interview?",
+      "complete": "Complete Interview",
+      "completing": "Completing...",
+      "completeError": "Could not complete interview",
+      "completedTitle": "Interview Completed",
+      "completedMessage": "All answers have been recorded successfully.",
+      "backToCampaign": "Back to Campaign"
     }
   }
 }

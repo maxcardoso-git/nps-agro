@@ -1,200 +1,255 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-import { useQuery } from '@tanstack/react-query';
-import Link from 'next/link';
-import { useLocale, useTranslations } from 'next-intl';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
-import { Card } from '@/components/ui/Card';
+import { useState } from 'react';
+import { Badge } from '@/components/ui/Badge';
+import { Button } from '@/components/ui/Button';
+import { Input } from '@/components/ui/Input';
+import { Select } from '@/components/ui/Select';
 import { Table } from '@/components/ui/Table';
+import { Modal } from '@/components/ui/Modal';
 import { api, ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth/auth-context';
-import { extractItems } from '@/lib/utils';
-import { applyFilters, buildNpsTrend } from '@/modules/dashboard/transform';
-import { KpiCard } from '@/modules/dashboard/components/KpiCard';
-import { FilterPanel } from '@/modules/campaign-analytics/components/FilterPanel';
+import type { ContactOutcome, RespondentWithStatus } from '@/lib/types';
 
-const TrendChart = dynamic(() => import('@/components/charts/TrendChart').then((mod) => mod.TrendChart), {
-  ssr: false
-});
+const STATUS_TONES: Record<string, 'neutral' | 'success' | 'warning' | 'danger'> = {
+  pending: 'neutral',
+  success: 'success',
+  in_progress: 'warning',
+  completed: 'success',
+  scheduled: 'warning',
+  no_answer: 'danger',
+  wrong_number: 'danger',
+  busy: 'warning',
+  refused: 'danger',
+};
 
-const SentimentPieChart = dynamic(
-  () => import('@/components/charts/SentimentPieChart').then((mod) => mod.SentimentPieChart),
-  { ssr: false }
-);
-
-export default function CampaignDetailPage() {
-  const t = useTranslations('reports');
-  const common = useTranslations('common');
-  const locale = useLocale();
-  const params = useParams<{ id: string }>();
+export default function CampaignContactsPage() {
+  const t = useTranslations('interviewer.contacts');
+  const { session } = useAuth();
   const router = useRouter();
-  const { session, logout } = useAuth();
+  const params = useParams();
+  const campaignId = params.id as string;
+  const locale = params.locale as string;
+  const queryClient = useQueryClient();
 
-  const [dateFrom, setDateFrom] = useState('');
-  const [dateTo, setDateTo] = useState('');
-  const [region, setRegion] = useState('');
-  const [sentiment, setSentiment] = useState('');
-  const [npsMin, setNpsMin] = useState('');
-  const [npsMax, setNpsMax] = useState('');
+  const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [selectedRespondent, setSelectedRespondent] = useState<RespondentWithStatus | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
-  const campaignId = params.id;
+  // Contact attempt form state
+  const [outcome, setOutcome] = useState<ContactOutcome>('success');
+  const [notes, setNotes] = useState('');
+  const [scheduledAt, setScheduledAt] = useState('');
+  const [error, setError] = useState<string | null>(null);
 
-  const campaignsQuery = useQuery({
-    queryKey: ['campaign-detail', 'campaigns'],
-    queryFn: async () => api.campaigns.list(session!, { page: 1, page_size: 100 }),
-    enabled: Boolean(session)
-  });
-
-  const summaryQuery = useQuery({
-    queryKey: ['campaign-detail', 'summary', campaignId],
-    queryFn: async () => api.reports.executiveSummary(session!, campaignId),
-    enabled: Boolean(session && campaignId)
-  });
-
-  const interviewsQuery = useQuery({
-    queryKey: ['campaign-detail', 'interviews', campaignId],
-    queryFn: async () => api.reports.campaignInterviews(session!, campaignId, { page: 1, page_size: 500 }),
-    enabled: Boolean(session && campaignId)
-  });
-
-  const campaigns = extractItems(campaignsQuery.data);
-  const summary = summaryQuery.data;
-  const interviews = extractItems(interviewsQuery.data);
-  const onError = [campaignsQuery.error, summaryQuery.error, interviewsQuery.error].find(Boolean);
-
-  useEffect(() => {
-    if (onError instanceof ApiError && onError.status === 401) {
-      logout();
-    }
-  }, [onError, logout]);
-
-  const filteredInterviews = useMemo(
-    () =>
-      applyFilters(interviews, {
-        date_from: dateFrom,
-        date_to: dateTo,
-        region,
-        sentiment,
-        nps_min: npsMin,
-        nps_max: npsMax
+  const respondentsQuery = useQuery({
+    queryKey: ['respondents', campaignId, search, statusFilter],
+    queryFn: () =>
+      api.campaigns.getRespondents(session!, campaignId, {
+        search: search || undefined,
+        status: statusFilter || undefined,
+        page_size: 100,
       }),
-    [interviews, dateFrom, dateTo, region, sentiment, npsMin, npsMax]
-  );
+    enabled: Boolean(session && campaignId),
+  });
 
-  const trend = useMemo(() => buildNpsTrend(filteredInterviews), [filteredInterviews]);
+  const respondents = respondentsQuery.data ?? [];
 
-  if (campaignsQuery.isLoading || summaryQuery.isLoading || interviewsQuery.isLoading) {
-    return (
-      <Card>
-        <p className="text-sm text-slate-500">{common('loading')}</p>
-      </Card>
-    );
-  }
+  const contactMutation = useMutation({
+    mutationFn: async () => {
+      if (!selectedRespondent) throw new Error('No respondent selected');
 
-  if (onError) {
-    return (
-      <Card>
-        <p className="text-sm text-red-600">{t('errors.generic')}</p>
-      </Card>
-    );
-  }
+      const attempt = await api.contactAttempts.create(session!, campaignId, selectedRespondent.id, {
+        outcome,
+        notes: notes || undefined,
+        scheduled_at: outcome === 'scheduled' ? scheduledAt : undefined,
+      });
 
-  if (!summary) {
-    return (
-      <Card>
-        <p className="text-sm text-slate-500">{t('empty')}</p>
-      </Card>
-    );
-  }
+      // If success, start interview
+      if (outcome === 'success') {
+        // Check for active interview first
+        const active = await api.interviews.findActive(session!, campaignId, selectedRespondent.id);
+        if (active) {
+          return { attempt, interviewId: active.id };
+        }
+
+        const result = await api.interviews.start(session!, {
+          tenant_id: session!.user.tenant_id,
+          campaign_id: campaignId,
+          respondent_id: selectedRespondent.id,
+          channel: 'manual',
+          interviewer_user_id: session!.user.id,
+        });
+        return { attempt, interviewId: result.interview_state.interview_id };
+      }
+
+      return { attempt, interviewId: null };
+    },
+    onSuccess: (result) => {
+      setShowModal(false);
+      resetForm();
+      queryClient.invalidateQueries({ queryKey: ['respondents', campaignId] });
+      queryClient.invalidateQueries({ queryKey: ['scheduled-callbacks'] });
+
+      if (result.interviewId) {
+        router.push(`/${locale}/interviews/${result.interviewId}`);
+      }
+    },
+    onError: (cause) => {
+      setError(cause instanceof ApiError ? cause.message : t('error'));
+    },
+  });
+
+  const resetForm = () => {
+    setOutcome('success');
+    setNotes('');
+    setScheduledAt('');
+    setError(null);
+  };
+
+  const openModal = (respondent: RespondentWithStatus) => {
+    setSelectedRespondent(respondent);
+    resetForm();
+    setShowModal(true);
+  };
+
+  const handleResume = async (respondent: RespondentWithStatus) => {
+    const active = await api.interviews.findActive(session!, campaignId, respondent.id);
+    if (active) {
+      router.push(`/${locale}/interviews/${active.id}`);
+    }
+  };
 
   return (
     <div className="space-y-4">
-      <h1 className="text-2xl font-semibold text-slate-900">{t('campaignDetail.title')}</h1>
-
-      <FilterPanel
-        labels={{
-          title: t('filters.title'),
-          campaign: t('filters.campaign'),
-          dateFrom: t('filters.dateRangeStart'),
-          dateTo: t('filters.dateRangeEnd'),
-          region: t('filters.region'),
-          sentiment: t('filters.sentiment'),
-          npsMin: t('filters.npsMin'),
-          npsMax: t('filters.npsMax'),
-          allCampaigns: t('filters.allCampaigns'),
-          allSentiments: t('filters.allSentiments'),
-          sentiments: {
-            positive: t('sentiments.positive'),
-            neutral: t('sentiments.neutral'),
-            negative: t('sentiments.negative'),
-            mixed: t('sentiments.mixed'),
-            unknown: t('sentiments.unknown')
-          }
-        }}
-        campaignId={campaignId}
-        campaignOptions={campaigns.map((item) => ({ id: item.id, name: item.name }))}
-        dateFrom={dateFrom}
-        dateTo={dateTo}
-        region={region}
-        sentiment={sentiment}
-        npsMin={npsMin}
-        npsMax={npsMax}
-        onCampaignChange={(value) => {
-          if (!value || value === campaignId) {
-            return;
-          }
-          router.push(`/${locale}/campaigns/${value}`);
-        }}
-        onDateFromChange={setDateFrom}
-        onDateToChange={setDateTo}
-        onRegionChange={setRegion}
-        onSentimentChange={setSentiment}
-        onNpsMinChange={setNpsMin}
-        onNpsMaxChange={setNpsMax}
-      />
-
-      <div className="grid gap-4 md:grid-cols-5">
-        <KpiCard label={t('kpis.nps')} value={summary.kpis.nps} />
-        <KpiCard label={t('kpis.totalInterviews')} value={summary.kpis.total_interviews} />
-        <KpiCard label={t('kpis.promoters')} value={summary.kpis.promoters} />
-        <KpiCard label={t('kpis.neutrals')} value={summary.kpis.neutrals} />
-        <KpiCard label={t('kpis.detractors')} value={summary.kpis.detractors} />
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" onClick={() => router.push(`/${locale}/campaigns`)}>
+          ← {t('back')}
+        </Button>
+        <h1 className="text-2xl font-semibold text-slate-900">{t('title')}</h1>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-2">
-        <Card title={t('charts.trend')}>
-          <TrendChart data={trend} />
-        </Card>
-        <Card title={t('charts.sentiment')}>
-          <SentimentPieChart data={summary.sentiment_distribution} />
-        </Card>
+      {/* Filters */}
+      <div className="flex items-center gap-3">
+        <Input
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder={t('searchPlaceholder')}
+          className="flex-1"
+        />
+        <Select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
+          <option value="">{t('allStatuses')}</option>
+          <option value="pending">{t('status.pending')}</option>
+          <option value="no_answer">{t('status.no_answer')}</option>
+          <option value="scheduled">{t('status.scheduled')}</option>
+          <option value="in_progress">{t('status.in_progress')}</option>
+          <option value="completed">{t('status.completed')}</option>
+          <option value="wrong_number">{t('status.wrong_number')}</option>
+          <option value="refused">{t('status.refused')}</option>
+        </Select>
       </div>
 
-      <Card title={t('campaignDetail.interviews')}>
+      {/* Table */}
+      {respondentsQuery.isLoading ? (
+        <p className="text-sm text-slate-400">{t('loading')}</p>
+      ) : respondents.length === 0 ? (
+        <p className="py-8 text-center text-sm text-slate-400">{t('empty')}</p>
+      ) : (
         <Table
-          headers={[
-            t('interviews.headers.id'),
-            t('interviews.headers.respondent'),
-            t('interviews.headers.region'),
-            t('interviews.headers.nps'),
-            t('interviews.headers.sentiment'),
-            t('interviews.headers.action')
-          ]}
-          emptyLabel={t('interviews.empty')}
-          rows={filteredInterviews.map((item) => [
-            item.interview_id,
-            item.respondent_name,
-            item.region || '-',
-            item.nps_score ?? '-',
-            item.sentiment || '-',
-            <Link key={item.interview_id} href={`/${locale}/interviews/${item.interview_id}?campaignId=${campaignId}` as never} className="text-primary underline">
-              {t('interviews.open')}
-            </Link>
+          headers={[t('colName'), t('colAccount'), t('colPhone'), t('colStatus'), '']}
+          rows={respondents.map((r) => [
+            <div key={`n-${r.id}`}>
+              <span className="font-medium">{r.name}</span>
+              {r.job_title && <span className="block text-xs text-slate-400">{r.job_title}</span>}
+            </div>,
+            r.account_name || '—',
+            r.phone || '—',
+            <Badge key={`s-${r.id}`} tone={STATUS_TONES[r.contact_status] ?? 'neutral'}>
+              {t(`status.${r.contact_status}`)}
+            </Badge>,
+            <div key={`a-${r.id}`} className="flex gap-1">
+              {r.contact_status === 'in_progress' ? (
+                <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => handleResume(r)}>
+                  {t('resume')}
+                </Button>
+              ) : r.contact_status !== 'completed' ? (
+                <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => openModal(r)}>
+                  {t('contact')}
+                </Button>
+              ) : null}
+            </div>,
           ])}
         />
-      </Card>
+      )}
+
+      {/* Contact Attempt Modal */}
+      <Modal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        title={t('attemptTitle')}
+      >
+        {selectedRespondent && (
+          <div className="space-y-4">
+            <div className="rounded-lg bg-slate-50 p-3">
+              <p className="font-medium text-slate-900">{selectedRespondent.name}</p>
+              <p className="text-sm text-slate-500">{selectedRespondent.phone || '—'}</p>
+              {selectedRespondent.account_name && (
+                <p className="text-xs text-slate-400">{selectedRespondent.account_name}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">{t('outcome')}</label>
+              <Select value={outcome} onChange={(e) => setOutcome(e.target.value as ContactOutcome)}>
+                <option value="success">{t('outcomes.success')}</option>
+                <option value="no_answer">{t('outcomes.no_answer')}</option>
+                <option value="wrong_number">{t('outcomes.wrong_number')}</option>
+                <option value="busy">{t('outcomes.busy')}</option>
+                <option value="scheduled">{t('outcomes.scheduled')}</option>
+                <option value="refused">{t('outcomes.refused')}</option>
+              </Select>
+            </div>
+
+            {outcome === 'scheduled' && (
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">{t('scheduleDate')}</label>
+                <Input
+                  type="datetime-local"
+                  value={scheduledAt}
+                  onChange={(e) => setScheduledAt(e.target.value)}
+                />
+              </div>
+            )}
+
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">{t('notes')}</label>
+              <Input
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder={t('notesPlaceholder')}
+              />
+            </div>
+
+            {error && <p className="text-sm text-red-600">{error}</p>}
+
+            <div className="flex justify-end gap-2">
+              <Button variant="ghost" onClick={() => setShowModal(false)}>
+                {t('cancel')}
+              </Button>
+              <Button
+                onClick={() => contactMutation.mutate()}
+                disabled={contactMutation.isPending || (outcome === 'scheduled' && !scheduledAt)}
+              >
+                {contactMutation.isPending ? t('saving') : t('save')}
+              </Button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 }

@@ -4,7 +4,8 @@
     "logout": "Sair",
     "language": "Idioma",
     "menu": {
-      "dashboard": "Dashboard"
+      "dashboard": "Dashboard",
+      "campaigns": "Campanhas"
     },
     "forbidden": {
       "title": "Acesso negado",
@@ -13,135 +14,92 @@
     }
   },
   "auth": {
-    "title": "Entrar no User Portal",
+    "title": "Entrar — Portal do Entrevistador",
     "email": "E-mail",
     "password": "Senha",
-    "tenantCode": "Código do tenant (opcional)",
     "submit": "Entrar",
     "loading": "Entrando...",
     "genericError": "Falha na autenticação"
   },
-  "dashboard": {
-    "title": "Executive Dashboard",
-    "empty": "Selecione uma campanha para visualizar os dados.",
-    "filters": {
-      "title": "Filtros",
-      "campaign": "Campanha",
-      "dateRangeStart": "Data inicial",
-      "dateRangeEnd": "Data final",
-      "region": "Região",
-      "sentiment": "Sentimento",
-      "npsMin": "NPS mínimo",
-      "npsMax": "NPS máximo",
-      "allCampaigns": "Todas as campanhas",
-      "allSentiments": "Todos os sentimentos"
+  "interviewer": {
+    "dashboard": {
+      "title": "Dashboard",
+      "activeCampaigns": "Campanhas Ativas",
+      "scheduledCallbacks": "Agendamentos de Hoje",
+      "loading": "Carregando...",
+      "noCampaigns": "Nenhuma campanha ativa",
+      "noCallbacks": "Nenhum agendamento para hoje",
+      "colTime": "Horário",
+      "colName": "Nome",
+      "colPhone": "Telefone",
+      "colCampaign": "Campanha",
+      "call": "Ligar"
     },
-    "kpis": {
-      "nps": "NPS",
-      "totalInterviews": "Total entrevistas",
-      "promoters": "Promotores",
-      "neutrals": "Neutros",
-      "detractors": "Detratores"
+    "campaigns": {
+      "title": "Campanhas",
+      "loading": "Carregando...",
+      "empty": "Nenhuma campanha disponível",
+      "colName": "Nome",
+      "colSegment": "Segmento",
+      "colStatus": "Status",
+      "open": "Abrir"
     },
-    "sentiments": {
-      "positive": "Positivo",
-      "neutral": "Neutro",
-      "negative": "Negativo",
-      "mixed": "Misto",
-      "unknown": "Desconhecido"
-    },
-    "campaign": {
-      "title": "Campanha",
-      "open": "Abrir detalhes"
-    },
-    "charts": {
-      "trend": "Tendência de NPS",
-      "sentiment": "Distribuição de sentimento",
-      "regional": "Breakdown regional"
-    },
-    "insights": {
-      "topTopics": "Top insights",
-      "empty": "Sem tópicos para o filtro atual.",
-      "alerts": "Alertas",
-      "noAlerts": "Sem detratores recentes para os filtros selecionados."
-    },
-    "interviews": {
-      "title": "Entrevistas",
-      "empty": "Nenhuma entrevista encontrada.",
-      "open": "Abrir",
-      "headers": {
-        "id": "ID",
-        "respondent": "Respondente",
-        "region": "Região",
-        "nps": "NPS",
-        "sentiment": "Sentimento",
-        "action": "Ação"
+    "contacts": {
+      "title": "Contatos da Campanha",
+      "back": "Voltar",
+      "searchPlaceholder": "Buscar por nome ou telefone...",
+      "allStatuses": "Todos os status",
+      "loading": "Carregando...",
+      "empty": "Nenhum contato encontrado",
+      "colName": "Nome",
+      "colAccount": "Conta",
+      "colPhone": "Telefone",
+      "colStatus": "Status",
+      "contact": "Contatar",
+      "resume": "Retomar",
+      "attemptTitle": "Registrar Contato",
+      "outcome": "Resultado",
+      "outcomes": {
+        "success": "Sucesso — iniciar entrevista",
+        "no_answer": "Não atendeu",
+        "wrong_number": "Número errado",
+        "busy": "Ocupado",
+        "scheduled": "Agendar retorno",
+        "refused": "Recusou"
+      },
+      "scheduleDate": "Data e horário do agendamento",
+      "notes": "Observações",
+      "notesPlaceholder": "Observações opcionais...",
+      "cancel": "Cancelar",
+      "save": "Salvar",
+      "saving": "Salvando...",
+      "error": "Não foi possível registrar o contato",
+      "status": {
+        "pending": "Pendente",
+        "success": "Contatado",
+        "no_answer": "Não atendeu",
+        "wrong_number": "Nº errado",
+        "busy": "Ocupado",
+        "scheduled": "Agendado",
+        "refused": "Recusou",
+        "in_progress": "Em andamento",
+        "completed": "Concluído"
       }
     },
-    "errors": {
-      "forbidden": "Você não possui permissão para visualizar os dados.",
-      "generic": "Falha ao carregar o dashboard."
-    }
-  },
-  "reports": {
-    "empty": "Sem dados disponíveis.",
-    "filters": {
-      "title": "Filtros",
-      "campaign": "Campanha",
-      "dateRangeStart": "Data inicial",
-      "dateRangeEnd": "Data final",
-      "region": "Região",
-      "sentiment": "Sentimento",
-      "npsMin": "NPS mínimo",
-      "npsMax": "NPS máximo",
-      "allCampaigns": "Todas as campanhas",
-      "allSentiments": "Todos os sentimentos"
-    },
-    "kpis": {
-      "nps": "NPS",
-      "totalInterviews": "Total entrevistas",
-      "promoters": "Promotores",
-      "neutrals": "Neutros",
-      "detractors": "Detratores"
-    },
-    "sentiments": {
-      "positive": "Positivo",
-      "neutral": "Neutro",
-      "negative": "Negativo",
-      "mixed": "Misto",
-      "unknown": "Desconhecido"
-    },
-    "charts": {
-      "trend": "Evolução temporal",
-      "sentiment": "Sentimento"
-    },
-    "campaignDetail": {
-      "title": "Campaign Analytics",
-      "interviews": "Tabela de entrevistas"
-    },
-    "interviews": {
-      "empty": "Nenhuma entrevista encontrada.",
-      "open": "Abrir",
-      "missingCampaign": "campaignId não informado.",
-      "notFound": "Entrevista não encontrada para a campanha.",
-      "headers": {
-        "id": "ID",
-        "respondent": "Respondente",
-        "region": "Região",
-        "nps": "NPS",
-        "sentiment": "Sentimento",
-        "action": "Ação"
-      }
-    },
-    "interviewDetail": {
-      "title": "Interview Detail",
-      "respondent": "Respondente",
-      "metrics": "Métricas",
-      "summary": "Resumo",
-      "topics": "Tópicos"
-    },
-    "errors": {
-      "generic": "Falha ao carregar os dados do relatório."
+    "interview": {
+      "loading": "Carregando entrevista...",
+      "saveExit": "Salvar e Sair",
+      "required": "Obrigatório",
+      "next": "Próxima",
+      "submitting": "Enviando...",
+      "answerError": "Não foi possível enviar a resposta",
+      "allAnswered": "Todas as perguntas foram respondidas. Finalizar a entrevista?",
+      "complete": "Finalizar Entrevista",
+      "completing": "Finalizando...",
+      "completeError": "Não foi possível finalizar a entrevista",
+      "completedTitle": "Entrevista Concluída",
+      "completedMessage": "Todas as respostas foram registradas com sucesso.",
+      "backToCampaign": "Voltar para a Campanha"
     }
   }
 }

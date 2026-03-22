@@ -47,10 +47,115 @@ export interface Campaign {
   id: string;
   tenant_id: string;
   name: string;
+  description?: string | null;
   status: 'draft' | 'active' | 'paused' | 'completed' | 'archived';
   segment?: string | null;
   start_date?: string | null;
   end_date?: string | null;
+  questionnaire_version_id?: string;
+}
+
+export interface RespondentWithStatus {
+  id: string;
+  tenant_id: string;
+  campaign_id: string;
+  account_id: string | null;
+  external_id: string | null;
+  name: string;
+  phone: string | null;
+  email: string | null;
+  region: string | null;
+  city: string | null;
+  state: string | null;
+  job_title: string | null;
+  persona_type: string | null;
+  account_name: string | null;
+  contact_status: ContactStatus;
+  scheduled_at: string | null;
+}
+
+export type ContactStatus =
+  | 'pending'
+  | 'success'
+  | 'no_answer'
+  | 'wrong_number'
+  | 'busy'
+  | 'scheduled'
+  | 'refused'
+  | 'in_progress'
+  | 'completed';
+
+export type ContactOutcome =
+  | 'success'
+  | 'no_answer'
+  | 'wrong_number'
+  | 'busy'
+  | 'scheduled'
+  | 'refused';
+
+export interface ContactAttempt {
+  id: string;
+  campaign_id: string;
+  respondent_id: string;
+  interviewer_user_id: string;
+  outcome: ContactOutcome;
+  notes: string | null;
+  interview_id: string | null;
+  scheduled_at: string | null;
+  created_at: string;
+}
+
+export interface ScheduledCallback {
+  id: string;
+  respondent_id: string;
+  respondent_name: string;
+  respondent_phone: string | null;
+  campaign_id: string;
+  campaign_name: string;
+  account_name: string | null;
+  scheduled_at: string;
+  notes: string | null;
+}
+
+export interface InterviewRecord {
+  id: string;
+  tenant_id: string;
+  campaign_id: string;
+  questionnaire_version_id: string;
+  respondent_id: string;
+  channel: string;
+  status: string;
+  interviewer_user_id: string | null;
+  started_at: string | null;
+  completed_at: string | null;
+}
+
+export interface Question {
+  id: string;
+  label: string;
+  type: 'nps' | 'scale' | 'single_choice' | 'multi_choice' | 'text' | 'number' | 'boolean';
+  required: boolean;
+  options?: string[];
+  scale?: { min: number; max: number };
+  display_condition?: {
+    question_id: string;
+    operator: string;
+    value: unknown;
+  };
+}
+
+export interface InterviewState {
+  interview_id: string;
+  tenant_id: string;
+  campaign_id: string;
+  respondent_id: string;
+  completed: boolean;
+  progress: number;
+}
+
+export interface SurveyRuntimeResponse {
+  next_question: Question | null;
+  interview_state: InterviewState;
 }
 
 export interface ExecutiveSummary {

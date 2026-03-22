@@ -2,9 +2,12 @@ import { REQUEST_ID_HEADER } from '@/lib/auth/constants';
 import type {
   AuthSession,
   Campaign,
-  ExecutiveSummary,
-  InterviewSummary,
+  ContactAttempt,
+  InterviewRecord,
   PaginatedResponse,
+  RespondentWithStatus,
+  ScheduledCallback,
+  SurveyRuntimeResponse,
   Tenant
 } from '@/lib/types';
 
@@ -24,17 +27,13 @@ export class ApiError extends Error {
 }
 
 function toQueryString(query?: Record<string, string | number | boolean | undefined>): string {
-  if (!query) {
-    return '';
-  }
-
+  if (!query) return '';
   const search = new URLSearchParams();
   Object.entries(query).forEach(([key, value]) => {
     if (value !== undefined && value !== null && value !== '') {
       search.set(key, String(value));
     }
   });
-
   const raw = search.toString();
   return raw ? `?${raw}` : '';
 }
@@ -49,13 +48,8 @@ function unwrapEnvelope<T>(payload: unknown): T {
     const envelope = payload as {
       success: boolean;
       data?: T;
-      error?: {
-        code?: string;
-        message?: string;
-        details?: unknown;
-      };
+      error?: { code?: string; message?: string; details?: unknown };
     };
-
     if (!envelope.success) {
       throw new ApiError(
         envelope.error?.message || 'Request failed',
@@ -64,10 +58,8 @@ function unwrapEnvelope<T>(payload: unknown): T {
         envelope.error?.details
       );
     }
-
     return (envelope.data || ({} as T)) as T;
   }
-
   return payload as T;
 }
 
@@ -111,13 +103,18 @@ async function request<T>(
   return unwrapEnvelope<T>(body);
 }
 
+function extractItems<T>(data: T[] | PaginatedResponse<T> | undefined | null): T[] {
+  if (!data) return [];
+  if (Array.isArray(data)) return data;
+  if ('items' in data) return data.items;
+  return [];
+}
+
+export { extractItems };
+
 export const api = {
   auth: {
-    login: async (payload: {
-      email: string;
-      password: string;
-      tenant_code?: string;
-    }): Promise<AuthSession> => {
+    login: async (payload: { email: string; password: string }): Promise<AuthSession> => {
       return request<AuthSession>('/auth/login', {
         method: 'POST',
         body: JSON.stringify(payload)
@@ -142,30 +139,104 @@ export const api = {
         { method: 'GET' },
         session
       );
+    },
+    getRespondents: async (
+      session: AuthSession,
+      campaignId: string,
+      query?: Record<string, string | number | boolean | undefined>
+    ): Promise<RespondentWithStatus[]> => {
+      return request<RespondentWithStatus[]>(
+        `/campaigns/${campaignId}/respondents${toQueryString(query)}`,
+        { method: 'GET' },
+        session
+      );
     }
   },
-  reports: {
-    executiveSummary: async (session: AuthSession, campaignId: string): Promise<ExecutiveSummary> => {
-      return request<ExecutiveSummary>(
-        `/reports/campaigns/${campaignId}/executive-summary`,
+  contactAttempts: {
+    create: async (
+      session: AuthSession,
+      campaignId: string,
+      respondentId: string,
+      payload: { outcome: string; notes?: string; scheduled_at?: string }
+    ): Promise<ContactAttempt> => {
+      return request<ContactAttempt>(
+        `/campaigns/${campaignId}/respondents/${respondentId}/contact-attempts`,
+        { method: 'POST', body: JSON.stringify(payload) },
+        session
+      );
+    },
+    getMyScheduled: async (
+      session: AuthSession,
+      date?: string
+    ): Promise<ScheduledCallback[]> => {
+      return request<ScheduledCallback[]>(
+        `/contact-attempts/my-scheduled${toQueryString({ date })}`,
+        { method: 'GET' },
+        session
+      );
+    }
+  },
+  interviews: {
+    findActive: async (
+      session: AuthSession,
+      campaignId: string,
+      respondentId: string
+    ): Promise<InterviewRecord | null> => {
+      try {
+        return await request<InterviewRecord>(
+          `/interviews/active${toQueryString({
+            tenant_id: session.user.tenant_id,
+            campaign_id: campaignId,
+            respondent_id: respondentId
+          })}`,
+          { method: 'GET' },
+          session
+        );
+      } catch {
+        return null;
+      }
+    },
+    start: async (
+      session: AuthSession,
+      payload: { tenant_id: string; campaign_id: string; respondent_id: string; channel?: string; interviewer_user_id?: string }
+    ): Promise<SurveyRuntimeResponse> => {
+      return request<SurveyRuntimeResponse>(
+        '/interviews/start',
+        { method: 'POST', body: JSON.stringify(payload) },
+        session,
+        payload.tenant_id
+      );
+    },
+    answer: async (
+      session: AuthSession,
+      interviewId: string,
+      payload: { tenant_id: string; question_id: string; value: unknown }
+    ): Promise<SurveyRuntimeResponse> => {
+      return request<SurveyRuntimeResponse>(
+        `/interviews/${interviewId}/answer`,
+        { method: 'POST', body: JSON.stringify(payload) },
+        session
+      );
+    },
+    next: async (
+      session: AuthSession,
+      interviewId: string,
+      tenantId: string
+    ): Promise<SurveyRuntimeResponse> => {
+      return request<SurveyRuntimeResponse>(
+        `/interviews/${interviewId}/next${toQueryString({ tenant_id: tenantId })}`,
         { method: 'GET' },
         session
       );
     },
-    campaignInterviews: async (
+    complete: async (
       session: AuthSession,
-      campaignId: string,
-      query?: {
-        region?: string;
-        sentiment?: string;
-        nps_class?: string;
-        page?: number;
-        page_size?: number;
-      }
-    ): Promise<InterviewSummary[] | PaginatedResponse<InterviewSummary>> => {
-      return request<InterviewSummary[] | PaginatedResponse<InterviewSummary>>(
-        `/reports/campaigns/${campaignId}/interviews${toQueryString(query)}`,
-        { method: 'GET' },
+      interviewId: string,
+      tenantId: string
+    ): Promise<SurveyRuntimeResponse> => {
+      return request<SurveyRuntimeResponse>(
+        `/interviews/${interviewId}/complete`,
+        { method: 'POST', body: JSON.stringify({ tenant_id: tenantId }) },
         session
       );
     }
