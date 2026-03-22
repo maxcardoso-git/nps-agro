@@ -362,6 +362,17 @@ export const apiClient = {
     getInterviewers: async (session: AuthSession, campaignId: string, actionId: string) => {
       return request<{ user_id: string; name: string; email: string }[]>(`/campaigns/${campaignId}/actions/${actionId}/interviewers`, { method: 'GET' }, session);
     },
+    getRespondents: async (
+      session: AuthSession,
+      actionId: string,
+      filters?: Record<string, string | number | boolean | undefined>
+    ): Promise<unknown[]> => {
+      return request<unknown[]>(
+        `/actions/${actionId}/respondents${toQueryString(filters)}`,
+        { method: 'GET' },
+        session
+      );
+    },
   },
   accounts: {
     list: async (

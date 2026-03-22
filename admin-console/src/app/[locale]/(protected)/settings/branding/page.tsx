@@ -123,9 +123,19 @@ export default function BrandingPage() {
               color: form.text_color
             }}
           >
-            <h2 style={{ color: form.primary_color }} className="text-xl font-bold">
-              {form.app_name}
-            </h2>
+            <div className="flex items-center gap-3">
+              {form.logo_url && (
+                <img
+                  src={form.logo_url}
+                  alt={form.app_name}
+                  className="h-10 w-auto object-contain"
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                />
+              )}
+              <h2 style={{ color: form.primary_color }} className="text-xl font-bold">
+                {form.app_name}
+              </h2>
+            </div>
             <p className="mt-2 text-sm">{t('branding.previewText')}</p>
             <div className="mt-3 h-2 rounded" style={{ backgroundColor: form.secondary_color }} />
           </div>

@@ -67,15 +67,7 @@ export default function InterviewsPage() {
   // Respondents for selected action
   const respondentsQuery = useQuery({
     queryKey: ['survey', 'respondents', actionId],
-    queryFn: () =>
-      apiClient.campaigns.getRespondents
-        ? fetch(`/api/actions/${actionId}/respondents`, {
-            headers: {
-              'Authorization': `Bearer ${session!.access_token}`,
-              'x-tenant-id': session!.user.tenant_id,
-            },
-          }).then((r) => r.json()).then((d) => d.data ?? d)
-        : Promise.resolve([]),
+    queryFn: () => apiClient.campaignActions.getRespondents(session!, actionId),
     enabled: Boolean(session && actionId && view === 'contacts'),
   });
   const respondents = (respondentsQuery.data ?? []) as RespondentItem[];
