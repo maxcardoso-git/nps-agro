@@ -20,19 +20,25 @@ export class ContactAttemptService {
     );
   }
 
+  async listRespondentsByAction(
+    actor: AuthUserClaims,
+    actionId: string,
+    filters: { search?: string; status?: string; page?: number; page_size?: number },
+  ) {
+    return this.contactAttemptRepository.listRespondentsByAction(
+      actor.tenant_id,
+      actionId,
+      filters,
+    );
+  }
+
   async createContactAttempt(
     actor: AuthUserClaims,
     campaignId: string,
     respondentId: string,
     dto: CreateContactAttemptDto,
   ) {
-    if (dto.outcome === 'scheduled' && !dto.scheduled_at) {
-      throw new DomainException(
-        'INVALID_INPUT',
-        'scheduled_at is required when outcome is scheduled',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    this.validateScheduled(dto);
 
     const attempt = await this.contactAttemptRepository.create({
       tenant_id: actor.tenant_id,
@@ -45,11 +51,39 @@ export class ContactAttemptService {
     });
 
     if (!attempt) {
-      throw new DomainException(
-        'CONTACT_ATTEMPT_NOT_CREATED',
-        'Could not create contact attempt',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new DomainException('CONTACT_ATTEMPT_NOT_CREATED', 'Could not create contact attempt', HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    return attempt;
+  }
+
+  async createContactAttemptByAction(
+    actor: AuthUserClaims,
+    actionId: string,
+    respondentId: string,
+    dto: CreateContactAttemptDto,
+  ) {
+    this.validateScheduled(dto);
+
+    // Get campaign_id from action
+    const campaignId = await this.contactAttemptRepository.getCampaignIdForAction(actionId, actor.tenant_id);
+    if (!campaignId) {
+      throw new DomainException('ACTION_NOT_FOUND', 'Action not found', HttpStatus.NOT_FOUND);
+    }
+
+    const attempt = await this.contactAttemptRepository.createByAction({
+      tenant_id: actor.tenant_id,
+      action_id: actionId,
+      campaign_id: campaignId,
+      respondent_id: respondentId,
+      interviewer_user_id: actor.sub,
+      outcome: dto.outcome,
+      notes: dto.notes,
+      scheduled_at: dto.scheduled_at,
+    });
+
+    if (!attempt) {
+      throw new DomainException('CONTACT_ATTEMPT_NOT_CREATED', 'Could not create contact attempt', HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     return attempt;
@@ -61,5 +95,11 @@ export class ContactAttemptService {
       actor.sub,
       date,
     );
+  }
+
+  private validateScheduled(dto: CreateContactAttemptDto) {
+    if (dto.outcome === 'scheduled' && !dto.scheduled_at) {
+      throw new DomainException('INVALID_INPUT', 'scheduled_at is required when outcome is scheduled', HttpStatus.BAD_REQUEST);
+    }
   }
 }

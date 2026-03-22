@@ -152,6 +152,29 @@ export const api = {
       );
     }
   },
+  actions: {
+    list: async (
+      session: AuthSession,
+      campaignId: string
+    ): Promise<{ id: string; campaign_id: string; name: string; description: string | null; questionnaire_version_id: string; status: string; questionnaire_name: string | null; respondent_count: number; interviewer_count: number; start_date: string | null; end_date: string | null }[]> => {
+      return request<never[]>(
+        `/campaigns/${campaignId}/actions`,
+        { method: 'GET' },
+        session
+      );
+    },
+    getRespondents: async (
+      session: AuthSession,
+      actionId: string,
+      query?: Record<string, string | number | boolean | undefined>
+    ): Promise<RespondentWithStatus[]> => {
+      return request<RespondentWithStatus[]>(
+        `/actions/${actionId}/respondents${toQueryString(query)}`,
+        { method: 'GET' },
+        session
+      );
+    }
+  },
   contactAttempts: {
     create: async (
       session: AuthSession,
@@ -161,6 +184,18 @@ export const api = {
     ): Promise<ContactAttempt> => {
       return request<ContactAttempt>(
         `/campaigns/${campaignId}/respondents/${respondentId}/contact-attempts`,
+        { method: 'POST', body: JSON.stringify(payload) },
+        session
+      );
+    },
+    createByAction: async (
+      session: AuthSession,
+      actionId: string,
+      respondentId: string,
+      payload: { outcome: string; notes?: string; scheduled_at?: string }
+    ): Promise<ContactAttempt> => {
+      return request<ContactAttempt>(
+        `/actions/${actionId}/respondents/${respondentId}/contact-attempts`,
         { method: 'POST', body: JSON.stringify(payload) },
         session
       );
@@ -198,7 +233,7 @@ export const api = {
     },
     start: async (
       session: AuthSession,
-      payload: { tenant_id: string; campaign_id: string; respondent_id: string; channel?: string; interviewer_user_id?: string }
+      payload: { tenant_id: string; campaign_id: string; action_id?: string; respondent_id: string; channel?: string; interviewer_user_id?: string }
     ): Promise<SurveyRuntimeResponse> => {
       return request<SurveyRuntimeResponse>(
         '/interviews/start',

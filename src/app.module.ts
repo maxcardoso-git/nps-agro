@@ -14,6 +14,7 @@ import { ReportingModule } from './modules/reporting/reporting.module';
 import { TenantModule } from './modules/tenant/tenant.module';
 import { TenantUserModule } from './modules/tenant-user/tenant-user.module';
 import { AccountModule } from './modules/account/account.module';
+import { CampaignActionModule } from './modules/campaign-action/campaign-action.module';
 import { ContactAttemptModule } from './modules/contact-attempt/contact-attempt.module';
 import { SurveyModule } from './survey/survey.module';
 
@@ -34,6 +35,7 @@ import { SurveyModule } from './survey/survey.module';
     QuestionnaireModule,
     ReportingModule,
     AccountModule,
+    CampaignActionModule,
     ContactAttemptModule,
     HealthModule,
     SurveyModule,

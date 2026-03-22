@@ -51,6 +51,38 @@ export class PgSurveyRepository implements SurveyRepository {
     return (result.rowCount ?? 0) > 0;
   }
 
+  async getActionContext(tenantId: string, actionId: string): Promise<CampaignContext | null> {
+    const result = await this.pool.query(
+      `
+      SELECT a.campaign_id AS id, a.tenant_id, a.questionnaire_version_id
+      FROM core.campaign_action a
+      WHERE a.id = $1
+        AND a.tenant_id = $2
+      LIMIT 1
+      `,
+      [actionId, tenantId],
+    );
+
+    if ((result.rowCount ?? 0) === 0) return null;
+    return result.rows[0] as CampaignContext;
+  }
+
+  async respondentExistsByAction(tenantId: string, actionId: string, respondentId: string): Promise<boolean> {
+    const result = await this.pool.query(
+      `
+      SELECT 1
+      FROM core.respondent
+      WHERE id = $1
+        AND action_id = $2
+        AND tenant_id = $3
+      LIMIT 1
+      `,
+      [respondentId, actionId, tenantId],
+    );
+
+    return (result.rowCount ?? 0) > 0;
+  }
+
   async getQuestionnaireSchema(questionnaireVersionId: string): Promise<QuestionnaireSchema | null> {
     const result = await this.pool.query(
       `
@@ -75,6 +107,7 @@ export class PgSurveyRepository implements SurveyRepository {
       INSERT INTO core.interview (
         tenant_id,
         campaign_id,
+        action_id,
         questionnaire_version_id,
         respondent_id,
         channel,
@@ -82,11 +115,12 @@ export class PgSurveyRepository implements SurveyRepository {
         interviewer_user_id,
         started_at
       )
-      VALUES ($1, $2, $3, $4, $5, 'in_progress', $6, NOW())
+      VALUES ($1, $2, $3, $4, $5, $6, 'in_progress', $7, NOW())
       RETURNING
         id,
         tenant_id,
         campaign_id,
+        action_id,
         questionnaire_version_id,
         respondent_id,
         channel,
@@ -98,6 +132,7 @@ export class PgSurveyRepository implements SurveyRepository {
       [
         params.tenant_id,
         params.campaign_id,
+        params.action_id ?? null,
         params.questionnaire_version_id,
         params.respondent_id,
         params.channel,

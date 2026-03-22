@@ -340,6 +340,29 @@ export const apiClient = {
       );
     }
   },
+  campaignActions: {
+    list: async (session: AuthSession, campaignId: string) => {
+      return request<unknown[]>(`/campaigns/${campaignId}/actions`, { method: 'GET' }, session);
+    },
+    create: async (session: AuthSession, campaignId: string, payload: { name: string; description?: string; questionnaire_version_id: string; start_date?: string; end_date?: string }) => {
+      return request<unknown>(`/campaigns/${campaignId}/actions`, { method: 'POST', body: JSON.stringify(payload) }, session);
+    },
+    update: async (session: AuthSession, campaignId: string, actionId: string, payload: Record<string, unknown>) => {
+      return request<unknown>(`/campaigns/${campaignId}/actions/${actionId}`, { method: 'PATCH', body: JSON.stringify(payload) }, session);
+    },
+    activate: async (session: AuthSession, campaignId: string, actionId: string) => {
+      return request<unknown>(`/campaigns/${campaignId}/actions/${actionId}/activate`, { method: 'POST' }, session);
+    },
+    pause: async (session: AuthSession, campaignId: string, actionId: string) => {
+      return request<unknown>(`/campaigns/${campaignId}/actions/${actionId}/pause`, { method: 'POST' }, session);
+    },
+    setInterviewers: async (session: AuthSession, campaignId: string, actionId: string, userIds: string[]) => {
+      return request<unknown>(`/campaigns/${campaignId}/actions/${actionId}/interviewers`, { method: 'PUT', body: JSON.stringify({ user_ids: userIds }) }, session);
+    },
+    getInterviewers: async (session: AuthSession, campaignId: string, actionId: string) => {
+      return request<{ user_id: string; name: string; email: string }[]>(`/campaigns/${campaignId}/actions/${actionId}/interviewers`, { method: 'GET' }, session);
+    },
+  },
   accounts: {
     list: async (
       session: AuthSession,

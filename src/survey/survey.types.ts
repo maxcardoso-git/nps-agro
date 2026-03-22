@@ -78,6 +78,7 @@ export interface InterviewSession {
 export interface StartInterviewInput {
   tenant_id: string;
   campaign_id: string;
+  action_id?: string;
   respondent_id: string;
   channel?: InterviewChannel;
   interviewer_user_id?: string;
@@ -97,6 +98,7 @@ export interface InterviewRecord {
   id: string;
   tenant_id: string;
   campaign_id: string;
+  action_id: string | null;
   questionnaire_version_id: string;
   respondent_id: string;
   channel: string;
@@ -125,6 +127,7 @@ export interface CampaignContext {
 export interface CreateInterviewParams {
   tenant_id: string;
   campaign_id: string;
+  action_id?: string;
   questionnaire_version_id: string;
   respondent_id: string;
   channel: InterviewChannel;

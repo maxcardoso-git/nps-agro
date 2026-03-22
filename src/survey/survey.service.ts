@@ -33,34 +33,56 @@ export class SurveyService {
 
   async startInterview(input: StartInterviewInput): Promise<SurveyRuntimeResponse> {
     this.assertNonEmpty(input.tenant_id, 'tenant_id');
-    this.assertNonEmpty(input.campaign_id, 'campaign_id');
     this.assertNonEmpty(input.respondent_id, 'respondent_id');
 
-    const campaign = await this.repository.getCampaignContext(input.tenant_id, input.campaign_id);
-    if (!campaign) {
-      throw new SurveyException('CAMPAIGN_NOT_FOUND', 'Campaign not found for tenant', HttpStatus.NOT_FOUND);
-    }
+    let questionnaireVersionId: string;
+    let campaignId: string;
 
-    const respondentExists = await this.repository.respondentExists(
-      input.tenant_id,
-      input.campaign_id,
-      input.respondent_id,
-    );
-    if (!respondentExists) {
-      throw new SurveyException(
-        'RESPONDENT_NOT_FOUND',
-        'Respondent not found for campaign and tenant',
-        HttpStatus.NOT_FOUND,
+    // If action_id is provided, resolve context from action
+    if (input.action_id) {
+      const actionCtx = await this.repository.getActionContext(input.tenant_id, input.action_id);
+      if (!actionCtx) {
+        throw new SurveyException('ACTION_NOT_FOUND', 'Action not found for tenant', HttpStatus.NOT_FOUND);
+      }
+      questionnaireVersionId = actionCtx.questionnaire_version_id;
+      campaignId = actionCtx.id; // campaign_id from action context
+
+      const respondentExists = await this.repository.respondentExistsByAction(
+        input.tenant_id,
+        input.action_id,
+        input.respondent_id,
       );
+      if (!respondentExists) {
+        throw new SurveyException('RESPONDENT_NOT_FOUND', 'Respondent not found for action', HttpStatus.NOT_FOUND);
+      }
+    } else {
+      // Fallback: legacy campaign-based flow
+      this.assertNonEmpty(input.campaign_id, 'campaign_id');
+      const campaign = await this.repository.getCampaignContext(input.tenant_id, input.campaign_id);
+      if (!campaign) {
+        throw new SurveyException('CAMPAIGN_NOT_FOUND', 'Campaign not found for tenant', HttpStatus.NOT_FOUND);
+      }
+      questionnaireVersionId = campaign.questionnaire_version_id;
+      campaignId = input.campaign_id;
+
+      const respondentExists = await this.repository.respondentExists(
+        input.tenant_id,
+        input.campaign_id,
+        input.respondent_id,
+      );
+      if (!respondentExists) {
+        throw new SurveyException('RESPONDENT_NOT_FOUND', 'Respondent not found for campaign', HttpStatus.NOT_FOUND);
+      }
     }
 
-    const schema = await this.repository.getQuestionnaireSchema(campaign.questionnaire_version_id);
+    const schema = await this.repository.getQuestionnaireSchema(questionnaireVersionId);
     this.assertSchema(schema);
 
     const interview = await this.repository.createInterview({
       tenant_id: input.tenant_id,
-      campaign_id: input.campaign_id,
-      questionnaire_version_id: campaign.questionnaire_version_id,
+      campaign_id: campaignId,
+      action_id: input.action_id,
+      questionnaire_version_id: questionnaireVersionId,
       respondent_id: input.respondent_id,
       channel: input.channel ?? 'manual',
       interviewer_user_id: input.interviewer_user_id,

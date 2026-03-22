@@ -44,6 +44,13 @@
       "colStatus": "Status",
       "open": "Open"
     },
+    "actions": {
+      "title": "Campaign Actions",
+      "back": "Back",
+      "loading": "Loading...",
+      "empty": "No actions registered",
+      "contacts": "contacts"
+    },
     "contacts": {
       "title": "Campaign Contacts",
       "back": "Back",

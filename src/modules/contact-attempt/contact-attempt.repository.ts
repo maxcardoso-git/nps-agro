@@ -137,6 +137,96 @@ export class ContactAttemptRepository extends SqlRepositoryBase {
     return this.many<RespondentWithStatusRow>(sql, values);
   }
 
+  listRespondentsByAction(
+    tenantId: string,
+    actionId: string,
+    filters: { search?: string; status?: string; page?: number; page_size?: number },
+  ): Promise<RespondentWithStatusRow[]> {
+    const conditions = ['r.tenant_id = $1', 'r.action_id = $2'];
+    const values: unknown[] = [tenantId, actionId];
+    let idx = 3;
+
+    if (filters.search) {
+      values.push(`%${filters.search}%`);
+      conditions.push(`(r.name ILIKE $${idx} OR r.phone ILIKE $${idx})`);
+      idx++;
+    }
+
+    const limit = filters.page_size ?? 50;
+    const offset = ((filters.page ?? 1) - 1) * limit;
+
+    let sql = `
+      SELECT r.*,
+        acc.name AS account_name,
+        COALESCE(
+          CASE
+            WHEN ca.outcome = 'success' AND i.status = 'completed' THEN 'completed'
+            WHEN ca.outcome = 'success' AND i.status = 'in_progress' THEN 'in_progress'
+            ELSE ca.outcome
+          END,
+          'pending'
+        ) AS contact_status,
+        ca.scheduled_at
+      FROM core.respondent r
+      LEFT JOIN core.account acc ON acc.id = r.account_id
+      LEFT JOIN LATERAL (
+        SELECT outcome, interview_id, scheduled_at
+        FROM core.contact_attempt
+        WHERE respondent_id = r.id AND action_id = $2
+        ORDER BY created_at DESC
+        LIMIT 1
+      ) ca ON true
+      LEFT JOIN core.interview i ON i.id = ca.interview_id
+      WHERE ${conditions.join(' AND ')}
+    `;
+
+    if (filters.status) {
+      sql = `SELECT sub.* FROM (${sql}) sub WHERE sub.contact_status = $${idx}`;
+      values.push(filters.status);
+      idx++;
+    }
+
+    sql += ` ORDER BY r.name LIMIT ${limit} OFFSET ${offset}`;
+
+    return this.many<RespondentWithStatusRow>(sql, values);
+  }
+
+  createByAction(params: {
+    tenant_id: string;
+    action_id: string;
+    campaign_id: string;
+    respondent_id: string;
+    interviewer_user_id: string;
+    outcome: string;
+    notes?: string;
+    scheduled_at?: string;
+  }): Promise<ContactAttemptRow | null> {
+    return this.one<ContactAttemptRow>(
+      `INSERT INTO core.contact_attempt
+       (tenant_id, campaign_id, action_id, respondent_id, interviewer_user_id, outcome, notes, scheduled_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+       RETURNING *`,
+      [
+        params.tenant_id,
+        params.campaign_id,
+        params.action_id,
+        params.respondent_id,
+        params.interviewer_user_id,
+        params.outcome,
+        params.notes ?? null,
+        params.scheduled_at ?? null,
+      ],
+    );
+  }
+
+  async getCampaignIdForAction(actionId: string, tenantId: string): Promise<string | null> {
+    const row = await this.one<{ campaign_id: string }>(
+      `SELECT campaign_id FROM core.campaign_action WHERE id = $1 AND tenant_id = $2`,
+      [actionId, tenantId],
+    );
+    return row?.campaign_id ?? null;
+  }
+
   getScheduledCallbacks(
     tenantId: string,
     interviewerUserId: string,

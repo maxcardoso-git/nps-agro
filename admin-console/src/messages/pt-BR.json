@@ -203,6 +203,26 @@
       "generic": "Não foi possível processar o usuário"
     }
   },
+  "campaignDetail": {
+    "loading": "Carregando...",
+    "actionsTitle": "Ações",
+    "createAction": "Nova Ação",
+    "createActionTitle": "Criar Ação",
+    "noActions": "Nenhuma ação cadastrada",
+    "actionName": "Nome da ação",
+    "actionDescription": "Descrição (opcional)",
+    "selectForm": "Selecionar questionário...",
+    "cancel": "Cancelar",
+    "create": "Criar",
+    "activate": "Ativar",
+    "pause": "Pausar",
+    "colName": "Nome",
+    "colForm": "Questionário",
+    "colContacts": "Contatos",
+    "colStatus": "Status",
+    "colActions": "Ações",
+    "errors": { "generic": "Não foi possível processar a ação" }
+  },
   "account": {
     "title": "Contas",
     "createTitle": "Nova Conta",

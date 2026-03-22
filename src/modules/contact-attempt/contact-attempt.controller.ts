@@ -9,6 +9,37 @@ import { CreateContactAttemptDto } from './dto/create-contact-attempt.dto';
 export class ContactAttemptController {
   constructor(private readonly contactAttemptService: ContactAttemptService) {}
 
+  // Action-scoped routes (new)
+  @Get('actions/:actionId/respondents')
+  @Permissions('campaign.read')
+  listRespondentsByAction(
+    @CurrentUser() user: AuthUserClaims,
+    @Param('actionId') actionId: string,
+    @Query('search') search?: string,
+    @Query('status') status?: string,
+    @Query('page') page?: string,
+    @Query('page_size') pageSize?: string,
+  ) {
+    return this.contactAttemptService.listRespondentsByAction(user, actionId, {
+      search,
+      status,
+      page: page ? Number(page) : undefined,
+      page_size: pageSize ? Number(pageSize) : undefined,
+    });
+  }
+
+  @Post('actions/:actionId/respondents/:respondentId/contact-attempts')
+  @Permissions('campaign.read')
+  createContactAttemptByAction(
+    @CurrentUser() user: AuthUserClaims,
+    @Param('actionId') actionId: string,
+    @Param('respondentId') respondentId: string,
+    @Body() body: CreateContactAttemptDto,
+  ) {
+    return this.contactAttemptService.createContactAttemptByAction(user, actionId, respondentId, body);
+  }
+
+  // Legacy campaign-scoped routes (kept for backward compat)
   @Get('campaigns/:campaignId/respondents')
   @Permissions('campaign.read')
   listRespondents(

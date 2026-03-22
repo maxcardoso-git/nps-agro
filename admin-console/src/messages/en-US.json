@@ -203,6 +203,26 @@
       "generic": "Could not process user"
     }
   },
+  "campaignDetail": {
+    "loading": "Loading...",
+    "actionsTitle": "Actions",
+    "createAction": "New Action",
+    "createActionTitle": "Create Action",
+    "noActions": "No actions yet",
+    "actionName": "Action name",
+    "actionDescription": "Description (optional)",
+    "selectForm": "Select questionnaire...",
+    "cancel": "Cancel",
+    "create": "Create",
+    "activate": "Activate",
+    "pause": "Pause",
+    "colName": "Name",
+    "colForm": "Questionnaire",
+    "colContacts": "Contacts",
+    "colStatus": "Status",
+    "colActions": "Actions",
+    "errors": { "generic": "Could not process action" }
+  },
   "account": {
     "title": "Accounts",
     "createTitle": "New Account",

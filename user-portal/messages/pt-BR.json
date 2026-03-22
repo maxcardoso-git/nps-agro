@@ -44,6 +44,13 @@
       "colStatus": "Status",
       "open": "Abrir"
     },
+    "actions": {
+      "title": "Ações da Campanha",
+      "back": "Voltar",
+      "loading": "Carregando...",
+      "empty": "Nenhuma ação cadastrada",
+      "contacts": "contatos"
+    },
     "contacts": {
       "title": "Contatos da Campanha",
       "back": "Voltar",
