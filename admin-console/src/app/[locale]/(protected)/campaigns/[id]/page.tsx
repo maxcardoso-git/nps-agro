@@ -238,14 +238,32 @@ export default function CampaignDetailPage() {
                   </Button>
                 )}
                 {a.status === 'active' && (
-                  <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => pauseMutation.mutate(a.id)}>
-                    {t('pause')}
-                  </Button>
+                  <>
+                    <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => pauseMutation.mutate(a.id)}>
+                      {t('pause')}
+                    </Button>
+                    <Button variant="ghost" className="h-7 px-2 text-xs text-red-600" onClick={() =>
+                      apiClient.campaignActions.update(session!, campaignId, a.id, { status: 'completed' }).then(() =>
+                        queryClient.invalidateQueries({ queryKey: ['campaign-actions', campaignId] })
+                      )
+                    }>
+                      {t('deactivate')}
+                    </Button>
+                  </>
                 )}
                 {a.status === 'paused' && (
-                  <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => activateMutation.mutate(a.id)}>
-                    {t('activate')}
-                  </Button>
+                  <>
+                    <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => activateMutation.mutate(a.id)}>
+                      {t('activate')}
+                    </Button>
+                    <Button variant="ghost" className="h-7 px-2 text-xs text-red-600" onClick={() =>
+                      apiClient.campaignActions.update(session!, campaignId, a.id, { status: 'completed' }).then(() =>
+                        queryClient.invalidateQueries({ queryKey: ['campaign-actions', campaignId] })
+                      )
+                    }>
+                      {t('deactivate')}
+                    </Button>
+                  </>
                 )}
               </div>,
             ])}
@@ -340,6 +358,22 @@ export default function CampaignDetailPage() {
             </DialogHeader>
             <div className="space-y-3">
               <p className="text-sm text-slate-600">{t('importHint')}</p>
+              <button
+                type="button"
+                className="text-xs font-medium text-primary underline"
+                onClick={() => {
+                  const csv = 'codigo;conta;nome;celular;Cargo;tipo_persona\nEX_01;EMPRESA EXEMPLO LTDA;João Silva;11999999999;Gerente Comercial;AGRICULTOR\nEX_02;EMPRESA EXEMPLO LTDA;Maria Santos;11988888888;Diretora;CANAL\n';
+                  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = 'modelo_contatos.csv';
+                  a.click();
+                  URL.revokeObjectURL(url);
+                }}
+              >
+                {t('downloadTemplate')}
+              </button>
               <input
                 type="file"
                 accept=".csv,.txt"
