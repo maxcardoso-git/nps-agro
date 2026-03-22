@@ -24,6 +24,12 @@ export default function DashboardPage() {
     enabled: Boolean(session)
   });
 
+  const tenantQuery = useQuery({
+    queryKey: ['dashboard', 'tenant', session?.user.tenant_id],
+    queryFn: () => apiClient.tenants.getById(session!, session!.user.tenant_id),
+    enabled: Boolean(session?.user.tenant_id)
+  });
+
   const campaigns = extractItems(campaignsQuery.data);
   const questionnaires = extractItems(questionnairesQuery.data);
 
@@ -39,7 +45,7 @@ export default function DashboardPage() {
           <p className="text-3xl font-bold text-primary">{questionnaires.length}</p>
         </Card>
         <Card title={t('cards.tenant')}>
-          <p className="text-sm text-slate-700">{session?.user.tenant_id}</p>
+          <p className="text-lg font-bold text-primary">{tenantQuery.data?.name ?? '...'}</p>
         </Card>
       </div>
 
