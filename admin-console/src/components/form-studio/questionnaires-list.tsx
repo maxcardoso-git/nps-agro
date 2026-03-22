@@ -76,9 +76,10 @@ export function QuestionnairesList({ session, onSelect }: QuestionnairesListProp
 
   const cloneMutation = useMutation({
     mutationFn: async (source: Questionnaire) => {
-      // 1. Fetch the source questionnaire with versions to get schema
+      // 1. Fetch source with versions
       const detail = await apiClient.questionnaires.getById(session, source.id);
-      const latestVersion = detail.versions?.find((v) => v.status === 'published') ?? detail.versions?.[0];
+      const versions = detail.versions ?? [];
+      const latestVersion = versions.find((v) => v.status === 'published') ?? versions[0];
 
       // 2. Create new questionnaire
       const cloned = await apiClient.questionnaires.create(session, {
@@ -87,11 +88,15 @@ export function QuestionnairesList({ session, onSelect }: QuestionnairesListProp
         description: source.description || undefined,
       });
 
-      // 3. If source had a version with schema, create a draft version with same schema
-      if (latestVersion?.schema_json) {
-        await apiClient.questionnaires.createVersion(session, cloned.id, {
-          schema_json: latestVersion.schema_json as unknown as Record<string, unknown>,
-        });
+      // 3. Copy schema if available
+      if (latestVersion?.schema_json && latestVersion.schema_json.questions?.length > 0) {
+        try {
+          await apiClient.questionnaires.createVersion(session, cloned.id, {
+            schema_json: latestVersion.schema_json as unknown as Record<string, unknown>,
+          });
+        } catch {
+          // Version copy failed but questionnaire was created — continue
+        }
       }
 
       return cloned;
@@ -123,6 +128,14 @@ export function QuestionnairesList({ session, onSelect }: QuestionnairesListProp
           {t('create')}
         </Button>
       </div>
+
+      {/* Error banner */}
+      {error && (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+          {error}
+          <button type="button" className="ml-2 underline" onClick={() => setError(null)}>✕</button>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex items-center gap-3">
