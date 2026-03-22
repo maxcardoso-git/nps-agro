@@ -62,27 +62,41 @@ export default function ActionContactsPage() {
     mutationFn: async () => {
       if (!selectedRespondent) throw new Error('No respondent selected');
 
+      // Step 1: Register contact attempt
       const attempt = await api.contactAttempts.createByAction(session!, actionId, selectedRespondent.id, {
         outcome,
         notes: notes || undefined,
         scheduled_at: outcome === 'scheduled' ? scheduledAt : undefined,
       });
 
+      // Step 2: If success, start or resume interview
       if (outcome === 'success') {
-        const active = await api.interviews.findActive(session!, selectedRespondent.campaign_id, selectedRespondent.id);
-        if (active) {
-          return { attempt, interviewId: active.id };
-        }
+        try {
+          // Check for existing active interview
+          const active = await api.interviews.findActive(
+            session!,
+            selectedRespondent.campaign_id,
+            selectedRespondent.id,
+          );
+          if (active) {
+            return { attempt, interviewId: active.id };
+          }
 
-        const result = await api.interviews.start(session!, {
-          tenant_id: session!.user.tenant_id,
-          campaign_id: selectedRespondent.campaign_id,
-          action_id: actionId,
-          respondent_id: selectedRespondent.id,
-          channel: 'manual',
-          interviewer_user_id: session!.user.id,
-        });
-        return { attempt, interviewId: result.interview_state.interview_id };
+          // Start new interview via action
+          const result = await api.interviews.start(session!, {
+            tenant_id: session!.user.tenant_id,
+            campaign_id: selectedRespondent.campaign_id,
+            action_id: actionId,
+            respondent_id: selectedRespondent.id,
+            channel: 'manual',
+            interviewer_user_id: session!.user.id,
+          });
+          return { attempt, interviewId: result.interview_state.interview_id };
+        } catch (interviewError) {
+          // Contact was registered but interview failed — still close modal
+          console.error('Interview start failed:', interviewError);
+          return { attempt, interviewId: null, interviewError: String(interviewError) };
+        }
       }
 
       return { attempt, interviewId: null };
@@ -95,6 +109,8 @@ export default function ActionContactsPage() {
 
       if (result.interviewId) {
         router.push(`/${locale}/interviews/${result.interviewId}`);
+      } else if ('interviewError' in result && result.interviewError) {
+        setError(String(result.interviewError));
       }
     },
     onError: (cause) => {
