@@ -19,9 +19,9 @@ Progress: [████████████] 100% (6/6 plans complete)
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 4
-- Average duration: ~6.5 min
-- Total execution time: ~28 min
+- Total plans completed: 6
+- Average duration: ~5 min
+- Total execution time: ~30 min
 
 **By Phase:**
 
@@ -29,9 +29,10 @@ Progress: [████████████] 100% (6/6 plans complete)
 |-------|-------|-------|----------|
 | 01-security-quality | 2/2 | ~20 min | ~10 min |
 | 02-dockerize | 2/2 | ~8 min | ~4 min |
+| 03-deploy-cicd | 2/2 | ~4 min | ~2 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (~13 min), 01-02 (~7 min), 02-01 (~3 min), 02-02 (~5 min), 03-02 (~3 min)
+- Last 5 plans: 01-02 (~7 min), 02-01 (~3 min), 02-02 (~5 min), 03-01 (~1 min), 03-02 (~3 min)
 - Trend: Stable, fast
 
 *Updated after each plan completion*
@@ -58,6 +59,10 @@ Progress: [████████████] 100% (6/6 plans complete)
 - [02-02]: Nginx usa container_name como upstream (nps-backend:3310, etc.) — mais explícito que service names
 - [02-02]: /api/ usa trailing-slash proxy_pass (http://backend/) para strip do prefix — NestJS routes não têm /api prefix
 - [02-02]: Backend expõe porta 3310 diretamente E via Nginx /api/ — frontends usam URL direta para SSR
+- [03-01]: deploy.sh reescrito para Docker Compose — PM2 removido completamente
+- [03-01]: Health check bate em http://127.0.0.1/health (porta 80 via nginx) — valida stack completo
+- [03-01]: Migrations não rodam no deploy script — rodam dentro do container backend no startup
+- [03-01]: .env validado antes do deploy (não .env.production) — docker-compose usa env_file: .env
 - [03-02]: script_stop: true adicionado ao appleboy/ssh-action — workflow falha se deploy.sh sair com erro
 - [03-02]: command_timeout: 10m — timeout padrão de 10s é muito curto para Docker builds no VPS
 
@@ -69,11 +74,9 @@ Progress: [████████████] 100% (6/6 plans complete)
 ### Blockers/Concerns
 
 - Nenhum blocker ativo — todos os 3 phases completos
-- VPS operator: criar .env a partir de .env.example antes do `docker compose up`
-- VPS operator: garantir que external network existe (`docker network create nps-db-net`) e PostgreSQL está na network
 
 ## Session Continuity
 
 Last session: 2026-03-22
-Stopped at: Completed 03-02-PLAN.md — .github/workflows/deploy.yml atualizado (script_stop + command_timeout)
+Stopped at: Completed 03-01-PLAN.md — scripts/deploy.sh reescrito para Docker Compose (PM2 removido)
 Resume file: None
