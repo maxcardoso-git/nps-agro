@@ -18,7 +18,7 @@ RUN npm run build
 FROM node:22-alpine AS production
 WORKDIR /app
 ENV NODE_ENV=production
-COPY --from=build /app/public ./public
+RUN mkdir -p ./public
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 ENV PORT=3000
