@@ -140,10 +140,26 @@ export default function TenantsPage() {
         <Card title={t('listTitle')}>
           <Table
             headers={[t('table.name'), t('table.code'), t('table.status'), t('table.actions')]}
-            rows={tenants.map((tenant) => [
-              tenant.name,
+            rows={tenants.map((tenant) => {
+              const b = (tenant as { settings_json?: { branding?: { logo_url?: string; primary_color?: string } } }).settings_json?.branding;
+              return [
+              <div key={`n-${tenant.id}`} className="flex items-center gap-2">
+                {b?.logo_url ? (
+                  <img src={b.logo_url} alt="" className="h-6 w-auto max-w-[60px] object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                ) : (
+                  <div className="flex h-6 w-6 items-center justify-center rounded text-[8px] font-bold text-white" style={{ backgroundColor: b?.primary_color || '#94a3b8' }}>
+                    {tenant.name.charAt(0)}
+                  </div>
+                )}
+                <span className="font-medium">{tenant.name}</span>
+              </div>,
               tenant.code,
-              <Badge key={`s-${tenant.id}`} tone={statusTone(tenant.status)}>{tenant.status}</Badge>,
+              <div key={`c-${tenant.id}`} className="flex items-center gap-1">
+                <Badge tone={statusTone(tenant.status)}>{tenant.status}</Badge>
+                {b?.primary_color && (
+                  <span className="inline-block h-4 w-4 rounded-full border border-slate-200" style={{ backgroundColor: b.primary_color }} title={b.primary_color} />
+                )}
+              </div>,
               <div key={`a-${tenant.id}`} className="flex gap-1">
                 <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => openEdit(tenant)}>
                   {t('actions.edit')}
@@ -152,7 +168,7 @@ export default function TenantsPage() {
                   {t('actions.branding')}
                 </Button>
               </div>,
-            ])}
+            ]; })}
           />
         </Card>
 
