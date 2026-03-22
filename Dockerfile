@@ -14,7 +14,7 @@ RUN npm run build
 # Stage 3 - production: minimal runtime image
 FROM node:22-alpine AS production
 # psql CLI required by scripts/run-migrations.sh
-RUN apk add --no-cache postgresql-client
+RUN apk add --no-cache postgresql-client bash
 WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci --omit=dev --ignore-scripts
