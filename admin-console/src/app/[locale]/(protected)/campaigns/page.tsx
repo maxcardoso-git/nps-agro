@@ -103,6 +103,9 @@ export default function CampaignsPage() {
                 {c.status}
               </Badge>,
               <div key={`a-${c.id}`} className="flex gap-1">
+                <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => router.push(`/${locale}/campaigns/${c.id}`)}>
+                  {t('actions.edit')}
+                </Button>
                 {c.status === 'draft' && (
                   <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => statusMutation.mutate({ id: c.id, action: 'activate' })}>
                     {t('actions.activate')}

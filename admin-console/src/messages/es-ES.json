@@ -65,6 +65,8 @@
     "actions": {
       "create": "Crear",
       "cancel": "Cancelar",
+      "edit": "Editar",
+      "save": "Guardar",
       "activate": "Activar",
       "pause": "Pausar",
       "complete": "Finalizar"
@@ -176,14 +178,21 @@
   "tenant": {
     "title": "Tenants",
     "createTitle": "Crear tenant",
+    "editTitle": "Editar tenant",
     "listTitle": "Lista de tenants",
+    "statusActive": "Activo",
+    "statusInactive": "Inactivo",
+    "statusSuspended": "Suspendido",
     "fields": {
       "name": "Nombre",
       "code": "Código",
       "timezone": "Zona horaria"
     },
     "actions": {
-      "create": "Crear"
+      "create": "Crear",
+      "edit": "Editar",
+      "save": "Guardar",
+      "cancel": "Cancelar"
     },
     "table": {
       "name": "Nombre",
@@ -231,6 +240,9 @@
     "selectForm": "Seleccionar cuestionario...",
     "cancel": "Cancelar",
     "create": "Crear",
+    "edit": "Editar",
+    "editActionTitle": "Editar Acción",
+    "save": "Guardar",
     "activate": "Activar",
     "pause": "Pausar",
     "colName": "Nombre",
@@ -243,11 +255,12 @@
   "account": {
     "title": "Cuentas",
     "createTitle": "Nueva Cuenta",
+    "editTitle": "Editar Cuenta",
     "searchPlaceholder": "Buscar cuentas...",
     "loading": "Cargando...",
     "empty": "No se encontraron cuentas",
     "fields": { "name": "Nombre de la cuenta" },
-    "actions": { "create": "Crear", "cancel": "Cancelar" },
+    "actions": { "create": "Crear", "edit": "Editar", "save": "Guardar", "cancel": "Cancelar" },
     "table": { "name": "Nombre", "contacts": "Contactos", "created": "Creado" },
     "errors": { "generic": "No se pudo procesar la cuenta" }
   },

@@ -24,6 +24,8 @@ export default function CampaignDetailPage() {
   const campaignId = params.id as string;
 
   const [showCreate, setShowCreate] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+  const [editingActionId, setEditingActionId] = useState<string | null>(null);
   const [actionForm, setActionForm] = useState({ name: '', questionnaire_version_id: '', description: '' });
   const [error, setError] = useState<string | null>(null);
 
@@ -41,11 +43,10 @@ export default function CampaignDetailPage() {
     enabled: Boolean(session && campaignId),
   });
 
-  // Fetch questionnaire versions for the create dialog
   const questionnairesQuery = useQuery({
     queryKey: ['questionnaires-for-actions'],
     queryFn: () => apiClient.questionnaires.list(session!, { page_size: 200 }),
-    enabled: Boolean(session && showCreate),
+    enabled: Boolean(session && (showCreate || showEdit)),
   });
 
   const campaign = campaignQuery.data;
@@ -83,6 +84,31 @@ export default function CampaignDetailPage() {
     mutationFn: (actionId: string) => apiClient.campaignActions.pause(session!, campaignId, actionId),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['campaign-actions', campaignId] }),
   });
+
+  const editMutation = useMutation({
+    mutationFn: () =>
+      apiClient.campaignActions.update(session!, campaignId, editingActionId!, {
+        name: actionForm.name,
+        description: actionForm.description || undefined,
+      }),
+    onSuccess: () => {
+      setShowEdit(false);
+      setEditingActionId(null);
+      setActionForm({ name: '', questionnaire_version_id: '', description: '' });
+      setError(null);
+      queryClient.invalidateQueries({ queryKey: ['campaign-actions', campaignId] });
+    },
+    onError: (cause) => {
+      setError(cause instanceof ApiError ? cause.message : t('errors.generic'));
+    },
+  });
+
+  const openEdit = (a: { id: string; name: string; description: string | null }) => {
+    setEditingActionId(a.id);
+    setActionForm({ name: a.name, description: a.description || '', questionnaire_version_id: '' });
+    setError(null);
+    setShowEdit(true);
+  };
 
   const statusTone = (s: string) => {
     if (s === 'active') return 'success' as const;
@@ -129,6 +155,9 @@ export default function CampaignDetailPage() {
               a.respondent_count,
               <Badge key={`s-${a.id}`} tone={statusTone(a.status)}>{a.status}</Badge>,
               <div key={`a-${a.id}`} className="flex gap-1">
+                <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => openEdit(a)}>
+                  {t('edit')}
+                </Button>
                 {a.status === 'draft' && (
                   <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => activateMutation.mutate(a.id)}>
                     {t('activate')}
@@ -186,6 +215,36 @@ export default function CampaignDetailPage() {
                 disabled={!actionForm.name || !actionForm.questionnaire_version_id || createMutation.isPending}
               >
                 {t('create')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        {/* Edit Action Dialog */}
+        <Dialog open={showEdit} onOpenChange={setShowEdit}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t('editActionTitle')}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-3">
+              <Input
+                placeholder={t('actionName')}
+                value={actionForm.name}
+                onChange={(e) => setActionForm((p) => ({ ...p, name: e.target.value }))}
+              />
+              <Input
+                placeholder={t('actionDescription')}
+                value={actionForm.description}
+                onChange={(e) => setActionForm((p) => ({ ...p, description: e.target.value }))}
+              />
+              {error && <p className="text-sm text-red-600">{error}</p>}
+            </div>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setShowEdit(false)}>{t('cancel')}</Button>
+              <Button
+                onClick={() => editMutation.mutate()}
+                disabled={!actionForm.name || editMutation.isPending}
+              >
+                {t('save')}
               </Button>
             </DialogFooter>
           </DialogContent>

@@ -20,6 +20,9 @@ export default function AccountsPage() {
   const [showCreate, setShowCreate] = useState(false);
   const [newName, setNewName] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [showEdit, setShowEdit] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
 
   const listQuery = useQuery({
     queryKey: ['accounts', search],
@@ -66,13 +69,21 @@ export default function AccountsPage() {
           <p className="py-8 text-center text-sm text-slate-400">{t('empty')}</p>
         ) : (
           <Table
-            headers={[t('table.name'), t('table.contacts'), t('table.created')]}
+            headers={[t('table.name'), t('table.contacts'), t('table.created'), '']}
             rows={accounts.map((a) => [
               a.name,
               <Badge key={`c-${a.id}`} tone="neutral">
                 {a.respondent_count}
               </Badge>,
               a.created_at ? new Date(a.created_at).toLocaleDateString() : '—',
+              <Button key={`e-${a.id}`} variant="ghost" className="h-7 px-2 text-xs" onClick={() => {
+                setEditId(a.id);
+                setEditName(a.name);
+                setError(null);
+                setShowEdit(true);
+              }}>
+                {t('actions.edit')}
+              </Button>,
             ])}
           />
         )}
@@ -97,6 +108,37 @@ export default function AccountsPage() {
                 disabled={!newName || createMutation.isPending}
               >
                 {t('actions.create')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        {/* Edit Dialog */}
+        <Dialog open={showEdit} onOpenChange={setShowEdit}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t('editTitle')}</DialogTitle>
+            </DialogHeader>
+            <Input
+              placeholder={t('fields.name')}
+              value={editName}
+              onChange={(e) => setEditName(e.target.value)}
+            />
+            {error && <p className="text-sm text-red-600">{error}</p>}
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setShowEdit(false)}>{t('actions.cancel')}</Button>
+              <Button
+                onClick={async () => {
+                  try {
+                    await apiClient.accounts.update(session!, editId!, { name: editName });
+                    setShowEdit(false);
+                    queryClient.invalidateQueries({ queryKey: ['accounts'] });
+                  } catch (cause) {
+                    setError(cause instanceof ApiError ? cause.message : t('errors.generic'));
+                  }
+                }}
+                disabled={!editName}
+              >
+                {t('actions.save')}
               </Button>
             </DialogFooter>
           </DialogContent>

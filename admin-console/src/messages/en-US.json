@@ -65,6 +65,8 @@
     "actions": {
       "create": "Create",
       "cancel": "Cancel",
+      "edit": "Edit",
+      "save": "Save",
       "activate": "Activate",
       "pause": "Pause",
       "complete": "Complete"
@@ -176,14 +178,21 @@
   "tenant": {
     "title": "Tenants",
     "createTitle": "Create tenant",
+    "editTitle": "Edit tenant",
     "listTitle": "Tenant list",
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
+    "statusSuspended": "Suspended",
     "fields": {
       "name": "Name",
       "code": "Code",
       "timezone": "Timezone"
     },
     "actions": {
-      "create": "Create"
+      "create": "Create",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel"
     },
     "table": {
       "name": "Name",
@@ -231,6 +240,9 @@
     "selectForm": "Select questionnaire...",
     "cancel": "Cancel",
     "create": "Create",
+    "edit": "Edit",
+    "editActionTitle": "Edit Action",
+    "save": "Save",
     "activate": "Activate",
     "pause": "Pause",
     "colName": "Name",
@@ -243,11 +255,12 @@
   "account": {
     "title": "Accounts",
     "createTitle": "New Account",
+    "editTitle": "Edit Account",
     "searchPlaceholder": "Search accounts...",
     "loading": "Loading...",
     "empty": "No accounts found",
     "fields": { "name": "Account name" },
-    "actions": { "create": "Create", "cancel": "Cancel" },
+    "actions": { "create": "Create", "edit": "Edit", "save": "Save", "cancel": "Cancel" },
     "table": { "name": "Name", "contacts": "Contacts", "created": "Created" },
     "errors": { "generic": "Could not process account" }
   },
