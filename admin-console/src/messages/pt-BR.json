@@ -191,6 +191,7 @@
     "actions": {
       "create": "Criar",
       "edit": "Editar",
+      "branding": "Branding",
       "save": "Salvar",
       "cancel": "Cancelar"
     },
@@ -199,6 +200,15 @@
       "code": "Código",
       "status": "Status",
       "actions": "Ações"
+    },
+    "brandingTitle": "Branding do Tenant",
+    "brandingFields": {
+      "appName": "Nome do aplicativo",
+      "logoUrl": "URL do logo",
+      "primaryColor": "Cor primária",
+      "secondaryColor": "Cor secundária",
+      "backgroundColor": "Cor de fundo",
+      "textColor": "Cor do texto"
     },
     "errors": {
       "generic": "Não foi possível processar o tenant"

@@ -22,8 +22,13 @@ export default function TenantsPage() {
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({ name: '', code: '', status: 'active', timezone: 'America/Sao_Paulo' });
   const [showEdit, setShowEdit] = useState(false);
+  const [showBranding, setShowBranding] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState({ name: '', timezone: '', status: 'active' });
+  const [brandingForm, setBrandingForm] = useState({
+    app_name: '', logo_url: '', primary_color: '#1168bd', secondary_color: '#0b4884',
+    background_color: '#f6f8fb', text_color: '#1f2937',
+  });
 
   const listQuery = useQuery({
     queryKey: ['tenants'],
@@ -58,13 +63,51 @@ export default function TenantsPage() {
     onError: (cause) => { setError(cause instanceof ApiError ? cause.message : t('errors.generic')); },
   });
 
+  const brandingMutation = useMutation({
+    mutationFn: async () => {
+      const tenant = await apiClient.tenants.getById(session!, editId!);
+      return apiClient.tenants.update(session!, editId!, {
+        settings_json: {
+          ...(tenant.settings_json || {}),
+          branding: brandingForm,
+        },
+      });
+    },
+    onSuccess: () => {
+      setShowBranding(false);
+      setError(null);
+      queryClient.invalidateQueries({ queryKey: ['tenants'] });
+    },
+    onError: (cause) => { setError(cause instanceof ApiError ? cause.message : t('errors.generic')); },
+  });
+
   const tenants = extractItems(listQuery.data);
 
-  const openEdit = (t: { id: string; name: string; status: string; timezone?: string }) => {
-    setEditId(t.id);
-    setEditForm({ name: t.name, timezone: t.timezone || 'America/Sao_Paulo', status: t.status });
+  const openEdit = (tenant: { id: string; name: string; status: string; timezone?: string }) => {
+    setEditId(tenant.id);
+    setEditForm({ name: tenant.name, timezone: tenant.timezone || 'America/Sao_Paulo', status: tenant.status });
     setError(null);
     setShowEdit(true);
+  };
+
+  const openBranding = async (tenant: { id: string }) => {
+    setEditId(tenant.id);
+    setError(null);
+    try {
+      const detail = await apiClient.tenants.getById(session!, tenant.id);
+      const b = detail.settings_json?.branding;
+      setBrandingForm({
+        app_name: b?.app_name || detail.name,
+        logo_url: b?.logo_url || '',
+        primary_color: b?.primary_color || '#1168bd',
+        secondary_color: b?.secondary_color || '#0b4884',
+        background_color: b?.background_color || '#f6f8fb',
+        text_color: b?.text_color || '#1f2937',
+      });
+    } catch {
+      setBrandingForm({ app_name: '', logo_url: '', primary_color: '#1168bd', secondary_color: '#0b4884', background_color: '#f6f8fb', text_color: '#1f2937' });
+    }
+    setShowBranding(true);
   };
 
   const statusTone = (s: string) => {
@@ -91,7 +134,7 @@ export default function TenantsPage() {
           <div className="mt-3">
             <Button onClick={() => createMutation.mutate()} disabled={!form.name || !form.code}>{t('actions.create')}</Button>
           </div>
-          {error && !showEdit && <p className="mt-2 text-sm text-red-600">{error}</p>}
+          {error && !showEdit && !showBranding && <p className="mt-2 text-sm text-red-600">{error}</p>}
         </Card>
 
         <Card title={t('listTitle')}>
@@ -101,13 +144,19 @@ export default function TenantsPage() {
               tenant.name,
               tenant.code,
               <Badge key={`s-${tenant.id}`} tone={statusTone(tenant.status)}>{tenant.status}</Badge>,
-              <Button key={`e-${tenant.id}`} variant="ghost" className="h-7 px-2 text-xs" onClick={() => openEdit(tenant)}>
-                {t('actions.edit')}
-              </Button>,
+              <div key={`a-${tenant.id}`} className="flex gap-1">
+                <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => openEdit(tenant)}>
+                  {t('actions.edit')}
+                </Button>
+                <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => openBranding(tenant)}>
+                  {t('actions.branding')}
+                </Button>
+              </div>,
             ])}
           />
         </Card>
 
+        {/* Edit Dialog */}
         <Dialog open={showEdit} onOpenChange={setShowEdit}>
           <DialogContent>
             <DialogHeader><DialogTitle>{t('editTitle')}</DialogTitle></DialogHeader>
@@ -127,7 +176,62 @@ export default function TenantsPage() {
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Branding Dialog */}
+        <Dialog open={showBranding} onOpenChange={setShowBranding}>
+          <DialogContent className="max-w-xl">
+            <DialogHeader><DialogTitle>{t('brandingTitle')}</DialogTitle></DialogHeader>
+            <div className="space-y-3">
+              <Input
+                placeholder={t('brandingFields.appName')}
+                value={brandingForm.app_name}
+                onChange={(e) => setBrandingForm((p) => ({ ...p, app_name: e.target.value }))}
+              />
+              <Input
+                placeholder={t('brandingFields.logoUrl')}
+                value={brandingForm.logo_url}
+                onChange={(e) => setBrandingForm((p) => ({ ...p, logo_url: e.target.value }))}
+              />
+              <div className="grid grid-cols-2 gap-3">
+                <ColorField label={t('brandingFields.primaryColor')} value={brandingForm.primary_color} onChange={(v) => setBrandingForm((p) => ({ ...p, primary_color: v }))} />
+                <ColorField label={t('brandingFields.secondaryColor')} value={brandingForm.secondary_color} onChange={(v) => setBrandingForm((p) => ({ ...p, secondary_color: v }))} />
+                <ColorField label={t('brandingFields.backgroundColor')} value={brandingForm.background_color} onChange={(v) => setBrandingForm((p) => ({ ...p, background_color: v }))} />
+                <ColorField label={t('brandingFields.textColor')} value={brandingForm.text_color} onChange={(v) => setBrandingForm((p) => ({ ...p, text_color: v }))} />
+              </div>
+
+              {/* Preview */}
+              <div className="rounded-xl border p-4" style={{ backgroundColor: brandingForm.background_color, color: brandingForm.text_color }}>
+                <div className="flex items-center gap-3">
+                  {brandingForm.logo_url && (
+                    <img src={brandingForm.logo_url} alt="" className="h-10 w-auto max-w-[100px] object-contain" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                  )}
+                  <span className="text-lg font-bold" style={{ color: brandingForm.primary_color }}>{brandingForm.app_name || '...'}</span>
+                </div>
+                <div className="mt-2 h-1.5 rounded" style={{ backgroundColor: brandingForm.secondary_color }} />
+              </div>
+
+              {error && <p className="text-sm text-red-600">{error}</p>}
+            </div>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => setShowBranding(false)}>{t('actions.cancel')}</Button>
+              <Button onClick={() => brandingMutation.mutate()} disabled={brandingMutation.isPending}>{t('actions.save')}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </PermissionGate>
+  );
+}
+
+function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  const hex = value || '#000000';
+  return (
+    <div>
+      <label className="mb-1 block text-xs font-medium text-slate-600">{label}</label>
+      <div className="flex items-center gap-2">
+        <input type="color" value={hex} onChange={(e) => onChange(e.target.value)} className="h-8 w-10 cursor-pointer rounded border border-slate-300 p-0.5" />
+        <span className="text-xs font-mono text-slate-500">{hex}</span>
+      </div>
+    </div>
   );
 }
