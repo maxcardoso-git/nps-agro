@@ -56,11 +56,11 @@ Plans:
   1. Application is reachable at http://72.61.52.70 from a browser
   2. SQL migrations run automatically on every deploy before the backend starts
   3. A push to `main` on GitHub triggers a GitHub Actions workflow that SSH-deploys to VPS without manual steps
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 03-01: Deploy to VPS and run migrations on startup (INFRA-07, INFRA-08)
-- [ ] 03-02: Update GitHub Actions workflow to use Docker-based deploy
+- [ ] 03-01-PLAN.md — Rewrite deploy.sh from PM2 to Docker Compose (INFRA-07, INFRA-08)
+- [ ] 03-02-PLAN.md — Update GitHub Actions workflow for Docker-based deploy (INFRA-07)
 
 ---
 
@@ -71,7 +71,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Security + Quality | 2/2 | Complete | 2026-03-21 |
-| 2. Dockerize | 2/2 | ✓ Complete | 2026-03-21 |
+| 2. Dockerize | 2/2 | Complete | 2026-03-21 |
 | 3. Deploy + CI/CD | 0/2 | Not started | - |
 
 ---
