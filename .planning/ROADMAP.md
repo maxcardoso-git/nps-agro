@@ -7,7 +7,7 @@ Brownfield project with working NestJS + Next.js codebase that needs security fi
 ## Phases
 
 - [x] **Phase 1: Security + Quality** - Fix known vulnerabilities and ensure clean build + tests
-- [ ] **Phase 2: Dockerize** - Package all 4 services in Docker and wire up with Compose + Nginx
+- [x] **Phase 2: Dockerize** - Package all 4 services in Docker and wire up with Compose + Nginx
 - [ ] **Phase 3: Deploy + CI/CD** - Ship to VPS and automate future deploys via GitHub Actions
 
 ## Phase Details
@@ -43,8 +43,8 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md — Dockerfiles for backend and all 3 frontends (INFRA-01, INFRA-02, INFRA-03, INFRA-04)
-- [ ] 02-02-PLAN.md — docker-compose.yml and Nginx reverse proxy (INFRA-05, INFRA-06)
+- [x] 02-01-PLAN.md — Dockerfiles for backend and all 3 frontends (INFRA-01, INFRA-02, INFRA-03, INFRA-04)
+- [x] 02-02-PLAN.md — docker-compose.yml and Nginx reverse proxy (INFRA-05, INFRA-06)
 
 ---
 
@@ -71,7 +71,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Security + Quality | 2/2 | Complete | 2026-03-21 |
-| 2. Dockerize | 0/2 | In Progress | - |
+| 2. Dockerize | 2/2 | ✓ Complete | 2026-03-21 |
 | 3. Deploy + CI/CD | 0/2 | Not started | - |
 
 ---
