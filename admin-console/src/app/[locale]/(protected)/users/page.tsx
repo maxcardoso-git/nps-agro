@@ -2,123 +2,191 @@
 
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PermissionGate } from '@/components/layout/permission-gate';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 import { Table } from '@/components/ui/table';
 import { apiClient, ApiError } from '@/lib/api/client';
+import { extractItems } from '@/lib/api/helpers';
 import { useRequiredSession } from '@/hooks/use-required-session';
+
+const ROLES = [
+  'platform_admin',
+  'tenant_admin',
+  'campaign_manager',
+  'analyst',
+  'interviewer',
+] as const;
+
+const ROLE_LABELS: Record<string, string> = {
+  platform_admin: 'Platform Admin',
+  tenant_admin: 'Tenant Admin',
+  campaign_manager: 'Campaign Manager',
+  analyst: 'Analyst',
+  interviewer: 'Interviewer',
+};
 
 export default function UsersPage() {
   const t = useTranslations('user');
   const { session } = useRequiredSession();
   const queryClient = useQueryClient();
-  const [tenantId, setTenantId] = useState(session?.user.tenant_id || '');
   const [error, setError] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: '',
     email: '',
     password: '',
     role: 'interviewer',
-    is_active: true
+    is_active: true,
   });
 
+  const isPlatformAdmin =
+    session?.user.role === 'platform_admin' || session?.user.role === 'admin_master';
+
+  // For platform_admin: load all tenants for dropdown
+  const tenantsQuery = useQuery({
+    queryKey: ['tenants'],
+    queryFn: () => apiClient.tenants.list(session!, { page_size: 200 }),
+    enabled: Boolean(session && isPlatformAdmin),
+  });
+  const tenants = extractItems(tenantsQuery.data);
+
+  // Selected tenant: default to user's own tenant
+  const [selectedTenantId, setSelectedTenantId] = useState('');
+
+  useEffect(() => {
+    if (session?.user.tenant_id && !selectedTenantId) {
+      setSelectedTenantId(session.user.tenant_id);
+    }
+  }, [session?.user.tenant_id, selectedTenantId]);
+
+  // Resolve current tenant name
+  const currentTenantName = useMemo(() => {
+    if (!isPlatformAdmin) {
+      return null; // will show from session context
+    }
+    return tenants.find((t) => t.id === selectedTenantId)?.name ?? selectedTenantId;
+  }, [isPlatformAdmin, tenants, selectedTenantId]);
+
+  // Load users for selected tenant
   const usersQuery = useQuery({
-    queryKey: ['tenant-users', tenantId],
-    queryFn: () => apiClient.users.listByTenant(session!, tenantId),
-    enabled: Boolean(session && tenantId)
-  });
-
-  const createMutation = useMutation({
-    mutationFn: () => apiClient.users.create(session!, tenantId, form),
-    onSuccess: () => {
-      setError(null);
-      setForm({ name: '', email: '', password: '', role: 'interviewer', is_active: true });
-      queryClient.invalidateQueries({ queryKey: ['tenant-users', tenantId] });
-    },
-    onError: (cause) => {
-      setError(cause instanceof ApiError ? cause.message : t('errors.generic'));
-    }
-  });
-
-  const updateMutation = useMutation({
-    mutationFn: ({ userId, role, is_active }: { userId: string; role: string; is_active: boolean }) =>
-      apiClient.users.update(session!, tenantId, userId, { role, is_active }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['tenant-users', tenantId] });
-    }
+    queryKey: ['tenant-users', selectedTenantId],
+    queryFn: () => apiClient.users.listByTenant(session!, selectedTenantId),
+    enabled: Boolean(session && selectedTenantId),
   });
 
   const users = usersQuery.data || [];
 
-  useEffect(() => {
-    if (session?.user.tenant_id && !tenantId) {
-      setTenantId(session.user.tenant_id);
-    }
-  }, [session?.user.tenant_id, tenantId]);
+  const createMutation = useMutation({
+    mutationFn: () => apiClient.users.create(session!, selectedTenantId, form),
+    onSuccess: () => {
+      setError(null);
+      setForm({ name: '', email: '', password: '', role: 'interviewer', is_active: true });
+      queryClient.invalidateQueries({ queryKey: ['tenant-users', selectedTenantId] });
+    },
+    onError: (cause) => {
+      setError(cause instanceof ApiError ? cause.message : t('errors.generic'));
+    },
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({
+      userId,
+      role,
+      is_active,
+    }: {
+      userId: string;
+      role: string;
+      is_active: boolean;
+    }) => apiClient.users.update(session!, selectedTenantId, userId, { role, is_active }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['tenant-users', selectedTenantId] });
+    },
+  });
 
   return (
     <PermissionGate permission="user.read">
       <div className="space-y-4">
         <h1 className="text-2xl font-semibold text-slate-900">{t('title')}</h1>
 
-        <Card title={t('tenantScopeTitle')}>
-          <Input value={tenantId} onChange={(event) => setTenantId(event.target.value)} />
-        </Card>
+        {/* Tenant selector — only for platform_admin */}
+        {isPlatformAdmin ? (
+          <Card title={t('tenantScopeTitle')}>
+            <Select
+              value={selectedTenantId}
+              onChange={(e) => setSelectedTenantId(e.target.value)}
+            >
+              {tenants.map((tenant) => (
+                <option key={tenant.id} value={tenant.id}>
+                  {tenant.name} ({tenant.code})
+                </option>
+              ))}
+            </Select>
+          </Card>
+        ) : (
+          <Card>
+            <div className="flex items-center gap-2 text-sm text-slate-600">
+              <span className="font-medium">{t('tenantScopeTitle')}:</span>
+              <Badge tone="neutral">{session?.user.tenant_id}</Badge>
+            </div>
+          </Card>
+        )}
 
+        {/* Create user */}
         <Card title={t('createTitle')}>
           <div className="grid gap-3 md:grid-cols-3">
             <Input
               placeholder={t('fields.name')}
               value={form.name}
-              onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
+              onChange={(e) => setForm((prev) => ({ ...prev, name: e.target.value }))}
             />
             <Input
               placeholder={t('fields.email')}
               value={form.email}
-              onChange={(event) => setForm((prev) => ({ ...prev, email: event.target.value }))}
+              onChange={(e) => setForm((prev) => ({ ...prev, email: e.target.value }))}
             />
             <Input
               placeholder={t('fields.password')}
               type="password"
               value={form.password}
-              onChange={(event) => setForm((prev) => ({ ...prev, password: event.target.value }))}
+              onChange={(e) => setForm((prev) => ({ ...prev, password: e.target.value }))}
             />
             <Select
               value={form.role}
-              onChange={(event) => setForm((prev) => ({ ...prev, role: event.target.value }))}
+              onChange={(e) => setForm((prev) => ({ ...prev, role: e.target.value }))}
             >
-              <option value="platform_admin">platform_admin</option>
-              <option value="tenant_admin">tenant_admin</option>
-              <option value="campaign_manager">campaign_manager</option>
-              <option value="analyst">analyst</option>
-              <option value="interviewer">interviewer</option>
+              {ROLES.map((r) => (
+                <option key={r} value={r}>
+                  {ROLE_LABELS[r]}
+                </option>
+              ))}
             </Select>
             <Select
               value={String(form.is_active)}
-              onChange={(event) =>
-                setForm((prev) => ({ ...prev, is_active: event.target.value === 'true' }))
+              onChange={(e) =>
+                setForm((prev) => ({ ...prev, is_active: e.target.value === 'true' }))
               }
             >
-              <option value="true">active</option>
-              <option value="false">inactive</option>
+              <option value="true">{t('statusActive')}</option>
+              <option value="false">{t('statusInactive')}</option>
             </Select>
           </div>
           <div className="mt-3">
             <Button
               onClick={() => createMutation.mutate()}
-              disabled={!tenantId || !form.name || !form.email || !form.password}
+              disabled={!selectedTenantId || !form.name || !form.email || !form.password}
             >
               {t('actions.create')}
             </Button>
           </div>
-          {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
+          {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
         </Card>
 
-        <Card title={t('listTitle')}>
+        {/* User list */}
+        <Card title={isPlatformAdmin && currentTenantName ? `${t('listTitle')} — ${currentTenantName}` : t('listTitle')}>
           <Table
             headers={[t('table.name'), t('table.email'), t('table.role'), t('table.active')]}
             rows={users.map((user) => [
@@ -127,34 +195,34 @@ export default function UsersPage() {
               <Select
                 key={`role-${user.id}`}
                 value={user.role}
-                onChange={(event) =>
+                onChange={(e) =>
                   updateMutation.mutate({
                     userId: user.id,
-                    role: event.target.value,
-                    is_active: user.is_active
+                    role: e.target.value,
+                    is_active: user.is_active,
                   })
                 }
               >
-                <option value="platform_admin">platform_admin</option>
-                <option value="tenant_admin">tenant_admin</option>
-                <option value="campaign_manager">campaign_manager</option>
-                <option value="analyst">analyst</option>
-                <option value="interviewer">interviewer</option>
+                {ROLES.map((r) => (
+                  <option key={r} value={r}>
+                    {ROLE_LABELS[r]}
+                  </option>
+                ))}
               </Select>,
               <Select
                 key={`active-${user.id}`}
                 value={String(user.is_active)}
-                onChange={(event) =>
+                onChange={(e) =>
                   updateMutation.mutate({
                     userId: user.id,
                     role: user.role,
-                    is_active: event.target.value === 'true'
+                    is_active: e.target.value === 'true',
                   })
                 }
               >
-                <option value="true">true</option>
-                <option value="false">false</option>
-              </Select>
+                <option value="true">{t('statusActive')}</option>
+                <option value="false">{t('statusInactive')}</option>
+              </Select>,
             ])}
           />
         </Card>

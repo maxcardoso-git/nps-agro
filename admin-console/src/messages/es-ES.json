@@ -190,11 +190,13 @@
     "actions": {
       "create": "Crear"
     },
+    "statusActive": "Activo",
+    "statusInactive": "Inactivo",
     "table": {
       "name": "Nombre",
       "email": "Correo",
-      "role": "Rol",
-      "active": "Activo"
+      "role": "Perfil",
+      "active": "Estado"
     },
     "errors": {
       "generic": "No fue posible procesar el usuario"

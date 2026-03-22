@@ -190,11 +190,13 @@
     "actions": {
       "create": "Create"
     },
+    "statusActive": "Active",
+    "statusInactive": "Inactive",
     "table": {
       "name": "Name",
       "email": "Email",
       "role": "Role",
-      "active": "Active"
+      "active": "Status"
     },
     "errors": {
       "generic": "Could not process user"
