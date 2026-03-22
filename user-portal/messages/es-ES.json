@@ -24,14 +24,22 @@
   "interviewer": {
     "dashboard": {
       "title": "Dashboard",
+      "goodMorning": "Buenos días",
+      "goodAfternoon": "Buenas tardes",
+      "goodEvening": "Buenas noches",
+      "subtitle": "Aquí tienes el resumen de tus actividades de hoy.",
       "activeCampaigns": "Campañas Activas",
-      "scheduledCallbacks": "Callbacks de Hoy",
+      "todayCallbacks": "Callbacks de Hoy",
+      "todayDate": "Hoy",
+      "scheduledCallbacks": "Callbacks Programados",
       "loading": "Cargando...",
       "noCampaigns": "No hay campañas activas",
       "noCallbacks": "No hay callbacks programados para hoy",
+      "openCampaign": "Abrir campaña",
       "colTime": "Hora",
       "colName": "Nombre",
       "colPhone": "Teléfono",
+      "colAccount": "Cuenta",
       "colCampaign": "Campaña",
       "call": "Llamar"
     },
