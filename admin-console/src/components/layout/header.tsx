@@ -23,7 +23,7 @@ export function Header() {
     <header className="flex h-16 items-center justify-between border-b border-slate-200 bg-white px-4">
       <div className="flex items-center gap-3">
         {branding.logo_url ? (
-          <img src={branding.logo_url} alt={branding.app_name} className="h-8 w-8 rounded object-cover" />
+          <img src={branding.logo_url} alt={branding.app_name} className="h-9 w-auto max-w-[120px] object-contain" />
         ) : (
           <div className="flex h-8 w-8 items-center justify-center rounded bg-primary text-xs font-bold text-white">
             NA
