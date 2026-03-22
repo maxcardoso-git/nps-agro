@@ -219,6 +219,35 @@ export class ContactAttemptRepository extends SqlRepositoryBase {
     );
   }
 
+  async getCampaignContactStats(tenantId: string, campaignId: string) {
+    return this.many<{ status: string; count: number }>(
+      `SELECT contact_status AS status, COUNT(*)::int AS count
+       FROM (
+         SELECT
+           COALESCE(
+             CASE
+               WHEN ca.outcome = 'success' AND i.status = 'completed' THEN 'completed'
+               WHEN ca.outcome = 'success' AND i.status = 'in_progress' THEN 'in_progress'
+               ELSE ca.outcome
+             END,
+             'pending'
+           ) AS contact_status
+         FROM core.respondent r
+         LEFT JOIN LATERAL (
+           SELECT outcome, interview_id
+           FROM core.contact_attempt
+           WHERE respondent_id = r.id AND campaign_id = $2
+           ORDER BY created_at DESC LIMIT 1
+         ) ca ON true
+         LEFT JOIN core.interview i ON i.id = ca.interview_id
+         WHERE r.campaign_id = $2 AND r.tenant_id = $1
+       ) sub
+       GROUP BY contact_status
+       ORDER BY count DESC`,
+      [tenantId, campaignId],
+    );
+  }
+
   async getCampaignIdForAction(actionId: string, tenantId: string): Promise<string | null> {
     const row = await this.one<{ campaign_id: string }>(
       `SELECT campaign_id FROM core.campaign_action WHERE id = $1 AND tenant_id = $2`,

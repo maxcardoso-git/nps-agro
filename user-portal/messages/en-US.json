@@ -36,6 +36,8 @@
       "noCampaigns": "No active campaigns",
       "noCallbacks": "No callbacks scheduled for today",
       "openCampaign": "Open campaign",
+      "contacted": "contacted",
+      "completedLabel": "completed",
       "colTime": "Time",
       "colName": "Name",
       "colPhone": "Phone",

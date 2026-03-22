@@ -9,6 +9,7 @@ import { Table } from '@/components/ui/Table';
 import { Button } from '@/components/ui/Button';
 import { api, extractItems } from '@/lib/api';
 import { useAuth } from '@/lib/auth/auth-context';
+import type { Campaign } from '@/lib/types';
 
 export default function DashboardPage() {
   const t = useTranslations('interviewer');
@@ -122,24 +123,9 @@ export default function DashboardPage() {
             <p className="text-lg text-slate-400">{t('dashboard.noCampaigns')}</p>
           </div>
         ) : (
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-3 md:grid-cols-2">
             {campaigns.map((c) => (
-              <Card key={c.id} className="group cursor-pointer transition hover:border-primary/50 hover:shadow-md">
-                <button
-                  type="button"
-                  className="w-full text-left"
-                  onClick={() => router.push(`/${locale}/campaigns/${c.id}`)}
-                >
-                  <div className="flex items-start justify-between">
-                    <h3 className="font-semibold text-slate-900 group-hover:text-primary">{c.name}</h3>
-                    <Badge tone="success">{c.status}</Badge>
-                  </div>
-                  {c.segment && (
-                    <span className="mt-2 inline-block rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{c.segment}</span>
-                  )}
-                  <p className="mt-3 text-xs text-primary font-medium">{t('dashboard.openCampaign')} →</p>
-                </button>
-              </Card>
+              <CampaignProgressCard key={c.id} campaign={c} locale={locale as string} />
             ))}
           </div>
         )}
@@ -147,3 +133,122 @@ export default function DashboardPage() {
     </div>
   );
 }
+
+// =====================================================
+// CAMPAIGN PROGRESS CARD
+// =====================================================
+const STATUS_COLORS: Record<string, string> = {
+  completed: '#10b981',
+  in_progress: '#f59e0b',
+  success: '#3b82f6',
+  scheduled: '#8b5cf6',
+  no_answer: '#ef4444',
+  wrong_number: '#dc2626',
+  busy: '#f97316',
+  refused: '#6b7280',
+  pending: '#e2e8f0',
+};
+
+const STATUS_LABELS_PT: Record<string, string> = {
+  completed: 'Concluído',
+  in_progress: 'Em andamento',
+  success: 'Contatado',
+  scheduled: 'Agendado',
+  no_answer: 'Não atendeu',
+  wrong_number: 'Nº errado',
+  busy: 'Ocupado',
+  refused: 'Recusou',
+  pending: 'Pendente',
+};
+
+function CampaignProgressCard({ campaign, locale }: { campaign: Campaign; locale: string }) {
+  const t = useTranslations('interviewer.dashboard');
+  const { session } = useAuth();
+  const router = useRouter();
+
+  const statsQuery = useQuery({
+    queryKey: ['campaign-stats', campaign.id],
+    queryFn: () => api.campaigns.getContactStats(session!, campaign.id),
+    enabled: Boolean(session),
+    staleTime: 30000,
+  });
+
+  const stats = statsQuery.data ?? [];
+  const total = stats.reduce((sum, s) => sum + s.count, 0);
+  const completedCount = stats.find((s) => s.status === 'completed')?.count ?? 0;
+  const pendingCount = stats.find((s) => s.status === 'pending')?.count ?? 0;
+  const contactedCount = total - pendingCount;
+  const pct = total > 0 ? Math.round((completedCount / total) * 100) : 0;
+
+  return (
+    <Card className="group cursor-pointer transition hover:border-primary/50 hover:shadow-md">
+      <button
+        type="button"
+        className="w-full text-left"
+        onClick={() => router.push(`/${locale}/campaigns/${campaign.id}`)}
+      >
+        <div className="flex items-start justify-between">
+          <h3 className="font-semibold text-slate-900 group-hover:text-primary">{campaign.name}</h3>
+          <Badge tone="success">{campaign.status}</Badge>
+        </div>
+
+        {campaign.segment && (
+          <span className="mt-1 inline-block rounded bg-slate-100 px-2 py-0.5 text-xs text-slate-600">{campaign.segment}</span>
+        )}
+
+        {/* Progress stats */}
+        {total > 0 && (
+          <div className="mt-3 space-y-2">
+            {/* Summary numbers */}
+            <div className="flex justify-between text-xs text-slate-500">
+              <span>{contactedCount}/{total} {t('contacted')}</span>
+              <span className="font-semibold text-emerald-600">{pct}% {t('completedLabel')}</span>
+            </div>
+
+            {/* Stacked progress bar */}
+            <div className="flex h-3 overflow-hidden rounded-full bg-slate-100">
+              {stats
+                .filter((s) => s.status !== 'pending')
+                .sort((a, b) => {
+                  const order = ['completed', 'in_progress', 'success', 'scheduled', 'no_answer', 'wrong_number', 'busy', 'refused'];
+                  return order.indexOf(a.status) - order.indexOf(b.status);
+                })
+                .map((s) => (
+                  <div
+                    key={s.status}
+                    className="h-full transition-all"
+                    style={{
+                      width: `${(s.count / total) * 100}%`,
+                      backgroundColor: STATUS_COLORS[s.status] || '#94a3b8',
+                    }}
+                    title={`${STATUS_LABELS_PT[s.status] || s.status}: ${s.count}`}
+                  />
+                ))}
+            </div>
+
+            {/* Legend */}
+            <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+              {stats
+                .filter((s) => s.count > 0 && s.status !== 'pending')
+                .map((s) => (
+                  <span key={s.status} className="flex items-center gap-1 text-[10px] text-slate-500">
+                    <span className="inline-block h-2 w-2 rounded-full" style={{ backgroundColor: STATUS_COLORS[s.status] }} />
+                    {STATUS_LABELS_PT[s.status] || s.status} ({s.count})
+                  </span>
+                ))}
+              {pendingCount > 0 && (
+                <span className="flex items-center gap-1 text-[10px] text-slate-400">
+                  <span className="inline-block h-2 w-2 rounded-full bg-slate-200" />
+                  Pendente ({pendingCount})
+                </span>
+              )}
+            </div>
+          </div>
+        )}
+
+        <p className="mt-2 text-xs font-medium text-primary">{t('openCampaign')} →</p>
+      </button>
+    </Card>
+  );
+}
+

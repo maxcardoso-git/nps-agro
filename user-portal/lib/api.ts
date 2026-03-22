@@ -140,6 +140,16 @@ export const api = {
         session
       );
     },
+    getContactStats: async (
+      session: AuthSession,
+      campaignId: string
+    ): Promise<{ status: string; count: number }[]> => {
+      return request<{ status: string; count: number }[]>(
+        `/campaigns/${campaignId}/contact-stats`,
+        { method: 'GET' },
+        session
+      );
+    },
     getRespondents: async (
       session: AuthSession,
       campaignId: string,

@@ -69,6 +69,15 @@ export class ContactAttemptController {
     return this.contactAttemptService.createContactAttempt(user, campaignId, respondentId, body);
   }
 
+  @Get('campaigns/:campaignId/contact-stats')
+  @Permissions('campaign.read')
+  getCampaignContactStats(
+    @CurrentUser() user: AuthUserClaims,
+    @Param('campaignId') campaignId: string,
+  ) {
+    return this.contactAttemptService.getCampaignContactStats(user, campaignId);
+  }
+
   @Get('contact-attempts/my-scheduled')
   @Permissions('campaign.read')
   getMyScheduledCallbacks(

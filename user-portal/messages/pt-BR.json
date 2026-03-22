@@ -36,6 +36,8 @@
       "noCampaigns": "Nenhuma campanha ativa",
       "noCallbacks": "Nenhum agendamento para hoje",
       "openCampaign": "Abrir campanha",
+      "contacted": "contatados",
+      "completedLabel": "concluído",
       "colTime": "Horário",
       "colName": "Nome",
       "colPhone": "Telefone",
