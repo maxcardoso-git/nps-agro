@@ -57,7 +57,7 @@ export default function CampaignDetailPage() {
   const campaign = campaignQuery.data;
   const actions = (actionsQuery.data ?? []) as Array<{
     id: string; name: string; description: string | null;
-    questionnaire_name: string | null; status: string;
+    questionnaire_version_id: string; questionnaire_name: string | null; status: string;
     respondent_count: number; interviewer_count: number;
   }>;
   const questionnaires = extractItems(questionnairesQuery.data);
@@ -90,12 +90,25 @@ export default function CampaignDetailPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['campaign-actions', campaignId] }),
   });
 
+  // Fetch questionnaires for edit dialog too
+  const questionnairesEditQuery = useQuery({
+    queryKey: ['questionnaires-for-edit'],
+    queryFn: () => apiClient.questionnaires.list(session!, { page_size: 200 }),
+    enabled: Boolean(session && showEdit),
+  });
+  const questionnairesForEdit = extractItems(questionnairesEditQuery.data);
+
   const editMutation = useMutation({
-    mutationFn: () =>
-      apiClient.campaignActions.update(session!, campaignId, editingActionId!, {
+    mutationFn: () => {
+      const payload: Record<string, unknown> = {
         name: actionForm.name,
         description: actionForm.description || undefined,
-      }),
+      };
+      if (actionForm.questionnaire_version_id) {
+        payload.questionnaire_version_id = actionForm.questionnaire_version_id;
+      }
+      return apiClient.campaignActions.update(session!, campaignId, editingActionId!, payload);
+    },
     onSuccess: () => {
       setShowEdit(false);
       setEditingActionId(null);
@@ -140,9 +153,13 @@ export default function CampaignDetailPage() {
     setShowEditCampaign(true);
   };
 
-  const openEdit = (a: { id: string; name: string; description: string | null }) => {
+  const openEdit = (a: { id: string; name: string; description: string | null; questionnaire_version_id?: string }) => {
     setEditingActionId(a.id);
-    setActionForm({ name: a.name, description: a.description || '', questionnaire_version_id: '' });
+    setActionForm({
+      name: a.name,
+      description: a.description || '',
+      questionnaire_version_id: a.questionnaire_version_id || '',
+    });
     setError(null);
     setShowEdit(true);
   };
@@ -290,6 +307,15 @@ export default function CampaignDetailPage() {
                 value={actionForm.description}
                 onChange={(e) => setActionForm((p) => ({ ...p, description: e.target.value }))}
               />
+              <Select
+                value={actionForm.questionnaire_version_id}
+                onChange={(e) => setActionForm((p) => ({ ...p, questionnaire_version_id: e.target.value }))}
+              >
+                <option value="">{t('selectForm')}</option>
+                {questionnairesForEdit.map((q) => (
+                  <option key={q.id} value={q.id}>{q.name}</option>
+                ))}
+              </Select>
               {error && <p className="text-sm text-red-600">{error}</p>}
             </div>
             <DialogFooter>

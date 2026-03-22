@@ -218,7 +218,7 @@ export const api = {
       respondentId: string
     ): Promise<InterviewRecord | null> => {
       try {
-        return await request<InterviewRecord>(
+        const result = await request<InterviewRecord | null>(
           `/interviews/active${toQueryString({
             tenant_id: session.user.tenant_id,
             campaign_id: campaignId,
@@ -227,6 +227,9 @@ export const api = {
           { method: 'GET' },
           session
         );
+        // unwrapEnvelope returns {} for null data — check for actual interview
+        if (!result || !('id' in result) || !result.id) return null;
+        return result;
       } catch {
         return null;
       }
