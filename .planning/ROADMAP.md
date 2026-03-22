@@ -22,11 +22,11 @@ Brownfield project with working NestJS + Next.js codebase that needs security fi
   3. Frontend reads API URL from NEXT_PUBLIC_API_URL env var — no hardcoded IP in source code
   4. Login with an empty string or whitespace-only password returns an auth error
   5. `tsc`, `next build` (all 3 frontends), and `jest` all exit with code 0
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 01-01: Fix security vulnerabilities (SEC-01, SEC-02, SEC-03, SEC-04)
-- [ ] 01-02: Verify and fix build + test pipeline (QUAL-01, QUAL-02, QUAL-03)
+- [ ] 01-01-PLAN.md — Fix security vulnerabilities (SEC-01, SEC-02, SEC-03, SEC-04)
+- [ ] 01-02-PLAN.md — Fix TypeScript config and verify build/test quality (QUAL-01, QUAL-02, QUAL-03)
 
 ---
 
@@ -66,11 +66,11 @@ Plans:
 
 ## Progress
 
-**Execution Order:** 1 → 2 → 3
+**Execution Order:** 1 -> 2 -> 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Security + Quality | 0/2 | Not started | - |
+| 1. Security + Quality | 0/2 | Planned | - |
 | 2. Dockerize | 0/2 | Not started | - |
 | 3. Deploy + CI/CD | 0/2 | Not started | - |
 
