@@ -6,7 +6,7 @@ Brownfield project with working NestJS + Next.js codebase that needs security fi
 
 ## Phases
 
-- [ ] **Phase 1: Security + Quality** - Fix known vulnerabilities and ensure clean build + tests
+- [x] **Phase 1: Security + Quality** - Fix known vulnerabilities and ensure clean build + tests
 - [ ] **Phase 2: Dockerize** - Package all 4 services in Docker and wire up with Compose + Nginx
 - [ ] **Phase 3: Deploy + CI/CD** - Ship to VPS and automate future deploys via GitHub Actions
 
@@ -25,8 +25,8 @@ Brownfield project with working NestJS + Next.js codebase that needs security fi
 **Plans:** 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Fix security vulnerabilities (SEC-01, SEC-02, SEC-03, SEC-04)
-- [ ] 01-02-PLAN.md — Fix TypeScript config and verify build/test quality (QUAL-01, QUAL-02, QUAL-03)
+- [x] 01-01-PLAN.md — Fix security vulnerabilities (SEC-01, SEC-02, SEC-03, SEC-04)
+- [x] 01-02-PLAN.md — Fix TypeScript config and verify build/test quality (QUAL-01, QUAL-02, QUAL-03)
 
 ---
 
@@ -70,7 +70,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Security + Quality | 0/2 | Planned | - |
+| 1. Security + Quality | 2/2 | ✓ Complete | 2026-03-21 |
 | 2. Dockerize | 0/2 | Not started | - |
 | 3. Deploy + CI/CD | 0/2 | Not started | - |
 
