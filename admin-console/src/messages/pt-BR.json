@@ -11,6 +11,7 @@
       "interviews": "Entrevistas",
       "tenants": "Tenants",
       "users": "Usuários",
+      "accounts": "Contas",
       "branding": "Branding"
     },
     "branding": {
@@ -201,6 +202,17 @@
     "errors": {
       "generic": "Não foi possível processar o usuário"
     }
+  },
+  "account": {
+    "title": "Contas",
+    "createTitle": "Nova Conta",
+    "searchPlaceholder": "Buscar contas...",
+    "loading": "Carregando...",
+    "empty": "Nenhuma conta encontrada",
+    "fields": { "name": "Nome da conta" },
+    "actions": { "create": "Criar", "cancel": "Cancelar" },
+    "table": { "name": "Nome", "contacts": "Contatos", "created": "Criado em" },
+    "errors": { "generic": "Não foi possível processar a conta" }
   },
   "formStudio": {
     "editor": {

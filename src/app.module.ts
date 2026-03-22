@@ -13,6 +13,8 @@ import { QuestionnaireModule } from './modules/questionnaire/questionnaire.modul
 import { ReportingModule } from './modules/reporting/reporting.module';
 import { TenantModule } from './modules/tenant/tenant.module';
 import { TenantUserModule } from './modules/tenant-user/tenant-user.module';
+import { AccountModule } from './modules/account/account.module';
+import { ContactAttemptModule } from './modules/contact-attempt/contact-attempt.module';
 import { SurveyModule } from './survey/survey.module';
 
 @Module({
@@ -31,6 +33,8 @@ import { SurveyModule } from './survey/survey.module';
     CampaignModule,
     QuestionnaireModule,
     ReportingModule,
+    AccountModule,
+    ContactAttemptModule,
     HealthModule,
     SurveyModule,
   ],

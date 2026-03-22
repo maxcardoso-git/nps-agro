@@ -18,5 +18,6 @@ export interface SurveyRepository {
   insertAnswer(params: PersistAnswerParams): Promise<boolean>;
   updateInterviewStatus(interviewId: string, status: string, completedAt: Date | null): Promise<void>;
   createProcessingJob(params: CreateProcessingJobParams): Promise<boolean>;
+  findActiveInterview(tenantId: string, campaignId: string, respondentId: string): Promise<InterviewRecord | null>;
 }
 

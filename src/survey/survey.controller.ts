@@ -25,5 +25,14 @@ export class SurveyController {
   async completeInterview(@Param('id') id: string, @Body() body: TenantScopedInput) {
     return this.surveyService.completeInterview(id, body);
   }
+
+  @Get('active')
+  async findActiveInterview(
+    @Query('tenant_id') tenantId: string,
+    @Query('campaign_id') campaignId: string,
+    @Query('respondent_id') respondentId: string,
+  ) {
+    return this.surveyService.findActiveInterview(tenantId, campaignId, respondentId);
+  }
 }
 

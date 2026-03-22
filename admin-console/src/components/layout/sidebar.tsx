@@ -18,6 +18,7 @@ const items: MenuItem[] = [
   { key: 'questionnaires', href: '/questionnaires', permissions: ['questionnaire.read'] },
   { key: 'reports', href: '/reports', permissions: ['report.read'] },
   { key: 'interviews', href: '/interviews', permissions: ['interview.execute', 'campaign.read'] },
+  { key: 'accounts', href: '/accounts', permissions: ['campaign.read'] },
   { key: 'tenants', href: '/tenants', permissions: ['tenant.read'] },
   { key: 'users', href: '/users', permissions: ['user.read'] },
   { key: 'branding', href: '/settings/branding', permissions: ['branding.update', 'tenant.read'] }

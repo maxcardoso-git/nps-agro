@@ -38,7 +38,7 @@ export const ROLE_PERMISSIONS: Record<PlatformRole, string[]> = {
     'report.read.self',
   ],
   analyst: ['report.read.self', 'campaign.read.self', 'questionnaire.read.self'],
-  interviewer: ['campaign.read.self', 'questionnaire.read.self'],
+  interviewer: ['campaign.read.self', 'questionnaire.read.self', 'interview.execute.self'],
 };
 
 export function hasPermission(userPermissions: string[], required: string): boolean {

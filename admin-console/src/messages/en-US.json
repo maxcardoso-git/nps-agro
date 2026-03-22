@@ -11,6 +11,7 @@
       "interviews": "Interviews",
       "tenants": "Tenants",
       "users": "Users",
+      "accounts": "Accounts",
       "branding": "Branding"
     },
     "branding": {
@@ -201,6 +202,17 @@
     "errors": {
       "generic": "Could not process user"
     }
+  },
+  "account": {
+    "title": "Accounts",
+    "createTitle": "New Account",
+    "searchPlaceholder": "Search accounts...",
+    "loading": "Loading...",
+    "empty": "No accounts found",
+    "fields": { "name": "Account name" },
+    "actions": { "create": "Create", "cancel": "Cancel" },
+    "table": { "name": "Name", "contacts": "Contacts", "created": "Created" },
+    "errors": { "generic": "Could not process account" }
   },
   "formStudio": {
     "editor": {

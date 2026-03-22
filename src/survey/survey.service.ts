@@ -359,6 +359,18 @@ export class SurveyService {
     }
   }
 
+  async findActiveInterview(tenantId: string, campaignId: string, respondentId: string) {
+    this.assertNonEmpty(tenantId, 'tenant_id');
+    this.assertNonEmpty(campaignId, 'campaign_id');
+    this.assertNonEmpty(respondentId, 'respondent_id');
+
+    const interview = await this.repository.findActiveInterview(tenantId, campaignId, respondentId);
+    if (!interview) {
+      return null;
+    }
+    return interview;
+  }
+
   private assertNonEmpty(value: string | undefined, field: string): void {
     if (!value || value.trim().length === 0) {
       throw new SurveyException('INVALID_INPUT', `${field} is required`);

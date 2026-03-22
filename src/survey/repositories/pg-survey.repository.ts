@@ -244,5 +244,28 @@ export class PgSurveyRepository implements SurveyRepository {
 
     return (result.rowCount ?? 0) > 0;
   }
+
+  async findActiveInterview(
+    tenantId: string,
+    campaignId: string,
+    respondentId: string,
+  ): Promise<InterviewRecord | null> {
+    const result = await this.pool.query(
+      `
+      SELECT id, tenant_id, campaign_id, questionnaire_version_id, respondent_id,
+             channel, status, interviewer_user_id, started_at, completed_at
+      FROM core.interview
+      WHERE tenant_id = $1
+        AND campaign_id = $2
+        AND respondent_id = $3
+        AND status = 'in_progress'
+      ORDER BY created_at DESC
+      LIMIT 1
+      `,
+      [tenantId, campaignId, respondentId],
+    );
+
+    return result.rows[0] ?? null;
+  }
 }
 

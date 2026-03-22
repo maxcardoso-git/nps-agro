@@ -340,6 +340,39 @@ export const apiClient = {
       );
     }
   },
+  accounts: {
+    list: async (
+      session: AuthSession,
+      filters?: Record<string, string | number | boolean | undefined>
+    ): Promise<{ id: string; tenant_id: string; name: string; respondent_count: number; created_at: string }[]> => {
+      return request<{ id: string; tenant_id: string; name: string; respondent_count: number; created_at: string }[]>(
+        `/accounts${toQueryString(filters)}`,
+        { method: 'GET' },
+        session
+      );
+    },
+    create: async (
+      session: AuthSession,
+      payload: { tenant_id?: string; name: string }
+    ): Promise<{ id: string; name: string }> => {
+      return request<{ id: string; name: string }>(
+        '/accounts',
+        { method: 'POST', body: JSON.stringify(payload) },
+        session
+      );
+    },
+    update: async (
+      session: AuthSession,
+      accountId: string,
+      payload: { name?: string }
+    ): Promise<{ id: string; name: string }> => {
+      return request<{ id: string; name: string }>(
+        `/accounts/${accountId}`,
+        { method: 'PATCH', body: JSON.stringify(payload) },
+        session
+      );
+    }
+  },
   interviews: {
     start: async (session: AuthSession, payload: StartInterviewRequest): Promise<StartInterviewResponse> => {
       return request<StartInterviewResponse>(
