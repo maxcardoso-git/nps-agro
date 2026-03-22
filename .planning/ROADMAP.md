@@ -40,11 +40,11 @@ Plans:
   3. `docker compose up` starts all containers and they pass health checks
   4. Nginx routes requests to the correct service by port/path
   5. Backend connects to the existing PostgreSQL container on the VPS network
-**Plans**: TBD
+**Plans:** 2 plans
 
 Plans:
-- [ ] 02-01: Write Dockerfiles for backend and all 3 frontends (INFRA-01, INFRA-02, INFRA-03, INFRA-04)
-- [ ] 02-02: Write docker-compose.yml and nginx config (INFRA-05, INFRA-06)
+- [ ] 02-01-PLAN.md — Dockerfiles for backend and all 3 frontends (INFRA-01, INFRA-02, INFRA-03, INFRA-04)
+- [ ] 02-02-PLAN.md — docker-compose.yml and Nginx reverse proxy (INFRA-05, INFRA-06)
 
 ---
 
@@ -70,8 +70,8 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Security + Quality | 2/2 | ✓ Complete | 2026-03-21 |
-| 2. Dockerize | 0/2 | Not started | - |
+| 1. Security + Quality | 2/2 | Complete | 2026-03-21 |
+| 2. Dockerize | 0/2 | In Progress | - |
 | 3. Deploy + CI/CD | 0/2 | Not started | - |
 
 ---
