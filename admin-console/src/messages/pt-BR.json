@@ -56,14 +56,15 @@
     "createTitle": "Criar campanha",
     "listTitle": "Lista de campanhas",
     "fields": {
-      "tenantId": "Tenant ID",
       "name": "Nome",
       "description": "Descrição",
       "segment": "Segmento",
-      "questionnaireVersion": "Versão de questionário"
+      "startDate": "Data início",
+      "endDate": "Data fim"
     },
     "actions": {
       "create": "Criar",
+      "cancel": "Cancelar",
       "activate": "Ativar",
       "pause": "Pausar",
       "complete": "Concluir"

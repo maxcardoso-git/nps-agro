@@ -56,14 +56,15 @@
     "createTitle": "Create campaign",
     "listTitle": "Campaign list",
     "fields": {
-      "tenantId": "Tenant ID",
       "name": "Name",
       "description": "Description",
       "segment": "Segment",
-      "questionnaireVersion": "Questionnaire version"
+      "startDate": "Start date",
+      "endDate": "End date"
     },
     "actions": {
       "create": "Create",
+      "cancel": "Cancel",
       "activate": "Activate",
       "pause": "Pause",
       "complete": "Complete"
