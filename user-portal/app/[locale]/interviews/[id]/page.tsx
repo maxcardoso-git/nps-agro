@@ -7,7 +7,6 @@ import { useCallback, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Card } from '@/components/ui/Card';
 import { Input } from '@/components/ui/Input';
-import { Badge } from '@/components/ui/Badge';
 import { api, ApiError } from '@/lib/api';
 import { useAuth } from '@/lib/auth/auth-context';
 import type { Question } from '@/lib/types';
@@ -96,7 +95,7 @@ export default function InterviewFlowPage() {
     return (
       <div className="flex flex-col items-center justify-center py-20">
         <div className="text-center">
-          <Badge tone="success" className="mb-4 text-lg px-4 py-2">✓</Badge>
+          <span className="mb-4 inline-flex rounded-full bg-emerald-100 px-4 py-2 text-lg font-medium text-emerald-700">✓</span>
           <h2 className="text-xl font-semibold text-slate-900">{t('completedTitle')}</h2>
           <p className="mt-2 text-sm text-slate-500">{t('completedMessage')}</p>
           <Button className="mt-6" onClick={handleSaveExit}>
