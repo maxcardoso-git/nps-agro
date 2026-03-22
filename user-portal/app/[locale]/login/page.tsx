@@ -15,7 +15,6 @@ import { useAuth } from '@/lib/auth/auth-context';
 const schema = z.object({
   email: z.string().email(),
   password: z.string().trim().min(1, 'Password is required'),
-  tenant_code: z.string().optional()
 });
 
 type LoginValues = z.infer<typeof schema>;
@@ -31,7 +30,6 @@ export default function LoginPage() {
     defaultValues: {
       email: '',
       password: '',
-      tenant_code: ''
     }
   });
 
@@ -60,10 +58,6 @@ export default function LoginPage() {
           <div>
             <label className="mb-1 block text-sm text-slate-700">{t('password')}</label>
             <Input type="password" {...form.register('password')} />
-          </div>
-          <div>
-            <label className="mb-1 block text-sm text-slate-700">{t('tenantCode')}</label>
-            <Input type="text" {...form.register('tenant_code')} />
           </div>
           {loginMutation.error ? (
             <p className="text-sm text-red-600">
