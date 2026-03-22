@@ -1,0 +1,91 @@
+# Copy .env.example to .env and fill in values before running
+
+services:
+  backend:
+    build:
+      context: .
+    container_name: nps-backend
+    ports:
+      - "3310:3310"
+    env_file: .env
+    command: sh -c "./scripts/run-migrations.sh && node dist/main.js"
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3310/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+    networks:
+      - app-net
+      - db-net
+
+  user-portal:
+    build:
+      context: ./user-portal
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://72.61.52.70:3310}
+        NEXT_PUBLIC_DEFAULT_LOCALE: ${NEXT_PUBLIC_DEFAULT_LOCALE:-pt-BR}
+    container_name: nps-user-portal
+    ports:
+      - "3001:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-net
+
+  admin-console:
+    build:
+      context: ./admin-console
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://72.61.52.70:3310}
+        NEXT_PUBLIC_DEFAULT_LOCALE: ${NEXT_PUBLIC_DEFAULT_LOCALE:-pt-BR}
+    container_name: nps-admin-console
+    ports:
+      - "3002:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-net
+
+  analytics:
+    build:
+      context: ./Analytics
+      args:
+        NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://72.61.52.70:3310}
+        NEXT_PUBLIC_DEFAULT_LOCALE: ${NEXT_PUBLIC_DEFAULT_LOCALE:-pt-BR}
+    container_name: nps-analytics
+    ports:
+      - "3003:3000"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-net
+
+  nginx:
+    build:
+      context: ./nginx
+    container_name: nps-nginx
+    ports:
+      - "80:80"
+    depends_on:
+      - user-portal
+      - admin-console
+      - analytics
+      - backend
+    restart: unless-stopped
+    networks:
+      - app-net
+
+networks:
+  app-net:
+    driver: bridge
+  db-net:
+    external: true
+    name: ${DB_NETWORK:-nps-db-net}
