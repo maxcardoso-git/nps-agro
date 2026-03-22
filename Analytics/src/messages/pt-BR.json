@@ -28,6 +28,7 @@
   "dashboard": {
     "title": "Executive Dashboard",
     "empty": "Selecione uma campanha para visualizar os indicadores.",
+    "loading": "Carregando dados...",
     "filters": {
       "title": "Filtros",
       "campaign": "Campanha",
