@@ -28,7 +28,7 @@ echo "[3/4] Building and starting all services"
 docker compose up -d --build
 
 echo "[4/4] Validating health endpoint"
-HEALTH_URL="http://127.0.0.1:8080/health"
+HEALTH_URL="http://127.0.0.1:8100/health"
 ATTEMPTS=15
 SLEEP_SECONDS=2
 

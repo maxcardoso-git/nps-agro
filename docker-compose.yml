@@ -67,7 +67,7 @@ services:
       context: ./nginx
     container_name: nps-nginx
     ports:
-      - "8080:80"
+      - "8100:80"
     depends_on:
       - user-portal
       - admin-console
