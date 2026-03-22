@@ -10,7 +10,7 @@ export class UpdateActionDto {
   description?: string;
 
   @IsOptional()
-  @IsUUID('all')
+  @IsString()
   questionnaire_version_id?: string;
 
   @IsOptional()

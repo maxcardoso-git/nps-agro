@@ -39,6 +39,7 @@ export class CampaignActionController {
     @Param('actionId') actionId: string,
     @Body() body: UpdateActionDto,
   ) {
+    console.log('[CampaignAction] PATCH actionId:', actionId, 'body:', JSON.stringify(body));
     return this.actionService.updateAction(user, actionId, body);
   }
 
