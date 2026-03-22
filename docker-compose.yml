@@ -27,8 +27,6 @@ services:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://72.61.52.70:3310}
         NEXT_PUBLIC_DEFAULT_LOCALE: ${NEXT_PUBLIC_DEFAULT_LOCALE:-pt-BR}
     container_name: nps-user-portal
-    ports:
-      - "3001:3000"
     depends_on:
       backend:
         condition: service_healthy
@@ -43,8 +41,6 @@ services:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://72.61.52.70:3310}
         NEXT_PUBLIC_DEFAULT_LOCALE: ${NEXT_PUBLIC_DEFAULT_LOCALE:-pt-BR}
     container_name: nps-admin-console
-    ports:
-      - "3002:3000"
     depends_on:
       backend:
         condition: service_healthy
@@ -59,8 +55,6 @@ services:
         NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://72.61.52.70:3310}
         NEXT_PUBLIC_DEFAULT_LOCALE: ${NEXT_PUBLIC_DEFAULT_LOCALE:-pt-BR}
     container_name: nps-analytics
-    ports:
-      - "3003:3000"
     depends_on:
       backend:
         condition: service_healthy
@@ -73,7 +67,7 @@ services:
       context: ./nginx
     container_name: nps-nginx
     ports:
-      - "80:80"
+      - "8080:80"
     depends_on:
       - user-portal
       - admin-console
