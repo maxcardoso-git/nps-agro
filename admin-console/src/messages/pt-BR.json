@@ -12,7 +12,8 @@
       "tenants": "Tenants",
       "users": "Usuários",
       "accounts": "Contas",
-      "llmResources": "Recursos LLM",
+      "qualityReview": "Controle de Qualidade",
+      "llmResources": "Recursos",
       "branding": "Branding"
     },
     "branding": {

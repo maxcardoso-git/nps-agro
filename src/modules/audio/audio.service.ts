@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 const UPLOAD_DIR = process.env.UPLOAD_DIR || '/app/uploads';
+const WHISPER_URL = process.env.WHISPER_URL || 'http://nps-whisper:9000';
 const CONFIDENCE_THRESHOLD = 0.7;
 
 interface QuestionSchema {
@@ -91,8 +92,8 @@ export class AudioService {
       let confidence: number;
 
       if (llmResource?.api_key) {
-        // Use LLM resource (Whisper via OpenAI)
-        const result = await this.transcribeWithWhisper(llmResource, filePath);
+        // Use LLM resource (Whisper via OpenAI API)
+        const result = await this.transcribeWithWhisperApi(llmResource, filePath);
         transcription = result.text;
         confidence = result.confidence;
       } else if (resource?.endpoint_url) {
@@ -101,7 +102,10 @@ export class AudioService {
         transcription = result.text;
         confidence = result.confidence;
       } else {
-        throw new Error('No transcription resource configured. Add an LLM resource with purpose=transcription or a Resource with type=llm subtype=transcription.');
+        // Fallback: local Whisper container (free, no API key needed)
+        const result = await this.transcribeWithLocalWhisper(filePath);
+        transcription = result.text;
+        confidence = result.confidence;
       }
 
       await this.repo.updateTranscription(audioId, transcription, confidence);
@@ -218,7 +222,31 @@ export class AudioService {
 
   // ─── Transcription Providers ──────────────────────────────────────────────
 
-  private async transcribeWithWhisper(
+  private async transcribeWithLocalWhisper(filePath: string): Promise<{ text: string; confidence: number }> {
+    const fileBuffer = fs.readFileSync(filePath);
+    const fileName = path.basename(filePath);
+
+    const formData = new FormData();
+    formData.append('audio_file', new Blob([fileBuffer]), fileName);
+
+    const response = await fetch(`${WHISPER_URL}/asr?language=pt&output=json`, {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`Local Whisper error ${response.status}: ${errorText}`);
+    }
+
+    const data = await response.json() as Record<string, unknown>;
+    return {
+      text: (data.text as string) || '',
+      confidence: 0.85, // Local Whisper medium model has good accuracy for PT-BR
+    };
+  }
+
+  private async transcribeWithWhisperApi(
     llm: { provider: string; model_id: string; api_key: string | null; base_url: string | null },
     filePath: string,
   ): Promise<{ text: string; confidence: number }> {

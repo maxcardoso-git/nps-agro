@@ -437,6 +437,23 @@ export const apiClient = {
       );
     }
   },
+  qualityReviews: {
+    list: async (session: AuthSession, status?: string) => {
+      return request<unknown[]>(`/quality-reviews${toQueryString({ status })}`, { method: 'GET' }, session);
+    },
+    stats: async (session: AuthSession) => {
+      return request<{ pending: number; approved: number; rejected: number; avg_score: number | null }>('/quality-reviews/stats', { method: 'GET' }, session);
+    },
+    getById: async (session: AuthSession, id: string) => {
+      return request<unknown>(`/quality-reviews/${id}`, { method: 'GET' }, session);
+    },
+    approve: async (session: AuthSession, id: string, body: { score?: number; notes?: string }) => {
+      return request<unknown>(`/quality-reviews/${id}/approve`, { method: 'POST', body: JSON.stringify(body) }, session);
+    },
+    reject: async (session: AuthSession, id: string, body: { score?: number; notes?: string }) => {
+      return request<unknown>(`/quality-reviews/${id}/reject`, { method: 'POST', body: JSON.stringify(body) }, session);
+    },
+  },
   resources: {
     list: async (session: AuthSession, type?: string): Promise<Resource[]> => {
       return request<Resource[]>(`/resources${toQueryString({ type })}`, { method: 'GET' }, session);

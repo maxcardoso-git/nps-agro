@@ -19,6 +19,7 @@ import { ContactAttemptModule } from './modules/contact-attempt/contact-attempt.
 import { AudioModule } from './modules/audio/audio.module';
 import { EnrichmentModule } from './modules/enrichment/enrichment.module';
 import { LlmResourceModule } from './modules/llm-resource/llm-resource.module';
+import { QualityReviewModule } from './modules/quality-review/quality-review.module';
 import { ResourceModule } from './modules/resource/resource.module';
 import { SurveyModule } from './survey/survey.module';
 
@@ -44,6 +45,7 @@ import { SurveyModule } from './survey/survey.module';
     AudioModule,
     EnrichmentModule,
     LlmResourceModule,
+    QualityReviewModule,
     ResourceModule,
     HealthModule,
     SurveyModule,

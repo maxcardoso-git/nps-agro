@@ -64,6 +64,20 @@ services:
     networks:
       - app-net
 
+  whisper:
+    image: onerahmet/openai-whisper-asr-webservice:latest
+    container_name: nps-whisper
+    environment:
+      - ASR_MODEL=medium
+      - ASR_ENGINE=faster_whisper
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+    restart: unless-stopped
+    networks:
+      - app-net
+
   nginx:
     build:
       context: ./nginx
