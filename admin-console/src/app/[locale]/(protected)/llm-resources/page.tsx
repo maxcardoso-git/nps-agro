@@ -9,96 +9,168 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Select } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
 import { Table } from '@/components/ui/table';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { apiClient, ApiError } from '@/lib/api/client';
 import { useRequiredSession } from '@/hooks/use-required-session';
-import type { LlmResource } from '@/lib/types';
+import type { Resource } from '@/lib/types';
 
-const PROVIDERS = ['openai', 'anthropic', 'google', 'azure', 'ollama', 'custom'] as const;
-const PURPOSES = ['general', 'enrichment', 'chat', 'embeddings', 'transcription'] as const;
+const TYPES = [
+  { value: 'api_http', label: 'API HTTP (Outbound)' },
+  { value: 'database', label: 'Database' },
+  { value: 'mcp_server', label: 'MCP Server' },
+  { value: 'llm', label: 'LLM Provider' },
+  { value: 'queue', label: 'Queue / Worker' },
+  { value: 'storage', label: 'Object Storage' },
+  { value: 'custom', label: 'Custom' },
+];
 
-const PROVIDER_MODELS: Record<string, string[]> = {
-  openai: ['gpt-4o', 'gpt-4o-mini', 'gpt-4.1', 'gpt-4.1-mini', 'gpt-4.1-nano', 'o3', 'o4-mini'],
-  anthropic: ['claude-opus-4-20250514', 'claude-sonnet-4-20250514', 'claude-haiku-4-20250514'],
-  google: ['gemini-2.5-pro', 'gemini-2.5-flash', 'gemini-2.0-flash'],
-  azure: ['gpt-4o', 'gpt-4o-mini'],
-  ollama: ['llama3', 'mistral', 'codellama', 'mixtral'],
-  custom: [],
+const SUBTYPES: Record<string, { value: string; label: string }[]> = {
+  api_http: [
+    { value: '', label: 'Nenhum' },
+    { value: 'rest', label: 'REST API' },
+    { value: 'graphql', label: 'GraphQL' },
+    { value: 'webhook', label: 'Webhook' },
+  ],
+  llm: [
+    { value: '', label: 'Nenhum' },
+    { value: 'chat', label: 'Chat Completion' },
+    { value: 'embeddings', label: 'Embeddings' },
+    { value: 'transcription', label: 'Transcription' },
+    { value: 'enrichment', label: 'Enrichment' },
+  ],
+  database: [
+    { value: '', label: 'Nenhum' },
+    { value: 'postgresql', label: 'PostgreSQL' },
+    { value: 'redis', label: 'Redis' },
+    { value: 'mongodb', label: 'MongoDB' },
+  ],
+  mcp_server: [{ value: '', label: 'Nenhum' }],
+  queue: [{ value: '', label: 'Nenhum' }, { value: 'bullmq', label: 'BullMQ' }],
+  storage: [{ value: '', label: 'Nenhum' }, { value: 's3', label: 'S3' }, { value: 'gcs', label: 'GCS' }],
+  custom: [{ value: '', label: 'Nenhum' }],
 };
+
+const METHODS = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
+const AUTH_MODES = [
+  { value: 'none', label: 'Nenhum' },
+  { value: 'bearer', label: 'Bearer Token' },
+  { value: 'api_key', label: 'API Key Header' },
+  { value: 'basic', label: 'Basic Auth' },
+  { value: 'oauth2', label: 'OAuth 2.0' },
+  { value: 'custom', label: 'Custom' },
+];
+const ENVIRONMENTS = [
+  { value: 'production', label: 'PROD' },
+  { value: 'staging', label: 'STAGING' },
+  { value: 'development', label: 'DEV' },
+];
 
 interface FormState {
   name: string;
-  provider: string;
-  model_id: string;
-  api_key: string;
-  base_url: string;
-  purpose: string;
+  type: string;
+  subtype: string;
+  endpoint_url: string;
+  http_method: string;
+  auth_mode: string;
+  auth_config: string;
+  connection_json: string;
+  config_json: string;
+  metadata_json: string;
+  tags: string;
+  environment: string;
   is_active: boolean;
 }
 
 const EMPTY_FORM: FormState = {
   name: '',
-  provider: 'openai',
-  model_id: '',
-  api_key: '',
-  base_url: '',
-  purpose: 'general',
+  type: 'api_http',
+  subtype: '',
+  endpoint_url: '',
+  http_method: 'POST',
+  auth_mode: 'none',
+  auth_config: '{}',
+  connection_json: '{\n  "baseUrl": "",\n  "timeout": 30000\n}',
+  config_json: '{}',
+  metadata_json: '{\n  "version": "v1",\n  "provider": ""\n}',
+  tags: '',
+  environment: 'production',
   is_active: true,
 };
 
-export default function LlmResourcesPage() {
+function safeParseJson(text: string): Record<string, unknown> | null {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+}
+
+function resourceToForm(r: Resource): FormState {
+  return {
+    name: r.name,
+    type: r.type,
+    subtype: r.subtype || '',
+    endpoint_url: r.endpoint_url || '',
+    http_method: r.http_method || 'POST',
+    auth_mode: r.auth_mode,
+    auth_config: JSON.stringify(r.auth_config, null, 2),
+    connection_json: JSON.stringify(r.connection_json, null, 2),
+    config_json: JSON.stringify(r.config_json, null, 2),
+    metadata_json: JSON.stringify(r.metadata_json, null, 2),
+    tags: (r.tags || []).join(', '),
+    environment: r.environment,
+    is_active: r.is_active,
+  };
+}
+
+function formToPayload(form: FormState): Partial<Resource> {
+  return {
+    name: form.name,
+    type: form.type as Resource['type'],
+    subtype: form.subtype || undefined,
+    endpoint_url: form.endpoint_url || undefined,
+    http_method: form.http_method,
+    auth_mode: form.auth_mode as Resource['auth_mode'],
+    auth_config: safeParseJson(form.auth_config) || {},
+    connection_json: safeParseJson(form.connection_json) || {},
+    config_json: safeParseJson(form.config_json) || {},
+    metadata_json: safeParseJson(form.metadata_json) || {},
+    tags: form.tags ? form.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
+    environment: form.environment as Resource['environment'],
+    is_active: form.is_active,
+  };
+}
+
+export default function ResourcesPage() {
   const t = useTranslations('llmResource');
   const { session } = useRequiredSession();
   const queryClient = useQueryClient();
 
   const [error, setError] = useState<string | null>(null);
-  const [showCreate, setShowCreate] = useState(false);
-  const [showEdit, setShowEdit] = useState(false);
+  const [showDialog, setShowDialog] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
 
   const listQuery = useQuery({
-    queryKey: ['llm-resources'],
-    queryFn: () => apiClient.llmResources.list(session!),
+    queryKey: ['resources'],
+    queryFn: () => apiClient.resources.list(session!),
     enabled: Boolean(session),
   });
 
-  const createMutation = useMutation({
-    mutationFn: () => apiClient.llmResources.create(session!, {
-      name: form.name,
-      provider: form.provider as LlmResource['provider'],
-      model_id: form.model_id,
-      api_key: form.api_key || undefined,
-      base_url: form.base_url || undefined,
-      purpose: form.purpose as LlmResource['purpose'],
-      is_active: form.is_active,
-    }),
+  const saveMutation = useMutation({
+    mutationFn: () => {
+      const payload = formToPayload(form);
+      return editId
+        ? apiClient.resources.update(session!, editId, payload)
+        : apiClient.resources.create(session!, payload);
+    },
     onSuccess: () => {
       setError(null);
-      setShowCreate(false);
-      setForm(EMPTY_FORM);
-      queryClient.invalidateQueries({ queryKey: ['llm-resources'] });
-    },
-    onError: (cause) => {
-      setError(cause instanceof ApiError ? cause.message : t('errors.generic'));
-    },
-  });
-
-  const editMutation = useMutation({
-    mutationFn: () => apiClient.llmResources.update(session!, editId!, {
-      name: form.name,
-      provider: form.provider as LlmResource['provider'],
-      model_id: form.model_id,
-      api_key: form.api_key || undefined,
-      base_url: form.base_url || undefined,
-      purpose: form.purpose as LlmResource['purpose'],
-      is_active: form.is_active,
-    }),
-    onSuccess: () => {
-      setError(null);
-      setShowEdit(false);
-      queryClient.invalidateQueries({ queryKey: ['llm-resources'] });
+      setShowDialog(false);
+      setEditId(null);
+      queryClient.invalidateQueries({ queryKey: ['resources'] });
     },
     onError: (cause) => {
       setError(cause instanceof ApiError ? cause.message : t('errors.generic'));
@@ -106,140 +178,41 @@ export default function LlmResourcesPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: string) => apiClient.llmResources.delete(session!, id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['llm-resources'] });
-    },
+    mutationFn: (id: string) => apiClient.resources.delete(session!, id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['resources'] }),
   });
 
   const toggleMutation = useMutation({
     mutationFn: ({ id, is_active }: { id: string; is_active: boolean }) =>
-      apiClient.llmResources.update(session!, id, { is_active }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['llm-resources'] });
-    },
+      apiClient.resources.update(session!, id, { is_active }),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['resources'] }),
   });
 
   const resources = Array.isArray(listQuery.data) ? listQuery.data : [];
+  const subtypes = SUBTYPES[form.type] || [{ value: '', label: 'Nenhum' }];
 
   const openCreate = () => {
     setForm(EMPTY_FORM);
+    setEditId(null);
     setError(null);
-    setShowCreate(true);
+    setShowDialog(true);
   };
 
-  const openEdit = (resource: LlmResource) => {
-    setEditId(resource.id);
-    setForm({
-      name: resource.name,
-      provider: resource.provider,
-      model_id: resource.model_id,
-      api_key: '',
-      base_url: resource.base_url || '',
-      purpose: resource.purpose,
-      is_active: resource.is_active,
-    });
+  const openEdit = (r: Resource) => {
+    setForm(resourceToForm(r));
+    setEditId(r.id);
     setError(null);
-    setShowEdit(true);
+    setShowDialog(true);
   };
 
-  const handleDelete = (resource: LlmResource) => {
-    if (confirm(t('actions.confirmDelete'))) {
-      deleteMutation.mutate(resource.id);
-    }
+  const handleDelete = (r: Resource) => {
+    if (confirm(t('actions.confirmDelete'))) deleteMutation.mutate(r.id);
   };
 
-  const models = PROVIDER_MODELS[form.provider] || [];
+  const set = (field: keyof FormState, value: string | boolean) =>
+    setForm((p) => ({ ...p, [field]: value }));
 
-  const formFields = (
-    <div className="space-y-3">
-      <div className="grid gap-3 md:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">{t('fields.name')}</label>
-          <Input
-            placeholder={t('fields.name')}
-            value={form.name}
-            onChange={(e) => setForm((p) => ({ ...p, name: e.target.value }))}
-          />
-        </div>
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">{t('fields.provider')}</label>
-          <Select
-            value={form.provider}
-            onChange={(e) => setForm((p) => ({ ...p, provider: e.target.value, model_id: '' }))}
-          >
-            {PROVIDERS.map((p) => (
-              <option key={p} value={p}>{t(`providers.${p}`)}</option>
-            ))}
-          </Select>
-        </div>
-      </div>
-
-      <div className="grid gap-3 md:grid-cols-2">
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">{t('fields.modelId')}</label>
-          {models.length > 0 ? (
-            <Select
-              value={form.model_id}
-              onChange={(e) => setForm((p) => ({ ...p, model_id: e.target.value }))}
-            >
-              <option value="">—</option>
-              {models.map((m) => (
-                <option key={m} value={m}>{m}</option>
-              ))}
-            </Select>
-          ) : (
-            <Input
-              placeholder="model-id"
-              value={form.model_id}
-              onChange={(e) => setForm((p) => ({ ...p, model_id: e.target.value }))}
-            />
-          )}
-        </div>
-        <div>
-          <label className="mb-1 block text-xs font-medium text-slate-600">{t('fields.purpose')}</label>
-          <Select
-            value={form.purpose}
-            onChange={(e) => setForm((p) => ({ ...p, purpose: e.target.value }))}
-          >
-            {PURPOSES.map((p) => (
-              <option key={p} value={p}>{t(`purposes.${p}`)}</option>
-            ))}
-          </Select>
-        </div>
-      </div>
-
-      <div>
-        <label className="mb-1 block text-xs font-medium text-slate-600">{t('fields.apiKey')}</label>
-        <Input
-          type="password"
-          placeholder={t('fields.apiKey')}
-          value={form.api_key}
-          onChange={(e) => setForm((p) => ({ ...p, api_key: e.target.value }))}
-        />
-      </div>
-
-      <div>
-        <label className="mb-1 block text-xs font-medium text-slate-600">{t('fields.baseUrl')}</label>
-        <Input
-          placeholder="https://api.example.com/v1"
-          value={form.base_url}
-          onChange={(e) => setForm((p) => ({ ...p, base_url: e.target.value }))}
-        />
-      </div>
-
-      <label className="flex items-center gap-2 text-sm">
-        <input
-          type="checkbox"
-          checked={form.is_active}
-          onChange={(e) => setForm((p) => ({ ...p, is_active: e.target.checked }))}
-        />
-        {t('fields.active')}
-      </label>
-
-      {error && <p className="text-sm text-red-600">{error}</p>}
-    </div>
-  );
+  const typeLabel = (type: string) => TYPES.find((t) => t.value === type)?.label || type;
 
   return (
     <PermissionGate permission="llm_resource.read">
@@ -254,74 +227,140 @@ export default function LlmResourcesPage() {
             <p className="py-8 text-center text-sm text-slate-400">{t('empty')}</p>
           ) : (
             <Table
-              headers={[
-                t('table.name'),
-                t('table.provider'),
-                t('table.model'),
-                t('table.purpose'),
-                t('table.status'),
-                t('table.actions'),
-              ]}
+              headers={['Nome', 'Tipo', 'Endpoint', 'Ambiente', 'Status', 'Ações']}
               rows={resources.map((r) => [
                 <span key={`n-${r.id}`} className="font-medium">{r.name}</span>,
-                <Badge key={`p-${r.id}`} tone="neutral">{t(`providers.${r.provider}`)}</Badge>,
-                <code key={`m-${r.id}`} className="text-xs">{r.model_id}</code>,
-                t(`purposes.${r.purpose}`),
-                <button
-                  key={`s-${r.id}`}
-                  onClick={() => toggleMutation.mutate({ id: r.id, is_active: !r.is_active })}
-                  className="cursor-pointer"
-                >
-                  <Badge tone={r.is_active ? 'success' : 'danger'}>
-                    {r.is_active ? 'Ativo' : 'Inativo'}
-                  </Badge>
+                <Badge key={`t-${r.id}`} tone="neutral">{typeLabel(r.type)}</Badge>,
+                <code key={`e-${r.id}`} className="truncate text-xs">{r.endpoint_url || '—'}</code>,
+                <Badge key={`env-${r.id}`} tone={r.environment === 'production' ? 'success' : 'warning'}>
+                  {ENVIRONMENTS.find((e) => e.value === r.environment)?.label || r.environment}
+                </Badge>,
+                <button key={`s-${r.id}`} onClick={() => toggleMutation.mutate({ id: r.id, is_active: !r.is_active })} className="cursor-pointer">
+                  <Badge tone={r.is_active ? 'success' : 'danger'}>{r.is_active ? 'Ativo' : 'Inativo'}</Badge>
                 </button>,
                 <div key={`a-${r.id}`} className="flex gap-1">
-                  <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => openEdit(r)}>
-                    {t('actions.edit')}
-                  </Button>
-                  <Button variant="ghost" className="h-7 px-2 text-xs text-red-600" onClick={() => handleDelete(r)}>
-                    {t('actions.delete')}
-                  </Button>
+                  <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => openEdit(r)}>Editar</Button>
+                  <Button variant="ghost" className="h-7 px-2 text-xs text-red-600" onClick={() => handleDelete(r)}>Excluir</Button>
                 </div>,
               ])}
             />
           )}
         </Card>
 
-        {/* Create Dialog */}
-        <Dialog open={showCreate} onOpenChange={setShowCreate}>
+        {/* Create / Edit Dialog */}
+        <Dialog open={showDialog} onOpenChange={setShowDialog}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{t('createTitle')}</DialogTitle>
+              <DialogTitle>{editId ? 'Editar Resource' : 'Adicionar Resource'}</DialogTitle>
             </DialogHeader>
-            {formFields}
-            <DialogFooter>
-              <Button variant="ghost" onClick={() => setShowCreate(false)}>{t('actions.cancel')}</Button>
-              <Button
-                onClick={() => createMutation.mutate()}
-                disabled={!form.name || !form.model_id || createMutation.isPending}
-              >
-                {t('actions.create')}
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
 
-        {/* Edit Dialog */}
-        <Dialog open={showEdit} onOpenChange={setShowEdit}>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t('editTitle')}</DialogTitle>
-            </DialogHeader>
-            {formFields}
+            <div className="max-h-[70vh] space-y-4 overflow-y-auto pr-1">
+              {/* Name */}
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-600">Nome do Resource <span className="text-red-500">*</span></label>
+                <Input placeholder="Ex: OpenAI API" value={form.name} onChange={(e) => set('name', e.target.value)} />
+              </div>
+
+              {/* Type + Subtype */}
+              <div className="grid gap-3 md:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-600">Tipo</label>
+                  <Select value={form.type} onChange={(e) => setForm((p) => ({ ...p, type: e.target.value, subtype: '' }))}>
+                    {TYPES.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </Select>
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-600">Subtipo</label>
+                  <Select value={form.subtype} onChange={(e) => set('subtype', e.target.value)}>
+                    {subtypes.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+                  </Select>
+                </div>
+              </div>
+
+              {/* Endpoint + Method */}
+              <div className="grid gap-3 md:grid-cols-[1fr_120px]">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-600">Endpoint/URL <span className="text-red-500">*</span></label>
+                  <Input placeholder="https://api.openai.com/v1/chat/completions" value={form.endpoint_url} onChange={(e) => set('endpoint_url', e.target.value)} />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-600">Método HTTP</label>
+                  <Select value={form.http_method} onChange={(e) => set('http_method', e.target.value)}>
+                    {METHODS.map((m) => <option key={m} value={m}>{m}</option>)}
+                  </Select>
+                </div>
+              </div>
+
+              {/* Auth Mode */}
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-600">Modo de Autenticação</label>
+                <Select value={form.auth_mode} onChange={(e) => set('auth_mode', e.target.value)}>
+                  {AUTH_MODES.map((a) => <option key={a.value} value={a.value}>{a.label}</option>)}
+                </Select>
+              </div>
+
+              {/* Auth Config - show only when auth is not none */}
+              {form.auth_mode !== 'none' && (
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-600">Auth Config (JSON)</label>
+                  <Textarea rows={3} className="font-mono text-xs" value={form.auth_config} onChange={(e) => set('auth_config', e.target.value)} />
+                </div>
+              )}
+
+              {/* Connection JSON */}
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-600">Connection (JSON)</label>
+                <Textarea rows={4} className="font-mono text-xs" value={form.connection_json} onChange={(e) => set('connection_json', e.target.value)} />
+                <p className="mt-1 text-xs text-slate-400">Informe host/porta/usuário/senha/database ou uma connectionString</p>
+              </div>
+
+              {/* Configuration JSON */}
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-600">Configuration (JSON)</label>
+                <Textarea rows={3} className="font-mono text-xs" value={form.config_json} onChange={(e) => set('config_json', e.target.value)} />
+              </div>
+
+              {/* Metadata JSON */}
+              <div>
+                <label className="mb-1 block text-xs font-semibold text-slate-600">Metadata (JSON)</label>
+                <Textarea rows={4} className="font-mono text-xs" value={form.metadata_json} onChange={(e) => set('metadata_json', e.target.value)} />
+              </div>
+
+              {/* Tags + Environment */}
+              <div className="grid gap-3 md:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-600">Tags</label>
+                  <Input placeholder="tag1, tag2, tag3" value={form.tags} onChange={(e) => set('tags', e.target.value)} />
+                </div>
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-600">Ambiente</label>
+                  <Select value={form.environment} onChange={(e) => set('environment', e.target.value)}>
+                    {ENVIRONMENTS.map((env) => <option key={env.value} value={env.value}>{env.label}</option>)}
+                  </Select>
+                </div>
+              </div>
+
+              {/* Active toggle */}
+              <label className="flex items-center gap-2 text-sm font-medium">
+                Ativo
+                <div
+                  className={`relative inline-flex h-6 w-11 cursor-pointer items-center rounded-full transition-colors ${form.is_active ? 'bg-primary' : 'bg-slate-300'}`}
+                  onClick={() => set('is_active', !form.is_active)}
+                >
+                  <span className={`inline-block h-4 w-4 rounded-full bg-white transition-transform ${form.is_active ? 'translate-x-6' : 'translate-x-1'}`} />
+                </div>
+              </label>
+
+              {error && <p className="text-sm text-red-600">{error}</p>}
+            </div>
+
             <DialogFooter>
-              <Button variant="ghost" onClick={() => setShowEdit(false)}>{t('actions.cancel')}</Button>
+              <Button variant="ghost" onClick={() => setShowDialog(false)}>Cancelar</Button>
               <Button
-                onClick={() => editMutation.mutate()}
-                disabled={!form.name || !form.model_id || editMutation.isPending}
+                onClick={() => saveMutation.mutate()}
+                disabled={!form.name || saveMutation.isPending}
               >
-                {t('actions.save')}
+                {editId ? 'Salvar' : 'Adicionar'}
               </Button>
             </DialogFooter>
           </DialogContent>

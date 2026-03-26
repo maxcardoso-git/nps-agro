@@ -180,6 +180,26 @@ export interface TenantUser {
   updated_at?: string;
 }
 
+export interface Resource {
+  id: string;
+  tenant_id: string;
+  name: string;
+  type: 'api_http' | 'database' | 'mcp_server' | 'llm' | 'queue' | 'storage' | 'custom';
+  subtype: string | null;
+  endpoint_url: string | null;
+  http_method: string;
+  auth_mode: 'none' | 'bearer' | 'api_key' | 'basic' | 'oauth2' | 'custom';
+  auth_config: Record<string, unknown>;
+  connection_json: Record<string, unknown>;
+  config_json: Record<string, unknown>;
+  metadata_json: Record<string, unknown>;
+  tags: string[];
+  environment: 'production' | 'staging' | 'development';
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface LlmResource {
   id: string;
   tenant_id: string;

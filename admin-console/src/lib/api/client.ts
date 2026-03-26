@@ -7,6 +7,7 @@ import type {
   ExecutiveSummary,
   LlmResource,
   NextQuestionResponse,
+  Resource,
   PaginatedResponse,
   Questionnaire,
   QuestionnaireVersion,
@@ -435,6 +436,23 @@ export const apiClient = {
         session
       );
     }
+  },
+  resources: {
+    list: async (session: AuthSession, type?: string): Promise<Resource[]> => {
+      return request<Resource[]>(`/resources${toQueryString({ type })}`, { method: 'GET' }, session);
+    },
+    getById: async (session: AuthSession, id: string): Promise<Resource> => {
+      return request<Resource>(`/resources/${id}`, { method: 'GET' }, session);
+    },
+    create: async (session: AuthSession, payload: Partial<Resource>): Promise<Resource> => {
+      return request<Resource>('/resources', { method: 'POST', body: JSON.stringify(payload) }, session);
+    },
+    update: async (session: AuthSession, id: string, payload: Partial<Resource>): Promise<Resource> => {
+      return request<Resource>(`/resources/${id}`, { method: 'PATCH', body: JSON.stringify(payload) }, session);
+    },
+    delete: async (session: AuthSession, id: string): Promise<void> => {
+      return request<void>(`/resources/${id}`, { method: 'DELETE' }, session);
+    },
   },
   llmResources: {
     list: async (session: AuthSession): Promise<LlmResource[]> => {

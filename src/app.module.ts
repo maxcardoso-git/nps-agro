@@ -18,6 +18,7 @@ import { CampaignActionModule } from './modules/campaign-action/campaign-action.
 import { ContactAttemptModule } from './modules/contact-attempt/contact-attempt.module';
 import { EnrichmentModule } from './modules/enrichment/enrichment.module';
 import { LlmResourceModule } from './modules/llm-resource/llm-resource.module';
+import { ResourceModule } from './modules/resource/resource.module';
 import { SurveyModule } from './survey/survey.module';
 
 @Module({
@@ -41,6 +42,7 @@ import { SurveyModule } from './survey/survey.module';
     ContactAttemptModule,
     EnrichmentModule,
     LlmResourceModule,
+    ResourceModule,
     HealthModule,
     SurveyModule,
   ],
