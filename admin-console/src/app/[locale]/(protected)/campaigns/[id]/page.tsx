@@ -31,7 +31,7 @@ export default function CampaignDetailPage() {
   const [importActionId, setImportActionId] = useState<string | null>(null);
   const [importResult, setImportResult] = useState<string | null>(null);
   const [editingActionId, setEditingActionId] = useState<string | null>(null);
-  const [actionForm, setActionForm] = useState({ name: '', questionnaire_version_id: '', description: '' });
+  const [actionForm, setActionForm] = useState({ name: '', questionnaire_version_id: '', description: '', tipo_persona: '', cluster: '', bu: '', gt: '' });
   const [campaignForm, setCampaignForm] = useState({ name: '', description: '', segment: '', start_date: '', end_date: '' });
   const [error, setError] = useState<string | null>(null);
 
@@ -88,10 +88,14 @@ export default function CampaignDetailPage() {
         name: actionForm.name,
         description: actionForm.description || undefined,
         questionnaire_version_id: actionForm.questionnaire_version_id,
-      }),
+        tipo_persona: actionForm.tipo_persona || undefined,
+        cluster: actionForm.cluster || undefined,
+        bu: actionForm.bu || undefined,
+        gt: actionForm.gt || undefined,
+      } as Record<string, unknown>),
     onSuccess: () => {
       setShowCreate(false);
-      setActionForm({ name: '', questionnaire_version_id: '', description: '' });
+      setActionForm({ name: '', questionnaire_version_id: '', description: '', tipo_persona: '', cluster: '', bu: '', gt: '' });
       setError(null);
       queryClient.invalidateQueries({ queryKey: ['campaign-actions', campaignId] });
     },
@@ -115,6 +119,10 @@ export default function CampaignDetailPage() {
       const payload: Record<string, unknown> = {
         name: actionForm.name,
         description: actionForm.description || undefined,
+        tipo_persona: actionForm.tipo_persona || undefined,
+        cluster: actionForm.cluster || undefined,
+        bu: actionForm.bu || undefined,
+        gt: actionForm.gt || undefined,
       };
       if (actionForm.questionnaire_version_id) {
         payload.questionnaire_version_id = actionForm.questionnaire_version_id;
@@ -126,7 +134,7 @@ export default function CampaignDetailPage() {
     onSuccess: () => {
       setShowEdit(false);
       setEditingActionId(null);
-      setActionForm({ name: '', questionnaire_version_id: '', description: '' });
+      setActionForm({ name: '', questionnaire_version_id: '', description: '', tipo_persona: '', cluster: '', bu: '', gt: '' });
       setError(null);
       queryClient.invalidateQueries({ queryKey: ['campaign-actions', campaignId] });
     },
@@ -167,12 +175,16 @@ export default function CampaignDetailPage() {
     setShowEditCampaign(true);
   };
 
-  const openEdit = async (a: { id: string; name: string; description: string | null; questionnaire_version_id?: string }) => {
+  const openEdit = async (a: { id: string; name: string; description: string | null; questionnaire_version_id?: string; tipo_persona?: string; cluster?: string; bu?: string; gt?: string }) => {
     setEditingActionId(a.id);
     setActionForm({
       name: a.name,
       description: a.description || '',
       questionnaire_version_id: a.questionnaire_version_id || '',
+      tipo_persona: a.tipo_persona || '',
+      cluster: a.cluster || '',
+      bu: a.bu || '',
+      gt: a.gt || '',
     });
     setError(null);
     // Load current interviewers
@@ -317,6 +329,12 @@ export default function CampaignDetailPage() {
                   </option>
                 ))}
               </Select>
+              <div className="grid gap-3 md:grid-cols-2">
+                <Input placeholder="Tipo Persona" value={actionForm.tipo_persona} onChange={(e) => setActionForm((p) => ({ ...p, tipo_persona: e.target.value }))} />
+                <Input placeholder="Cluster" value={actionForm.cluster} onChange={(e) => setActionForm((p) => ({ ...p, cluster: e.target.value }))} />
+                <Input placeholder="BU (Business Unit)" value={actionForm.bu} onChange={(e) => setActionForm((p) => ({ ...p, bu: e.target.value }))} />
+                <Input placeholder="GT (Gerência Territorial)" value={actionForm.gt} onChange={(e) => setActionForm((p) => ({ ...p, gt: e.target.value }))} />
+              </div>
               {error && <p className="text-sm text-red-600">{error}</p>}
             </div>
             <DialogFooter>
@@ -356,6 +374,12 @@ export default function CampaignDetailPage() {
                   <option key={v.id} value={v.id}>{v.label}</option>
                 ))}
               </Select>
+              <div className="grid gap-3 md:grid-cols-2">
+                <Input placeholder="Tipo Persona" value={actionForm.tipo_persona} onChange={(e) => setActionForm((p) => ({ ...p, tipo_persona: e.target.value }))} />
+                <Input placeholder="Cluster" value={actionForm.cluster} onChange={(e) => setActionForm((p) => ({ ...p, cluster: e.target.value }))} />
+                <Input placeholder="BU (Business Unit)" value={actionForm.bu} onChange={(e) => setActionForm((p) => ({ ...p, bu: e.target.value }))} />
+                <Input placeholder="GT (Gerência Territorial)" value={actionForm.gt} onChange={(e) => setActionForm((p) => ({ ...p, gt: e.target.value }))} />
+              </div>
               {/* Interviewers */}
               <div>
                 <p className="mb-1 text-xs font-medium text-slate-600">{t('interviewers')}</p>

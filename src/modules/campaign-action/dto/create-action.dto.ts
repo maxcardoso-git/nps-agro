@@ -18,4 +18,20 @@ export class CreateActionDto {
   @IsOptional()
   @IsDateString()
   end_date?: string;
+
+  @IsOptional()
+  @IsString()
+  tipo_persona?: string;
+
+  @IsOptional()
+  @IsString()
+  cluster?: string;
+
+  @IsOptional()
+  @IsString()
+  bu?: string;
+
+  @IsOptional()
+  @IsString()
+  gt?: string;
 }

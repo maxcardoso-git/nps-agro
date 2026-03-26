@@ -18,6 +18,10 @@ export class CampaignActionService {
       questionnaire_version_id: dto.questionnaire_version_id,
       start_date: dto.start_date,
       end_date: dto.end_date,
+      tipo_persona: dto.tipo_persona,
+      cluster: dto.cluster,
+      bu: dto.bu,
+      gt: dto.gt,
     });
     if (!action) {
       throw new DomainException('ACTION_NOT_CREATED', 'Could not create action', HttpStatus.INTERNAL_SERVER_ERROR);

@@ -12,6 +12,10 @@ export interface ActionRow {
   status: string;
   start_date: string | null;
   end_date: string | null;
+  tipo_persona: string | null;
+  cluster: string | null;
+  bu: string | null;
+  gt: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -36,11 +40,15 @@ export class CampaignActionRepository extends SqlRepositoryBase {
     questionnaire_version_id: string;
     start_date?: string;
     end_date?: string;
+    tipo_persona?: string;
+    cluster?: string;
+    bu?: string;
+    gt?: string;
   }): Promise<ActionRow | null> {
     return this.one<ActionRow>(
       `INSERT INTO core.campaign_action
-       (tenant_id, campaign_id, name, description, questionnaire_version_id, start_date, end_date)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+       (tenant_id, campaign_id, name, description, questionnaire_version_id, start_date, end_date, tipo_persona, cluster, bu, gt)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
        RETURNING *`,
       [
         params.tenant_id,
@@ -50,6 +58,10 @@ export class CampaignActionRepository extends SqlRepositoryBase {
         params.questionnaire_version_id,
         params.start_date ?? null,
         params.end_date ?? null,
+        params.tipo_persona ?? null,
+        params.cluster ?? null,
+        params.bu ?? null,
+        params.gt ?? null,
       ],
     );
   }
@@ -83,7 +95,7 @@ export class CampaignActionRepository extends SqlRepositoryBase {
     const values: unknown[] = [];
     let idx = 1;
 
-    const allowed = ['name', 'description', 'questionnaire_version_id', 'status', 'start_date', 'end_date'];
+    const allowed = ['name', 'description', 'questionnaire_version_id', 'status', 'start_date', 'end_date', 'tipo_persona', 'cluster', 'bu', 'gt'];
     for (const key of allowed) {
       if (params[key] !== undefined) {
         values.push(params[key]);
