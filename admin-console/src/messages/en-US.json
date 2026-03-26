@@ -12,6 +12,7 @@
       "tenants": "Tenants",
       "users": "Users",
       "accounts": "Accounts",
+      "llmResources": "LLM Resources",
       "branding": "Branding"
     },
     "branding": {
@@ -367,6 +368,56 @@
       "clone": "Clone",
       "copy": "copy",
       "cloneError": "Could not clone questionnaire"
+    }
+  },
+  "llmResource": {
+    "title": "LLM Resources",
+    "createTitle": "Add LLM resource",
+    "editTitle": "Edit LLM resource",
+    "listTitle": "Configured models",
+    "empty": "No LLM resources found",
+    "fields": {
+      "name": "Name",
+      "provider": "Provider",
+      "modelId": "Model",
+      "apiKey": "API Key",
+      "baseUrl": "Base URL (optional)",
+      "purpose": "Purpose",
+      "active": "Active"
+    },
+    "providers": {
+      "openai": "OpenAI",
+      "anthropic": "Anthropic",
+      "google": "Google",
+      "azure": "Azure OpenAI",
+      "ollama": "Ollama",
+      "custom": "Custom"
+    },
+    "purposes": {
+      "general": "General",
+      "enrichment": "NPS Enrichment",
+      "chat": "AI Chat",
+      "embeddings": "Embeddings",
+      "transcription": "Transcription"
+    },
+    "actions": {
+      "create": "Add",
+      "edit": "Edit",
+      "save": "Save",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "confirmDelete": "Are you sure you want to delete this resource?"
+    },
+    "table": {
+      "name": "Name",
+      "provider": "Provider",
+      "model": "Model",
+      "purpose": "Purpose",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "errors": {
+      "generic": "Failed to process LLM resource"
     }
   },
   "errors": {

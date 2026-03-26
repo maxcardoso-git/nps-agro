@@ -12,6 +12,7 @@
       "tenants": "Tenants",
       "users": "Usuarios",
       "accounts": "Cuentas",
+      "llmResources": "Recursos LLM",
       "branding": "Branding"
     },
     "branding": {
@@ -367,6 +368,56 @@
       "clone": "Clonar",
       "copy": "copia",
       "cloneError": "No se pudo clonar el cuestionario"
+    }
+  },
+  "llmResource": {
+    "title": "Recursos LLM",
+    "createTitle": "Agregar recurso LLM",
+    "editTitle": "Editar recurso LLM",
+    "listTitle": "Modelos configurados",
+    "empty": "No se encontraron recursos LLM",
+    "fields": {
+      "name": "Nombre",
+      "provider": "Proveedor",
+      "modelId": "Modelo",
+      "apiKey": "API Key",
+      "baseUrl": "URL base (opcional)",
+      "purpose": "Finalidad",
+      "active": "Activo"
+    },
+    "providers": {
+      "openai": "OpenAI",
+      "anthropic": "Anthropic",
+      "google": "Google",
+      "azure": "Azure OpenAI",
+      "ollama": "Ollama",
+      "custom": "Custom"
+    },
+    "purposes": {
+      "general": "General",
+      "enrichment": "Enriquecimiento NPS",
+      "chat": "Chat IA",
+      "embeddings": "Embeddings",
+      "transcription": "Transcripción"
+    },
+    "actions": {
+      "create": "Agregar",
+      "edit": "Editar",
+      "save": "Guardar",
+      "cancel": "Cancelar",
+      "delete": "Eliminar",
+      "confirmDelete": "¿Estás seguro de que deseas eliminar este recurso?"
+    },
+    "table": {
+      "name": "Nombre",
+      "provider": "Proveedor",
+      "model": "Modelo",
+      "purpose": "Finalidad",
+      "status": "Estado",
+      "actions": "Acciones"
+    },
+    "errors": {
+      "generic": "No se pudo procesar el recurso LLM"
     }
   },
   "errors": {

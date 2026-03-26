@@ -8,7 +8,6 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Select } from '@/components/ui/select';
 import { InsightCard } from '@/components/analytics/insight-card';
-import { InterviewTable } from '@/components/analytics/interview-table';
 import { useRequiredSession } from '@/hooks/use-required-session';
 import { apiClient } from '@/lib/api/client';
 import { extractItems } from '@/lib/api/helpers';
@@ -277,20 +276,6 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Interviews table */}
-          <InterviewTable
-            title={t('interviews.title')}
-            interviews={filteredInterviews.slice(0, 20)}
-            emptyLabel={t('interviews.empty')}
-            labels={{
-              id: t('interviews.table.id'),
-              respondent: t('interviews.table.respondent'),
-              region: t('interviews.table.region'),
-              nps: t('interviews.table.nps'),
-              sentiment: t('interviews.table.sentiment'),
-              status: t('interviews.table.status'),
-            }}
-          />
         </>
       ) : (
         <Card>

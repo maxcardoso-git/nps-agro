@@ -180,6 +180,21 @@ export interface TenantUser {
   updated_at?: string;
 }
 
+export interface LlmResource {
+  id: string;
+  tenant_id: string;
+  name: string;
+  provider: 'openai' | 'anthropic' | 'google' | 'azure' | 'ollama' | 'custom';
+  model_id: string;
+  api_key?: string | null;
+  base_url?: string | null;
+  purpose: 'general' | 'enrichment' | 'chat' | 'embeddings' | 'transcription';
+  config_json: Record<string, unknown>;
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface StartInterviewRequest {
   tenant_id: string;
   campaign_id: string;

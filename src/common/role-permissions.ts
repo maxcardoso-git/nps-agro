@@ -16,6 +16,10 @@ export const ROLE_PERMISSIONS: Record<PlatformRole, string[]> = {
     'questionnaire.update',
     'questionnaire.publish',
     'report.read',
+    'llm_resource.create',
+    'llm_resource.read',
+    'llm_resource.update',
+    'llm_resource.delete',
   ],
   tenant_admin: [
     'tenant.read.self',
@@ -30,6 +34,10 @@ export const ROLE_PERMISSIONS: Record<PlatformRole, string[]> = {
     'questionnaire.update.self',
     'questionnaire.publish.self',
     'report.read.self',
+    'llm_resource.create.self',
+    'llm_resource.read.self',
+    'llm_resource.update.self',
+    'llm_resource.delete.self',
   ],
   campaign_manager: [
     'campaign.read.self',

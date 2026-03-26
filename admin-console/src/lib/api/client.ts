@@ -5,6 +5,7 @@ import type {
   AuthSession,
   Campaign,
   ExecutiveSummary,
+  LlmResource,
   NextQuestionResponse,
   PaginatedResponse,
   Questionnaire,
@@ -434,6 +435,31 @@ export const apiClient = {
         session
       );
     }
+  },
+  llmResources: {
+    list: async (session: AuthSession): Promise<LlmResource[]> => {
+      return request<LlmResource[]>('/llm-resources', { method: 'GET' }, session);
+    },
+    getById: async (session: AuthSession, id: string): Promise<LlmResource> => {
+      return request<LlmResource>(`/llm-resources/${id}`, { method: 'GET' }, session);
+    },
+    create: async (session: AuthSession, payload: Partial<LlmResource>): Promise<LlmResource> => {
+      return request<LlmResource>(
+        '/llm-resources',
+        { method: 'POST', body: JSON.stringify(payload) },
+        session
+      );
+    },
+    update: async (session: AuthSession, id: string, payload: Partial<LlmResource>): Promise<LlmResource> => {
+      return request<LlmResource>(
+        `/llm-resources/${id}`,
+        { method: 'PATCH', body: JSON.stringify(payload) },
+        session
+      );
+    },
+    delete: async (session: AuthSession, id: string): Promise<void> => {
+      return request<void>(`/llm-resources/${id}`, { method: 'DELETE' }, session);
+    },
   },
   interviews: {
     start: async (session: AuthSession, payload: StartInterviewRequest): Promise<StartInterviewResponse> => {
