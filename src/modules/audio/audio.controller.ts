@@ -16,7 +16,7 @@ export class AudioController {
     @Param('id') interviewId: string,
     @CurrentUser() user: AuthUserClaims,
     @EffectiveTenantId() tenantId: string,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: { buffer: Buffer; originalname: string; mimetype: string; size: number },
   ) {
     return this.audioService.uploadAudio(interviewId, tenantId, {
       buffer: file.buffer,
