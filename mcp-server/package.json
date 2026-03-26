@@ -1,0 +1,21 @@
+{
+  "name": "nps-agro-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP Server for NPS Agro interview research tools",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "pg": "^8.13.3",
+    "zod": "^3.24.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.3",
+    "@types/pg": "^8.11.13",
+    "typescript": "^5.8.3"
+  }
+}
