@@ -92,7 +92,7 @@ export default function CampaignDetailPage() {
         cluster: actionForm.cluster || undefined,
         bu: actionForm.bu || undefined,
         gt: actionForm.gt || undefined,
-      } as Record<string, unknown>),
+      }),
     onSuccess: () => {
       setShowCreate(false);
       setActionForm({ name: '', questionnaire_version_id: '', description: '', tipo_persona: '', cluster: '', bu: '', gt: '' });

@@ -362,7 +362,7 @@ export const apiClient = {
     list: async (session: AuthSession, campaignId: string) => {
       return request<unknown[]>(`/campaigns/${campaignId}/actions`, { method: 'GET' }, session);
     },
-    create: async (session: AuthSession, campaignId: string, payload: { name: string; description?: string; questionnaire_version_id: string; start_date?: string; end_date?: string }) => {
+    create: async (session: AuthSession, campaignId: string, payload: { name: string; description?: string; questionnaire_version_id: string; start_date?: string; end_date?: string; tipo_persona?: string; cluster?: string; bu?: string; gt?: string }) => {
       return request<unknown>(`/campaigns/${campaignId}/actions`, { method: 'POST', body: JSON.stringify(payload) }, session);
     },
     update: async (session: AuthSession, campaignId: string, actionId: string, payload: Record<string, unknown>) => {
