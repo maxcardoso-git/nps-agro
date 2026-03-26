@@ -44,6 +44,8 @@ export default function ActionContactsPage() {
   const [notes, setNotes] = useState('');
   const [scheduledAt, setScheduledAt] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
 
   const respondentsQuery = useQuery({
     queryKey: ['action-respondents', actionId, search, statusFilter],
@@ -144,6 +146,26 @@ export default function ActionContactsPage() {
     setShowModal(true);
   };
 
+  const handleUploadAudio = async (respondent: RespondentWithStatus, file: File) => {
+    try {
+      setUploadingId(respondent.id);
+      setUploadSuccess(null);
+      // Find interview for this respondent
+      const active = await api.interviews.findActive(session!, respondent.campaign_id, respondent.id);
+      if (!active) {
+        setError('Nenhuma entrevista encontrada para este contato');
+        return;
+      }
+      await api.interviews.uploadAudio(session!, active.id, file);
+      setUploadSuccess(respondent.id);
+      setTimeout(() => setUploadSuccess(null), 3000);
+    } catch (cause) {
+      setError(cause instanceof ApiError ? cause.message : 'Erro no upload do áudio');
+    } finally {
+      setUploadingId(null);
+    }
+  };
+
   const handleResume = async (respondent: RespondentWithStatus) => {
     const active = await api.interviews.findActive(session!, respondent.campaign_id, respondent.id);
     if (active) {
@@ -209,7 +231,7 @@ export default function ActionContactsPage() {
             <Badge key={`s-${r.id}`} tone={STATUS_TONES[r.contact_status] ?? 'neutral'}>
               {t(`status.${r.contact_status}`)}
             </Badge>,
-            <div key={`a-${r.id}`} className="flex gap-1">
+            <div key={`a-${r.id}`} className="flex items-center gap-1">
               {r.contact_status === 'in_progress' ? (
                 <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => handleResume(r)}>
                   {t('resume')}
@@ -219,6 +241,24 @@ export default function ActionContactsPage() {
                   {t('contact')}
                 </Button>
               ) : null}
+              {(r.contact_status === 'completed' || r.contact_status === 'in_progress') && (
+                <>
+                  <label className={`cursor-pointer rounded px-2 py-1 text-xs font-medium transition ${uploadSuccess === r.id ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
+                    {uploadingId === r.id ? '...' : uploadSuccess === r.id ? '✓' : '🎤'}
+                    <input
+                      type="file"
+                      accept="audio/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadAudio(r, file);
+                        e.target.value = '';
+                      }}
+                      disabled={uploadingId === r.id}
+                    />
+                  </label>
+                </>
+              )}
             </div>,
           ])}
         />

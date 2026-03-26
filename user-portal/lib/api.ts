@@ -308,6 +308,28 @@ export const api = {
         { method: 'POST', body: JSON.stringify({ tenant_id: tenantId }) },
         session
       );
+    },
+    uploadAudio: async (
+      session: AuthSession,
+      interviewId: string,
+      file: File
+    ): Promise<{ id: string; file_name: string; file_url: string }> => {
+      const formData = new FormData();
+      formData.append('file', file);
+      const headers: Record<string, string> = {
+        'Authorization': `Bearer ${session.access_token}`,
+        'x-tenant-id': session.user.tenant_id,
+      };
+      const response = await fetch(`${API_BASE_URL}/interviews/${interviewId}/audio`, {
+        method: 'POST',
+        headers,
+        body: formData,
+      });
+      if (!response.ok) {
+        throw new ApiError('Upload failed', 'UPLOAD_ERROR', response.status);
+      }
+      const body = await response.json();
+      return unwrapEnvelope<{ id: string; file_name: string; file_url: string }>(body);
     }
   }
 };
