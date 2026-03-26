@@ -299,8 +299,73 @@ export default function ResourcesPage() {
                 </Select>
               </div>
 
-              {/* Auth Config - show only when auth is not none */}
-              {form.auth_mode !== 'none' && (
+              {/* Auth fields - specific per mode */}
+              {form.auth_mode === 'bearer' && (
+                <div>
+                  <label className="mb-1 block text-xs font-semibold text-slate-600">Bearer Token <span className="text-red-500">*</span></label>
+                  <Input
+                    type="password"
+                    placeholder="sk-... ou token de acesso"
+                    value={(safeParseJson(form.auth_config) as Record<string, string>)?.token || ''}
+                    onChange={(e) => set('auth_config', JSON.stringify({ token: e.target.value }))}
+                  />
+                </div>
+              )}
+              {form.auth_mode === 'api_key' && (
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-slate-600">Header Name</label>
+                    <Input
+                      placeholder="X-API-Key"
+                      value={(safeParseJson(form.auth_config) as Record<string, string>)?.header_name || ''}
+                      onChange={(e) => {
+                        const current = safeParseJson(form.auth_config) || {};
+                        set('auth_config', JSON.stringify({ ...current, header_name: e.target.value }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-slate-600">API Key <span className="text-red-500">*</span></label>
+                    <Input
+                      type="password"
+                      placeholder="Chave de API"
+                      value={(safeParseJson(form.auth_config) as Record<string, string>)?.api_key || ''}
+                      onChange={(e) => {
+                        const current = safeParseJson(form.auth_config) || {};
+                        set('auth_config', JSON.stringify({ ...current, api_key: e.target.value }));
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+              {form.auth_mode === 'basic' && (
+                <div className="grid gap-3 md:grid-cols-2">
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-slate-600">Usuário</label>
+                    <Input
+                      placeholder="username"
+                      value={(safeParseJson(form.auth_config) as Record<string, string>)?.username || ''}
+                      onChange={(e) => {
+                        const current = safeParseJson(form.auth_config) || {};
+                        set('auth_config', JSON.stringify({ ...current, username: e.target.value }));
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-xs font-semibold text-slate-600">Senha</label>
+                    <Input
+                      type="password"
+                      placeholder="password"
+                      value={(safeParseJson(form.auth_config) as Record<string, string>)?.password || ''}
+                      onChange={(e) => {
+                        const current = safeParseJson(form.auth_config) || {};
+                        set('auth_config', JSON.stringify({ ...current, password: e.target.value }));
+                      }}
+                    />
+                  </div>
+                </div>
+              )}
+              {(form.auth_mode === 'oauth2' || form.auth_mode === 'custom') && (
                 <div>
                   <label className="mb-1 block text-xs font-semibold text-slate-600">Auth Config (JSON)</label>
                   <Textarea rows={3} className="font-mono text-xs" value={form.auth_config} onChange={(e) => set('auth_config', e.target.value)} />
