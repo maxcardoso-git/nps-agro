@@ -24,6 +24,7 @@ RUN mkdir -p ./public
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
 ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
   CMD wget -qO- http://localhost:3000 || exit 1
