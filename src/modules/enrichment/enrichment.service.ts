@@ -143,14 +143,16 @@ export class EnrichmentService {
       throw new Error(`LLM API error ${response.status}: ${errorText}`);
     }
 
-    const data = await response.json();
+    const data = await response.json() as Record<string, unknown>;
 
     // Extract text content from response
     let textContent: string;
     if (llm.provider === 'anthropic') {
-      textContent = data.content?.[0]?.text ?? '';
+      const content = data.content as Array<{ text?: string }> | undefined;
+      textContent = content?.[0]?.text ?? '';
     } else {
-      textContent = data.choices?.[0]?.message?.content ?? '';
+      const choices = data.choices as Array<{ message?: { content?: string } }> | undefined;
+      textContent = choices?.[0]?.message?.content ?? '';
     }
 
     return this.parseLlmResponse(textContent);
