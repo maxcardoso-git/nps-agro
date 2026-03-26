@@ -16,6 +16,7 @@ import { TenantUserModule } from './modules/tenant-user/tenant-user.module';
 import { AccountModule } from './modules/account/account.module';
 import { CampaignActionModule } from './modules/campaign-action/campaign-action.module';
 import { ContactAttemptModule } from './modules/contact-attempt/contact-attempt.module';
+import { AudioModule } from './modules/audio/audio.module';
 import { EnrichmentModule } from './modules/enrichment/enrichment.module';
 import { LlmResourceModule } from './modules/llm-resource/llm-resource.module';
 import { ResourceModule } from './modules/resource/resource.module';
@@ -40,6 +41,7 @@ import { SurveyModule } from './survey/survey.module';
     AccountModule,
     CampaignActionModule,
     ContactAttemptModule,
+    AudioModule,
     EnrichmentModule,
     LlmResourceModule,
     ResourceModule,
