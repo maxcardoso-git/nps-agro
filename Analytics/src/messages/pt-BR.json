@@ -8,7 +8,8 @@
       "campaignAnalytics": "Campanhas",
       "segmentAnalytics": "Por Segmento",
       "accountAnalytics": "Por Conta",
-      "interviewExplorer": "Entrevistas"
+      "interviewExplorer": "Entrevistas",
+      "operations": "Operacional"
     },
     "restricted": {
       "title": "Acesso não permitido",

@@ -32,6 +32,18 @@ export class ReportingController {
     return this.reportingService.getNpsByAccount(user, campaignId);
   }
 
+  @Get('execution-stats')
+  @Permissions('report.read')
+  getExecutionStats(@CurrentUser() user: AuthUserClaims, @Query('campaign_id') campaignId?: string) {
+    return this.reportingService.getExecutionStats(user, campaignId);
+  }
+
+  @Get('quality-stats')
+  @Permissions('report.read')
+  getQualityStats(@CurrentUser() user: AuthUserClaims) {
+    return this.reportingService.getQualityStats(user);
+  }
+
   @Get('campaigns/:campaignId/interviews')
   @Permissions('report.read')
   listInterviewSummaries(

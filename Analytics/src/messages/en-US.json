@@ -8,7 +8,8 @@
       "campaignAnalytics": "Campaigns",
       "segmentAnalytics": "By Segment",
       "accountAnalytics": "By Account",
-      "interviewExplorer": "Interviews"
+      "interviewExplorer": "Interviews",
+      "operations": "Operations"
     },
     "restricted": {
       "title": "Access denied",

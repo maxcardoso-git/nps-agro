@@ -6,7 +6,8 @@
     "menu": {
       "dashboard": "Dashboard Ejecutivo",
       "campaignAnalytics": "Analítica de Campañas",
-      "interviewExplorer": "Explorador de Entrevistas"
+      "interviewExplorer": "Explorador de Entrevistas",
+      "operations": "Operaciones"
     },
     "restricted": {
       "title": "Acceso denegado",

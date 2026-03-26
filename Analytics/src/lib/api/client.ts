@@ -184,6 +184,19 @@ export const apiClient = {
         session
       );
     },
+    executionStats: async (
+      session: AuthSession,
+      campaignId?: string
+    ): Promise<unknown[]> => {
+      return request<unknown[]>(
+        `/reports/execution-stats${toQueryString({ campaign_id: campaignId })}`,
+        { method: 'GET' },
+        session
+      );
+    },
+    qualityStats: async (session: AuthSession): Promise<unknown> => {
+      return request<unknown>('/reports/quality-stats', { method: 'GET' }, session);
+    },
     npsByAccount: async (
       session: AuthSession,
       campaignId?: string

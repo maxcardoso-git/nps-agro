@@ -87,6 +87,14 @@ export class ReportingService {
     return this.reportingRepository.getNpsByAccount(actor.tenant_id, campaignId);
   }
 
+  async getExecutionStats(actor: AuthUserClaims, campaignId?: string) {
+    return this.reportingRepository.getExecutionStats(actor.tenant_id, campaignId);
+  }
+
+  async getQualityStats(actor: AuthUserClaims) {
+    return this.reportingRepository.getQualityStats(actor.tenant_id);
+  }
+
   private assertScope(actor: AuthUserClaims, tenantId: string): void {
     if (actor.role !== 'platform_admin' && actor.tenant_id !== tenantId) {
       throw new DomainException('FORBIDDEN_TENANT_SCOPE', 'Acesso negado ao tenant solicitado', HttpStatus.FORBIDDEN);

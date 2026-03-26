@@ -10,7 +10,8 @@ const items = [
   { key: 'campaignAnalytics', href: '/campaigns' },
   { key: 'segmentAnalytics', href: '/segments' },
   { key: 'accountAnalytics', href: '/accounts' },
-  { key: 'interviewExplorer', href: '/interviews' }
+  { key: 'interviewExplorer', href: '/interviews' },
+  { key: 'operations', href: '/operations' }
 ];
 
 export function Sidebar() {

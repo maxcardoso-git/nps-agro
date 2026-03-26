@@ -216,5 +216,30 @@ export class ReportingRepository extends SqlRepositoryBase {
       values,
     );
   }
+
+  getExecutionStats(tenantId: string, campaignId?: string) {
+    const where = ['tenant_id = $1'];
+    const params: unknown[] = [tenantId];
+    if (campaignId) {
+      params.push(campaignId);
+      where.push(`campaign_id = $${params.length}`);
+    }
+    return this.many(
+      `SELECT campaign_id, total_contacts, pending, in_progress, completed, exhausted,
+              completion_rate, avg_attempts_to_complete
+       FROM analytics.vw_execution_stats
+       WHERE ${where.join(' AND ')}`,
+      params,
+    );
+  }
+
+  getQualityStats(tenantId: string) {
+    return this.one(
+      `SELECT total_reviews, approved, rejected, pending, avg_score, rejection_rate
+       FROM analytics.vw_quality_stats
+       WHERE tenant_id = $1`,
+      [tenantId],
+    );
+  }
 }
 
