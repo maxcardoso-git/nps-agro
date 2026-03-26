@@ -18,7 +18,7 @@ const NPS_COLORS = (nps: number) => {
 };
 
 export default function SegmentAnalyticsPage() {
-  const t = useTranslations('analytics.segments');
+  const t = useTranslations('reports.segments');
   const { session } = useRequiredSession();
   const [campaignId, setCampaignId] = useState('');
 
@@ -115,7 +115,7 @@ export default function SegmentAnalyticsPage() {
 
           {/* Regions */}
           {regions.length > 0 && (
-            <Card title={t('regions.title', { ns: 'analytics' })}>
+            <Card title="NPS por Região">
               <table className="min-w-full divide-y divide-slate-200 text-left text-sm">
                 <thead className="bg-slate-50">
                   <tr>

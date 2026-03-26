@@ -18,7 +18,7 @@ const NPS_COLORS = (nps: number) => {
 };
 
 export default function AccountAnalyticsPage() {
-  const t = useTranslations('analytics.accounts');
+  const t = useTranslations('reports.accounts');
   const { session } = useRequiredSession();
   const [campaignId, setCampaignId] = useState('');
 
