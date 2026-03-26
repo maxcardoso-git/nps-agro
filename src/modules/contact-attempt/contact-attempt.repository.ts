@@ -148,7 +148,7 @@ export class ContactAttemptRepository extends SqlRepositoryBase {
 
     if (filters.search) {
       values.push(`%${filters.search}%`);
-      conditions.push(`(r.name ILIKE $${idx} OR r.phone ILIKE $${idx})`);
+      conditions.push(`(r.name ILIKE $${idx} OR r.phone ILIKE $${idx} OR r.external_id ILIKE $${idx} OR acc.name ILIKE $${idx})`);
       idx++;
     }
 
@@ -189,6 +189,52 @@ export class ContactAttemptRepository extends SqlRepositoryBase {
     sql += ` ORDER BY r.name LIMIT ${limit} OFFSET ${offset}`;
 
     return this.many<RespondentWithStatusRow>(sql, values);
+  }
+
+  async countRespondentsByAction(
+    tenantId: string,
+    actionId: string,
+    filters: { search?: string; status?: string },
+  ): Promise<number> {
+    const conditions = ['r.tenant_id = $1', 'r.action_id = $2'];
+    const values: unknown[] = [tenantId, actionId];
+    let idx = 3;
+
+    if (filters.search) {
+      values.push(`%${filters.search}%`);
+      conditions.push(`(r.name ILIKE $${idx} OR r.phone ILIKE $${idx} OR r.external_id ILIKE $${idx})`);
+      idx++;
+    }
+
+    let sql = `
+      SELECT COUNT(*) AS total FROM (
+        SELECT r.id,
+          COALESCE(
+            CASE
+              WHEN ca.outcome = 'success' AND i.status = 'completed' THEN 'completed'
+              WHEN ca.outcome = 'success' AND i.status = 'in_progress' THEN 'in_progress'
+              ELSE ca.outcome
+            END,
+            'pending'
+          ) AS contact_status
+        FROM core.respondent r
+        LEFT JOIN LATERAL (
+          SELECT outcome, interview_id FROM core.contact_attempt
+          WHERE respondent_id = r.id AND action_id = $2
+          ORDER BY created_at DESC LIMIT 1
+        ) ca ON true
+        LEFT JOIN core.interview i ON i.id = ca.interview_id
+        WHERE ${conditions.join(' AND ')}
+      ) sub
+    `;
+
+    if (filters.status) {
+      sql += ` WHERE sub.contact_status = $${idx}`;
+      values.push(filters.status);
+    }
+
+    const row = await this.one<{ total: string }>(sql, values);
+    return Number(row?.total ?? 0);
   }
 
   createByAction(params: {

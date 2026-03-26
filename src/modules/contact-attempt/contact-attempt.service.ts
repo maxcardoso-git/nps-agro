@@ -25,11 +25,11 @@ export class ContactAttemptService {
     actionId: string,
     filters: { search?: string; status?: string; page?: number; page_size?: number },
   ) {
-    return this.contactAttemptRepository.listRespondentsByAction(
-      actor.tenant_id,
-      actionId,
-      filters,
-    );
+    const [items, total] = await Promise.all([
+      this.contactAttemptRepository.listRespondentsByAction(actor.tenant_id, actionId, filters),
+      this.contactAttemptRepository.countRespondentsByAction(actor.tenant_id, actionId, { search: filters.search, status: filters.status }),
+    ]);
+    return { items, total, page: filters.page ?? 1, page_size: filters.page_size ?? 50 };
   }
 
   async createContactAttempt(
