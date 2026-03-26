@@ -320,7 +320,7 @@ export const api = {
         'Authorization': `Bearer ${session.access_token}`,
         'x-tenant-id': session.user.tenant_id,
       };
-      const response = await fetch(`${API_BASE_URL}/interviews/${interviewId}/audio`, {
+      const response = await fetch(`${API_URL}/interviews/${interviewId}/audio`, {
         method: 'POST',
         headers,
         body: formData,
