@@ -241,7 +241,7 @@ export default function ActionContactsPage() {
                   {t('contact')}
                 </Button>
               ) : null}
-              {(r.contact_status === 'completed' || r.contact_status === 'in_progress') && (
+              {(r.contact_status === 'completed' || r.contact_status === 'in_progress' || r.contact_status === 'success') && (
                 <>
                   <label className={`cursor-pointer rounded px-2 py-1 text-xs font-medium transition ${uploadSuccess === r.id ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
                     {uploadingId === r.id ? '...' : uploadSuccess === r.id ? '✓' : '🎤'}
