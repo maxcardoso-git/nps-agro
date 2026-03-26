@@ -19,6 +19,13 @@ FILES=(
   "002_indexes.sql"
   "003_views.sql"
   "004_phase2_alter_app_user.sql"
+  "005_accounts_and_contact_attempts.sql"
+  "006_campaign_actions.sql"
+  "007_user_multi_roles.sql"
+  "008_prd_gaps.sql"
+  "009_contact_reservation.sql"
+  "010_llm_resources.sql"
+  "011_execution_engine.sql"
 )
 
 for file in "${FILES[@]}"; do
