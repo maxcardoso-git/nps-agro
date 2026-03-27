@@ -78,6 +78,15 @@ export class ContactAttemptController {
     return this.contactAttemptService.getCampaignContactStats(user, campaignId);
   }
 
+  @Get('actions/:actionId/stats')
+  @Permissions('campaign.read')
+  getActionStats(
+    @CurrentUser() user: AuthUserClaims,
+    @Param('actionId') actionId: string,
+  ) {
+    return this.contactAttemptService.getActionStats(user, actionId);
+  }
+
   @Post('actions/:actionId/next-contact')
   @Permissions('campaign.read')
   reserveNextContact(

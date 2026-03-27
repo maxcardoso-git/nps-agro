@@ -113,6 +113,10 @@ export class ContactAttemptService {
     return this.contactAttemptRepository.getCampaignContactStats(actor.tenant_id, campaignId);
   }
 
+  async getActionStats(actor: AuthUserClaims, actionId: string) {
+    return this.contactAttemptRepository.getActionStats(actor.tenant_id, actionId);
+  }
+
   private validateScheduled(dto: CreateContactAttemptDto) {
     if (dto.outcome === 'scheduled' && !dto.scheduled_at) {
       throw new DomainException('INVALID_INPUT', 'scheduled_at is required when outcome is scheduled', HttpStatus.BAD_REQUEST);

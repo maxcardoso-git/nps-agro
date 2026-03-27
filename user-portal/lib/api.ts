@@ -204,6 +204,16 @@ export const api = {
         { method: 'GET' },
         session
       );
+    },
+    getStats: async (
+      session: AuthSession,
+      actionId: string
+    ): Promise<Record<string, number>> => {
+      return request<Record<string, number>>(
+        `/actions/${actionId}/stats`,
+        { method: 'GET' },
+        session
+      );
     }
   },
   contactAttempts: {

@@ -319,6 +319,57 @@ export class ContactAttemptRepository extends SqlRepositoryBase {
     );
   }
 
+  async getActionStats(tenantId: string, actionId: string) {
+    return this.one<{
+      total: number; pending: number; completed: number; in_progress: number;
+      no_answer: number; refused: number; scheduled: number; via_audio: number;
+      via_manual: number; completion_rate: number;
+    }>(
+      `SELECT
+        COUNT(*)::int AS total,
+        COUNT(*) FILTER (WHERE sub.contact_status = 'pending')::int AS pending,
+        COUNT(*) FILTER (WHERE sub.contact_status = 'completed')::int AS completed,
+        COUNT(*) FILTER (WHERE sub.contact_status = 'in_progress')::int AS in_progress,
+        COUNT(*) FILTER (WHERE sub.contact_status = 'no_answer')::int AS no_answer,
+        COUNT(*) FILTER (WHERE sub.contact_status = 'refused')::int AS refused,
+        COUNT(*) FILTER (WHERE sub.contact_status = 'scheduled')::int AS scheduled,
+        COUNT(*) FILTER (WHERE sub.has_audio)::int AS via_audio,
+        COUNT(*) FILTER (WHERE NOT sub.has_audio AND sub.contact_status IN ('completed','in_progress'))::int AS via_manual,
+        ROUND(COUNT(*) FILTER (WHERE sub.contact_status = 'completed')::numeric / NULLIF(COUNT(*), 0) * 100, 1) AS completion_rate
+      FROM (
+        SELECT
+          COALESCE(
+            CASE
+              WHEN latest_iv.status = 'completed' THEN 'completed'
+              WHEN latest_iv.status = 'review_pending' THEN 'review_pending'
+              WHEN latest_iv.status = 'in_progress' THEN 'in_progress'
+              WHEN ca.outcome IS NOT NULL THEN ca.outcome
+            END,
+            'pending'
+          ) AS contact_status,
+          CASE WHEN aa.id IS NOT NULL THEN true ELSE false END AS has_audio
+        FROM core.respondent r
+        LEFT JOIN LATERAL (
+          SELECT outcome, interview_id FROM core.contact_attempt
+          WHERE respondent_id = r.id AND action_id = $2
+          ORDER BY created_at DESC LIMIT 1
+        ) ca ON true
+        LEFT JOIN core.interview i ON i.id = ca.interview_id
+        LEFT JOIN LATERAL (
+          SELECT iv.status FROM core.interview iv
+          WHERE iv.respondent_id = r.id ORDER BY iv.created_at DESC LIMIT 1
+        ) latest_iv ON true
+        LEFT JOIN LATERAL (
+          SELECT aai.id FROM core.audio_asset aai
+          JOIN core.interview ii ON ii.id = aai.interview_id
+          WHERE ii.respondent_id = r.id LIMIT 1
+        ) aa ON true
+        WHERE r.action_id = $2 AND r.tenant_id = $1
+      ) sub`,
+      [tenantId, actionId],
+    );
+  }
+
   async getCampaignIdForAction(actionId: string, tenantId: string): Promise<string | null> {
     const row = await this.one<{ campaign_id: string }>(
       `SELECT campaign_id FROM core.campaign_action WHERE id = $1 AND tenant_id = $2`,
