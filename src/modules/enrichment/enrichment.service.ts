@@ -104,53 +104,40 @@ export class EnrichmentService {
     respondent: { respondent_name: string; region: string; segment: string; account_name: string | null } | null,
   ): Promise<LlmEnrichmentResult> {
     const prompt = this.buildPrompt(answers, respondent);
-
-    const baseUrl = this.resolveBaseUrl(llm.provider, llm.base_url);
-    const model = llm.model_id;
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-
-    if (llm.provider === 'anthropic') {
-      headers['x-api-key'] = llm.api_key!;
-      headers['anthropic-version'] = '2023-06-01';
-    } else {
-      headers['Authorization'] = `Bearer ${llm.api_key}`;
-    }
-
-    const body = llm.provider === 'anthropic'
-      ? {
-          model,
-          max_tokens: 2048,
-          messages: [{ role: 'user', content: prompt }],
-        }
-      : {
-          model,
-          messages: [
-            { role: 'system', content: 'You are an NPS survey analysis assistant. Always respond with valid JSON.' },
-            { role: 'user', content: prompt },
-          ],
-          response_format: { type: 'json_object' },
-          temperature: 0.2,
-        };
-
-    const response = await fetch(`${baseUrl}/messages`, {
-      method: 'POST',
-      headers,
-      body: JSON.stringify(body),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`LLM API error ${response.status}: ${errorText}`);
-    }
-
-    const data = await response.json() as Record<string, unknown>;
-
-    // Extract text content from response
     let textContent: string;
-    if (llm.provider === 'anthropic') {
+
+    if (llm.provider === 'google') {
+      const baseUrl = llm.base_url || 'https://generativelanguage.googleapis.com/v1beta';
+      const endpoint = `${baseUrl}/models/${llm.model_id}:generateContent?key=${llm.api_key}`;
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.2, maxOutputTokens: 4096 } }),
+      });
+      if (!response.ok) throw new Error(`Gemini API error ${response.status}: ${await response.text()}`);
+      const data = await response.json() as Record<string, unknown>;
+      const candidates = data.candidates as Array<{ content?: { parts?: Array<{ text?: string }> } }> | undefined;
+      textContent = candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    } else if (llm.provider === 'anthropic') {
+      const baseUrl = llm.base_url || 'https://api.anthropic.com/v1';
+      const response = await fetch(`${baseUrl}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': llm.api_key!, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: llm.model_id, max_tokens: 4096, messages: [{ role: 'user', content: prompt }] }),
+      });
+      if (!response.ok) throw new Error(`Anthropic API error ${response.status}: ${await response.text()}`);
+      const data = await response.json() as Record<string, unknown>;
       const content = data.content as Array<{ text?: string }> | undefined;
       textContent = content?.[0]?.text ?? '';
     } else {
+      const baseUrl = llm.base_url || 'https://api.openai.com/v1/chat';
+      const response = await fetch(`${baseUrl}/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${llm.api_key}` },
+        body: JSON.stringify({ model: llm.model_id, messages: [{ role: 'system', content: 'You are an NPS survey analysis assistant. Always respond with valid JSON.' }, { role: 'user', content: prompt }], response_format: { type: 'json_object' }, temperature: 0.2 }),
+      });
+      if (!response.ok) throw new Error(`OpenAI API error ${response.status}: ${await response.text()}`);
+      const data = await response.json() as Record<string, unknown>;
       const choices = data.choices as Array<{ message?: { content?: string } }> | undefined;
       textContent = choices?.[0]?.message?.content ?? '';
     }

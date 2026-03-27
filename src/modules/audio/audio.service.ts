@@ -359,31 +359,46 @@ Regras:
 - confidence: 1.0 se claramente mencionado, 0.5 se inferido, 0.3 se incerto
 - Omita perguntas que não foram respondidas na transcrição`;
 
-    const baseUrl = llm.base_url || (llm.provider === 'anthropic' ? 'https://api.anthropic.com/v1' : 'https://api.openai.com/v1/chat');
-    const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-
-    if (llm.provider === 'anthropic') {
-      headers['x-api-key'] = llm.api_key!;
-      headers['anthropic-version'] = '2023-06-01';
-    } else {
-      headers['Authorization'] = `Bearer ${llm.api_key}`;
-    }
-
-    const body = llm.provider === 'anthropic'
-      ? { model: llm.model_id, max_tokens: 2048, messages: [{ role: 'user', content: prompt }] }
-      : { model: llm.model_id, messages: [{ role: 'system', content: 'Extract answers from interview transcription. Respond with valid JSON only.' }, { role: 'user', content: prompt }], response_format: { type: 'json_object' }, temperature: 0.1 };
-
-    const endpoint = llm.provider === 'anthropic' ? `${baseUrl}/messages` : `${baseUrl}/completions`;
-    const response = await fetch(endpoint, { method: 'POST', headers, body: JSON.stringify(body) });
-
-    if (!response.ok) throw new Error(`LLM API error ${response.status}: ${await response.text()}`);
-
-    const data = await response.json() as Record<string, unknown>;
     let text: string;
-    if (llm.provider === 'anthropic') {
+
+    if (llm.provider === 'google') {
+      // Gemini API
+      const baseUrl = llm.base_url || 'https://generativelanguage.googleapis.com/v1beta';
+      const endpoint = `${baseUrl}/models/${llm.model_id}:generateContent?key=${llm.api_key}`;
+      const body = {
+        contents: [{ parts: [{ text: prompt }] }],
+        generationConfig: { temperature: 0.1, maxOutputTokens: 4096 },
+      };
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) throw new Error(`Gemini API error ${response.status}: ${await response.text()}`);
+      const data = await response.json() as Record<string, unknown>;
+      const candidates = data.candidates as Array<{ content?: { parts?: Array<{ text?: string }> } }> | undefined;
+      text = candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    } else if (llm.provider === 'anthropic') {
+      const baseUrl = llm.base_url || 'https://api.anthropic.com/v1';
+      const response = await fetch(`${baseUrl}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': llm.api_key!, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: llm.model_id, max_tokens: 4096, messages: [{ role: 'user', content: prompt }] }),
+      });
+      if (!response.ok) throw new Error(`Anthropic API error ${response.status}: ${await response.text()}`);
+      const data = await response.json() as Record<string, unknown>;
       const content = data.content as Array<{ text?: string }> | undefined;
       text = content?.[0]?.text ?? '';
     } else {
+      // OpenAI compatible
+      const baseUrl = llm.base_url || 'https://api.openai.com/v1/chat';
+      const response = await fetch(`${baseUrl}/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${llm.api_key}` },
+        body: JSON.stringify({ model: llm.model_id, messages: [{ role: 'system', content: 'Extract answers from interview transcription. Respond with valid JSON only.' }, { role: 'user', content: prompt }], response_format: { type: 'json_object' }, temperature: 0.1 }),
+      });
+      if (!response.ok) throw new Error(`OpenAI API error ${response.status}: ${await response.text()}`);
+      const data = await response.json() as Record<string, unknown>;
       const choices = data.choices as Array<{ message?: { content?: string } }> | undefined;
       text = choices?.[0]?.message?.content ?? '';
     }
