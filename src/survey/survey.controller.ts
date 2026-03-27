@@ -103,6 +103,22 @@ export class SurveyController {
     };
   }
 
+  @Get('by-respondent')
+  async findInterviewByRespondent(
+    @Query('tenant_id') tenantId: string,
+    @Query('campaign_id') campaignId: string,
+    @Query('respondent_id') respondentId: string,
+  ) {
+    const result = await this.pool.query(
+      `SELECT id, tenant_id, campaign_id, respondent_id, status, channel, started_at, completed_at
+       FROM core.interview
+       WHERE tenant_id = $1 AND campaign_id = $2 AND respondent_id = $3
+       ORDER BY created_at DESC LIMIT 1`,
+      [tenantId, campaignId, respondentId],
+    );
+    return result.rows[0] || null;
+  }
+
   @Get('active')
   async findActiveInterview(
     @Query('tenant_id') tenantId: string,

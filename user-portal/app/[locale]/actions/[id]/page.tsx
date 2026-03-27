@@ -186,10 +186,18 @@ export default function ActionContactsPage() {
     try {
       setReviewLoading(true);
       setShowReview(true);
-      const active = await api.interviews.findActive(session!, respondent.campaign_id, respondent.id);
-      if (!active) { setReviewData(null); return; }
+      setReviewData(null);
       const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
-      const res = await fetch(`${API_URL}/interviews/${active.id}/review`, {
+      // Find interview for this respondent (any status)
+      const findRes = await fetch(`${API_URL}/interviews/by-respondent?tenant_id=${session!.user.tenant_id}&campaign_id=${respondent.campaign_id}&respondent_id=${respondent.id}`, {
+        headers: { 'Authorization': `Bearer ${session!.access_token}`, 'x-tenant-id': session!.user.tenant_id },
+      });
+      if (!findRes.ok) { setReviewData(null); return; }
+      const findBody = await findRes.json();
+      const interview = findBody?.data || findBody;
+      if (!interview?.id) { setReviewData(null); return; }
+      // Get full review
+      const res = await fetch(`${API_URL}/interviews/${interview.id}/review`, {
         headers: { 'Authorization': `Bearer ${session!.access_token}`, 'x-tenant-id': session!.user.tenant_id },
       });
       if (res.ok) {
