@@ -421,8 +421,56 @@ export default function ActionContactsPage() {
                   <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs text-blue-600">🎤</span>
                   Transcrição do Áudio
                 </h3>
-                <div className="max-h-60 overflow-y-auto rounded-lg border border-slate-200 bg-white p-4 text-sm leading-relaxed text-slate-700">
-                  {reviewData.audio.transcription_text}
+                <div className="max-h-80 space-y-2 overflow-y-auto rounded-lg border border-slate-200 bg-white p-4 text-sm">
+                  {(() => {
+                    const text = reviewData.audio.transcription_text as string;
+                    // Split into sentences
+                    const sentences = text.split(/(?<=[.?!])\s+/).filter((s: string) => s.trim());
+                    let isInterviewer = true; // First speaker is usually interviewer
+                    const turns: Array<{ speaker: 'interviewer' | 'respondent'; text: string }> = [];
+                    let currentTurn = { speaker: 'interviewer' as const, text: '' };
+
+                    for (const sentence of sentences) {
+                      const s = sentence.trim();
+                      // Heuristics: interviewer asks questions, introduces themselves, reads options
+                      const isQuestion = /\?$/.test(s);
+                      const isIntro = /meu nome|falo por parte|em nome da|estamos|ligando|realizando|precisaria/i.test(s);
+                      const isReadingOptions = /escala de|onde \d|ler as opções|numa escala|em uma escala/i.test(s);
+                      const isShortAnswer = s.split(' ').length <= 5 && !isQuestion;
+                      const isAgreement = /^(sim|não|ok|perfeito|isso|exato|correto|certo|claro|uhum|obrigad)/i.test(s);
+
+                      let speaker: 'interviewer' | 'respondent';
+                      if (isIntro || isReadingOptions) {
+                        speaker = 'interviewer';
+                      } else if (isQuestion) {
+                        speaker = 'interviewer';
+                      } else if (isShortAnswer && !isIntro) {
+                        speaker = currentTurn.speaker === 'interviewer' ? 'respondent' : currentTurn.speaker;
+                      } else if (isAgreement && currentTurn.speaker === 'interviewer') {
+                        speaker = 'respondent';
+                      } else {
+                        speaker = currentTurn.speaker;
+                      }
+
+                      if (speaker !== currentTurn.speaker && currentTurn.text) {
+                        turns.push({ ...currentTurn });
+                        currentTurn = { speaker, text: s };
+                      } else {
+                        currentTurn.text += (currentTurn.text ? ' ' : '') + s;
+                        currentTurn.speaker = speaker;
+                      }
+                    }
+                    if (currentTurn.text) turns.push(currentTurn);
+
+                    return turns.map((turn, i) => (
+                      <div key={i} className={`rounded-lg px-3 py-2 ${turn.speaker === 'interviewer' ? 'bg-blue-50 border-l-2 border-blue-400' : 'bg-green-50 border-l-2 border-green-400'}`}>
+                        <p className={`text-[10px] font-bold uppercase tracking-wider mb-0.5 ${turn.speaker === 'interviewer' ? 'text-blue-600' : 'text-green-600'}`}>
+                          {turn.speaker === 'interviewer' ? 'Entrevistador' : 'Entrevistado'}
+                        </p>
+                        <p className="text-slate-700 leading-relaxed">{turn.text}</p>
+                      </div>
+                    ));
+                  })()}
                 </div>
               </div>
             )}
