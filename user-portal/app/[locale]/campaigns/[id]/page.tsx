@@ -1,6 +1,6 @@
 'use client';
 
-import { useQuery } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import { useTranslations } from 'next-intl';
 import { useParams, useRouter } from 'next/navigation';
 import { Badge } from '@/components/ui/Badge';
@@ -25,15 +25,13 @@ export default function CampaignDashboardPage() {
 
   const actions = actionsQuery.data ?? [];
 
-  // Fetch stats for each action
-  const statsQueries = actions.map((action) => ({
-    actionId: action.id,
-    query: useQuery({
+  const statsQueries = useQueries({
+    queries: actions.map((action) => ({
       queryKey: ['action-stats', action.id],
       queryFn: () => api.actions.getStats(session!, action.id),
       enabled: Boolean(session && action.id),
-    }),
-  }));
+    })),
+  });
 
   const statusTone = (s: string) => {
     if (s === 'active') return 'success' as const;
@@ -58,7 +56,7 @@ export default function CampaignDashboardPage() {
       ) : (
         <div className="space-y-6">
           {actions.map((action, idx) => {
-            const stats = statsQueries[idx]?.query.data as Record<string, number> | undefined;
+            const stats = statsQueries[idx]?.data as Record<string, number> | undefined;
 
             return (
               <Card key={action.id} className="p-0 overflow-hidden">
