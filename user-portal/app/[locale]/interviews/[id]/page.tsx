@@ -26,6 +26,8 @@ export default function InterviewFlowPage() {
   const [respondentId, setRespondentId] = useState<string | null>(null);
   const [answer, setAnswer] = useState<unknown>(undefined);
   const [error, setError] = useState<string | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [uploadDone, setUploadDone] = useState(false);
   const [context, setContext] = useState<{ campaign_name: string; respondent_name: string; respondent_phone: string; account_name: string; action_name: string } | null>(null);
 
   // Load current state
@@ -146,6 +148,34 @@ export default function InterviewFlowPage() {
           </div>
         </div>
       )}
+
+      {/* Audio upload */}
+      <div className="flex items-center justify-between rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-2">
+        <span className="text-xs text-slate-500">Enviar gravação do áudio da entrevista</span>
+        <label className={`cursor-pointer rounded-lg px-3 py-1.5 text-xs font-medium transition ${uploadDone ? 'bg-green-100 text-green-700' : uploading ? 'bg-amber-100 text-amber-700' : 'bg-primary text-white hover:opacity-90'}`}>
+          {uploading ? '⏳ Enviando...' : uploadDone ? '✓ Áudio enviado' : '🎤 Enviar áudio'}
+          <input
+            type="file"
+            accept="audio/*,video/*"
+            className="hidden"
+            disabled={uploading}
+            onChange={async (e) => {
+              const file = e.target.files?.[0];
+              if (!file) return;
+              e.target.value = '';
+              try {
+                setUploading(true);
+                await api.interviews.uploadAudio(session!, interviewId, file);
+                setUploadDone(true);
+              } catch (err) {
+                setError(err instanceof Error ? err.message : 'Erro no upload');
+              } finally {
+                setUploading(false);
+              }
+            }}
+          />
+        </label>
+      </div>
 
       {/* Progress bar */}
       <div className="flex items-center gap-3">
