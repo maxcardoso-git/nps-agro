@@ -27,7 +27,7 @@ export default function IndicatorsPage() {
     queryFn: () => apiClient.campaigns.list(session!, { page_size: 100 }),
     enabled: Boolean(session),
   });
-  const campaigns = extractItems(campaignsQuery.data);
+  const campaigns = extractItems(campaignsQuery.data).filter((c) => c.status !== 'draft');
 
   const indicatorsQuery = useQuery({
     queryKey: ['indicators', campaignId],
