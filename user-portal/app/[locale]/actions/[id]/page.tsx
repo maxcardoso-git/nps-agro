@@ -363,10 +363,10 @@ export default function ActionContactsPage() {
           <div className="space-y-5 max-h-[75vh] overflow-y-auto pr-1">
             {/* Info header */}
             <div className="grid gap-2 rounded-lg bg-slate-50 p-3 text-sm md:grid-cols-2">
-              <div><span className="font-semibold text-slate-500">Campanha:</span> {reviewData.campaign_name as string}</div>
-              {reviewData.action_name && <div><span className="font-semibold text-slate-500">Ação:</span> {reviewData.action_name as string}</div>}
-              <div><span className="font-semibold text-slate-500">Entrevistado:</span> {reviewData.respondent_name as string}</div>
-              <div><span className="font-semibold text-slate-500">Código:</span> {(reviewData.external_id as string) || '—'}</div>
+              <div><span className="font-semibold text-slate-500">Campanha:</span> {String(reviewData.campaign_name || '—')}</div>
+              {reviewData.action_name ? <div><span className="font-semibold text-slate-500">Ação:</span> {String(reviewData.action_name)}</div> : null}
+              <div><span className="font-semibold text-slate-500">Entrevistado:</span> {String(reviewData.respondent_name || '—')}</div>
+              <div><span className="font-semibold text-slate-500">Código:</span> {String(reviewData.external_id || '—')}</div>
             </div>
 
             {/* Transcription */}
@@ -377,7 +377,7 @@ export default function ActionContactsPage() {
                   Transcrição do Áudio
                 </h3>
                 <div className="max-h-60 overflow-y-auto rounded-lg border border-slate-200 bg-white p-4 text-sm leading-relaxed text-slate-700">
-                  {((reviewData.audio as Record<string, unknown>).transcription_text as string)}
+                  {String((reviewData.audio as Record<string, unknown>).transcription_text)}
                 </div>
               </div>
             )}
@@ -435,16 +435,23 @@ export default function ActionContactsPage() {
                   <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-xs text-purple-600">🧠</span>
                   Análise IA
                 </h3>
-                <div className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 text-sm md:grid-cols-3">
-                  <div><span className="font-semibold text-slate-500">NPS:</span> <span className="text-lg font-bold">{(reviewData.enrichment as Record<string, unknown>).nps_score as number ?? '—'}</span></div>
-                  <div><span className="font-semibold text-slate-500">Classe:</span> {(reviewData.enrichment as Record<string, unknown>).nps_class as string ?? '—'}</div>
-                  <div><span className="font-semibold text-slate-500">Sentimento:</span> {(reviewData.enrichment as Record<string, unknown>).sentiment as string ?? '—'}</div>
-                </div>
-                {(reviewData.enrichment as Record<string, unknown>).summary_text && (
-                  <div className="mt-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
-                    {(reviewData.enrichment as Record<string, unknown>).summary_text as string}
-                  </div>
-                )}
+                {(() => {
+                  const e = reviewData.enrichment as Record<string, unknown>;
+                  return (
+                    <>
+                      <div className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 text-sm md:grid-cols-3">
+                        <div><span className="font-semibold text-slate-500">NPS:</span> <span className="text-lg font-bold">{String(e.nps_score ?? '—')}</span></div>
+                        <div><span className="font-semibold text-slate-500">Classe:</span> {String(e.nps_class ?? '—')}</div>
+                        <div><span className="font-semibold text-slate-500">Sentimento:</span> {String(e.sentiment ?? '—')}</div>
+                      </div>
+                      {e.summary_text ? (
+                        <div className="mt-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
+                          {String(e.summary_text)}
+                        </div>
+                      ) : null}
+                    </>
+                  );
+                })()}
               </div>
             )}
           </div>
