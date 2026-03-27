@@ -8,7 +8,6 @@ import { cn } from '@/lib/utils/cn';
 const items = [
   { key: 'dashboard', href: '/dashboard' },
   { key: 'campaignAnalytics', href: '/campaigns' },
-  { key: 'segmentAnalytics', href: '/segments' },
   { key: 'interviewExplorer', href: '/interviews' },
   { key: 'indicators', href: '/indicators' },
   { key: 'operations', href: '/operations' }
