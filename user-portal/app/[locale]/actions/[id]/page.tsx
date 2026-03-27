@@ -64,8 +64,7 @@ export default function ActionContactsPage() {
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
   const [showReview, setShowReview] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [reviewData, setReviewData] = useState<any>(null);
+  const [reviewData, setReviewData] = useState<any>(null); // eslint-disable-line
   const [reviewLoading, setReviewLoading] = useState(false);
 
   // Debounce search
