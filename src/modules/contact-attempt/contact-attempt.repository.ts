@@ -184,9 +184,10 @@ export class ContactAttemptRepository extends SqlRepositoryBase {
       sql = `SELECT sub.* FROM (${sql}) sub WHERE sub.contact_status = $${idx}`;
       values.push(filters.status);
       idx++;
+      sql += ` ORDER BY sub.name LIMIT ${limit} OFFSET ${offset}`;
+    } else {
+      sql += ` ORDER BY r.name LIMIT ${limit} OFFSET ${offset}`;
     }
-
-    sql += ` ORDER BY r.name LIMIT ${limit} OFFSET ${offset}`;
 
     return this.many<RespondentWithStatusRow>(sql, values);
   }

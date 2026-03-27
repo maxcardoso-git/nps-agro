@@ -23,8 +23,10 @@ export default function InterviewFlowPage() {
   const [progress, setProgress] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [campaignId, setCampaignId] = useState<string | null>(null);
+  const [respondentId, setRespondentId] = useState<string | null>(null);
   const [answer, setAnswer] = useState<unknown>(undefined);
   const [error, setError] = useState<string | null>(null);
+  const [context, setContext] = useState<{ campaign_name: string; respondent_name: string; respondent_phone: string; account_name: string; action_name: string } | null>(null);
 
   // Load current state
   const stateQuery = useQuery({
@@ -35,7 +37,29 @@ export default function InterviewFlowPage() {
       setProgress(result.interview_state.progress);
       setCompleted(result.interview_state.completed);
       setCampaignId(result.interview_state.campaign_id);
+      setRespondentId(result.interview_state.respondent_id);
       return result;
+    },
+    enabled: Boolean(session && interviewId),
+  });
+
+  // Load interview context (campaign, respondent, action names)
+  useQuery({
+    queryKey: ['interview-context', interviewId],
+    queryFn: async () => {
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session!.access_token}`,
+        'x-tenant-id': session!.user.tenant_id,
+      };
+      const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+      const res = await fetch(`${API_URL}/interviews/${interviewId}/context`, { headers });
+      if (res.ok) {
+        const body = await res.json();
+        const data = body?.data || body;
+        setContext(data);
+      }
+      return null;
     },
     enabled: Boolean(session && interviewId),
   });
@@ -110,6 +134,19 @@ export default function InterviewFlowPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-4">
+      {/* Interview context header */}
+      {context && (
+        <div className="rounded-lg border border-slate-200 bg-white px-4 py-3">
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
+            <div><span className="font-semibold text-slate-500">Campanha:</span> <span className="text-slate-900">{context.campaign_name}</span></div>
+            {context.action_name && <div><span className="font-semibold text-slate-500">Ação:</span> <span className="text-slate-900">{context.action_name}</span></div>}
+            <div><span className="font-semibold text-slate-500">Entrevistado:</span> <span className="text-slate-900">{context.respondent_name}</span></div>
+            {context.respondent_phone && <div className="text-xs text-slate-400">{context.respondent_phone}</div>}
+            {context.account_name && <div className="text-xs text-slate-400">{context.account_name}</div>}
+          </div>
+        </div>
+      )}
+
       {/* Progress bar */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" className="text-xs" onClick={handleSaveExit}>
