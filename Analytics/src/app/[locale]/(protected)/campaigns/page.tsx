@@ -1,20 +1,13 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useQueries, useQuery } from '@tanstack/react-query';
 import { useLocale, useTranslations } from 'next-intl';
-import { useMemo, useState } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useRequiredSession } from '@/hooks/use-required-session';
 import { apiClient } from '@/lib/api/client';
 import { extractItems } from '@/lib/api/helpers';
-
-const CampaignCompareChart = dynamic(
-  () => import('@/components/charts/campaign-compare-chart').then((mod) => mod.CampaignCompareChart),
-  { ssr: false }
-);
 
 export default function CampaignsPage() {
   const t = useTranslations('reports');
@@ -55,8 +48,6 @@ export default function CampaignsPage() {
     ? Math.round(((totals.promoters - totals.detractors) / totals.interviews) * 100)
     : 0;
 
-  const compareData = summaries.map((s) => ({ campaign: s.campaign.name, nps: s.kpis.nps }));
-
   return (
     <div className="space-y-6">
       <h1 className="text-2xl font-bold text-slate-900">Campanhas Ativas</h1>
@@ -88,11 +79,53 @@ export default function CampaignsPage() {
         </Card>
       </div>
 
-      {/* NPS Comparison chart */}
-      {compareData.length > 0 && (
-        <Card title="NPS por Campanha">
-          <div className="h-64">
-            <CampaignCompareChart data={compareData} />
+      {/* Campaign comparison table */}
+      {summaries.length > 0 && (
+        <Card title="Comparativo de Campanhas">
+          <div className="overflow-x-auto">
+            <table className="min-w-full divide-y divide-slate-200 text-sm">
+              <thead className="bg-slate-50">
+                <tr>
+                  <th className="px-3 py-2 text-left font-semibold">Campanha</th>
+                  <th className="px-3 py-2 text-left font-semibold">Segmento</th>
+                  <th className="px-3 py-2 text-right font-semibold">NPS</th>
+                  <th className="px-3 py-2 text-right font-semibold">Entrevistas</th>
+                  <th className="px-3 py-2 text-right font-semibold">Promotores</th>
+                  <th className="px-3 py-2 text-right font-semibold">Neutros</th>
+                  <th className="px-3 py-2 text-right font-semibold">Detratores</th>
+                  <th className="px-3 py-2 text-center font-semibold">NPS</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {summaries.map((s) => {
+                  const camp = campaigns.find((c) => c.id === s.campaign.id);
+                  return (
+                    <tr key={s.campaign.id} className="cursor-pointer hover:bg-slate-50" onClick={() => window.location.href = `/${locale}/campaigns/${s.campaign.id}`}>
+                      <td className="px-3 py-2 font-medium text-primary">{s.campaign.name}</td>
+                      <td className="px-3 py-2"><Badge tone="neutral">{s.campaign.segment || camp?.segment || '—'}</Badge></td>
+                      <td className="px-3 py-2 text-right">
+                        <span className={`text-lg font-bold ${s.kpis.nps >= 50 ? 'text-green-600' : s.kpis.nps >= 0 ? 'text-amber-600' : 'text-red-600'}`}>{s.kpis.nps}</span>
+                      </td>
+                      <td className="px-3 py-2 text-right">{s.kpis.total_interviews}</td>
+                      <td className="px-3 py-2 text-right text-green-600">{s.kpis.promoters}</td>
+                      <td className="px-3 py-2 text-right text-amber-600">{s.kpis.neutrals}</td>
+                      <td className="px-3 py-2 text-right text-red-600">{s.kpis.detractors}</td>
+                      <td className="px-3 py-2">
+                        <div className="mx-auto h-3 w-24 overflow-hidden rounded-full bg-slate-200">
+                          {s.kpis.total_interviews > 0 && (
+                            <div className="flex h-full">
+                              <div className="bg-green-500" style={{ width: `${(s.kpis.promoters / s.kpis.total_interviews) * 100}%` }} />
+                              <div className="bg-amber-400" style={{ width: `${(s.kpis.neutrals / s.kpis.total_interviews) * 100}%` }} />
+                              <div className="bg-red-500" style={{ width: `${(s.kpis.detractors / s.kpis.total_interviews) * 100}%` }} />
+                            </div>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         </Card>
       )}
