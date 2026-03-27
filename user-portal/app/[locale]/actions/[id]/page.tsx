@@ -68,6 +68,8 @@ export default function ActionContactsPage() {
   const [showReview, setShowReview] = useState(false);
   const [reviewData, setReviewData] = useState<any>(null); // eslint-disable-line
   const [reviewLoading, setReviewLoading] = useState(false);
+  const [editingAnswers, setEditingAnswers] = useState<Record<string, string>>({});
+  const [savingAnswers, setSavingAnswers] = useState(false);
 
   // Debounce search
   const handleSearch = useCallback((value: string) => {
@@ -189,6 +191,7 @@ export default function ActionContactsPage() {
       setReviewLoading(true);
       setShowReview(true);
       setReviewData(null);
+      setEditingAnswers({});
       const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
       // Find interview for this respondent (any status)
       const findRes = await fetch(`${API_URL}/interviews/by-respondent?tenant_id=${session!.user.tenant_id}&campaign_id=${respondent.campaign_id}&respondent_id=${respondent.id}`, {
@@ -393,9 +396,9 @@ export default function ActionContactsPage() {
               </div>
               {/* Confidence indicator */}
               {reviewData.answers?.length > 0 && (() => {
-                const withConf = reviewData.answers.filter((a: { confidence_score: number | null }) => a.confidence_score != null);
+                const withConf = reviewData.answers.filter((a: { confidence_score: string | number | null }) => a.confidence_score != null);
                 if (withConf.length === 0) return null;
-                const avg = withConf.reduce((s: number, a: { confidence_score: number }) => s + a.confidence_score, 0) / withConf.length;
+                const avg = withConf.reduce((s: number, a: { confidence_score: string | number }) => s + Number(a.confidence_score), 0) / withConf.length;
                 const pct = Math.round(avg * 100);
                 return (
                   <div className="mt-3 flex items-center gap-3 border-t border-slate-200 pt-3">
@@ -432,10 +435,13 @@ export default function ActionContactsPage() {
                   Respostas do Questionário
                 </h3>
                 <div className="space-y-3">
-                  {reviewData.questionnaire_schema.questions.map((q: { id: string; label: string; type: string }, idx: number) => {
+                  {reviewData.questionnaire_schema.questions.map((q: { id: string; label: string; type: string; options?: string[] }, idx: number) => {
                     const ans = (reviewData.answers || []).find((a: { question_id: string }) => a.question_id === q.id);
                     const value = ans ? (ans.value_text ?? ans.value_numeric ?? ans.value_boolean ?? (ans.value_json ? JSON.stringify(ans.value_json) : null)) : null;
                     const confidence = ans?.confidence_score;
+                    const confNum = confidence != null ? Number(confidence) : null;
+                    const isEditing = q.id in editingAnswers;
+                    const editValue = editingAnswers[q.id] ?? '';
 
                     return (
                       <div key={q.id} className="rounded-lg border border-slate-200 bg-white p-3">
@@ -444,17 +450,61 @@ export default function ActionContactsPage() {
                             <p className="text-xs font-semibold text-slate-500">Pergunta {idx + 1} · {q.type.toUpperCase()}</p>
                             <p className="mt-0.5 text-sm font-medium text-slate-800">{q.label}</p>
                           </div>
-                          {confidence != null && (
-                            <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${confidence >= 0.7 ? 'bg-green-100 text-green-700' : confidence >= 0.4 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
-                              {Math.round(confidence * 100)}%
-                            </span>
-                          )}
+                          <div className="flex items-center gap-1">
+                            {confNum != null && (
+                              <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${confNum >= 0.7 ? 'bg-green-100 text-green-700' : confNum >= 0.4 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
+                                {Math.round(confNum * 100)}%
+                              </span>
+                            )}
+                            <button
+                              className="rounded p-1 text-xs text-slate-400 hover:bg-slate-100 hover:text-slate-600"
+                              onClick={() => {
+                                if (isEditing) {
+                                  setEditingAnswers((prev) => { const n = { ...prev }; delete n[q.id]; return n; });
+                                } else {
+                                  setEditingAnswers((prev) => ({ ...prev, [q.id]: value !== null ? String(value) : '' }));
+                                }
+                              }}
+                              title={isEditing ? 'Cancelar edição' : 'Editar resposta'}
+                            >
+                              {isEditing ? '✕' : '✏️'}
+                            </button>
+                          </div>
                         </div>
-                        <div className="mt-2 rounded bg-slate-50 px-3 py-2 text-sm">
-                          {value !== null ? (
-                            <span className="text-slate-900">{String(value)}</span>
+                        <div className="mt-2">
+                          {isEditing ? (
+                            q.type === 'single_choice' && q.options ? (
+                              <select
+                                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                value={editValue}
+                                onChange={(e) => setEditingAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                              >
+                                <option value="">— Selecione —</option>
+                                {q.options.map((opt: string) => <option key={opt} value={opt}>{opt}</option>)}
+                              </select>
+                            ) : q.type === 'nps' || q.type === 'scale' || q.type === 'number' ? (
+                              <input
+                                type="number"
+                                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                value={editValue}
+                                onChange={(e) => setEditingAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                              />
+                            ) : (
+                              <textarea
+                                className="w-full rounded border border-slate-300 px-3 py-2 text-sm"
+                                rows={2}
+                                value={editValue}
+                                onChange={(e) => setEditingAnswers((prev) => ({ ...prev, [q.id]: e.target.value }))}
+                              />
+                            )
                           ) : (
-                            <span className="italic text-slate-400">Sem resposta</span>
+                            <div className="rounded bg-slate-50 px-3 py-2 text-sm">
+                              {value !== null ? (
+                                <span className="text-slate-900">{String(value)}</span>
+                              ) : (
+                                <span className="italic text-slate-400">Sem resposta</span>
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>
@@ -462,6 +512,34 @@ export default function ActionContactsPage() {
                   })}
                 </div>
               </div>
+            )}
+
+            {/* Save edited answers */}
+            {Object.keys(editingAnswers).length > 0 && (
+              <button
+                className="w-full rounded-lg bg-primary py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50"
+                disabled={savingAnswers}
+                onClick={async () => {
+                  try {
+                    setSavingAnswers(true);
+                    const API_URL = process.env.NEXT_PUBLIC_API_URL || '/api';
+                    await fetch(`${API_URL}/interviews/${reviewData.interview_id}/answers`, {
+                      method: 'PATCH',
+                      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${session!.access_token}`, 'x-tenant-id': session!.user.tenant_id },
+                      body: JSON.stringify({ answers: Object.entries(editingAnswers).map(([qid, val]) => ({ question_id: qid, value: val })) }),
+                    });
+                    setEditingAnswers({});
+                    // Reload review data
+                    const res = await fetch(`${API_URL}/interviews/${reviewData.interview_id}/review`, {
+                      headers: { 'Authorization': `Bearer ${session!.access_token}`, 'x-tenant-id': session!.user.tenant_id },
+                    });
+                    if (res.ok) { const body = await res.json(); setReviewData(body?.data || body); }
+                    queryClient.invalidateQueries({ queryKey: ['action-respondents'] });
+                  } catch { setError('Erro ao salvar respostas'); } finally { setSavingAnswers(false); }
+                }}
+              >
+                {savingAnswers ? 'Salvando...' : `Salvar ${Object.keys(editingAnswers).length} alteração(ões)`}
+              </button>
             )}
 
             {/* Enrichment */}
