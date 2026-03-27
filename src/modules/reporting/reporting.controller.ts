@@ -44,6 +44,12 @@ export class ReportingController {
     return this.reportingService.getQualityStats(user);
   }
 
+  @Get('campaigns/:campaignId/indicators')
+  @Permissions('report.read')
+  getCampaignIndicators(@CurrentUser() user: AuthUserClaims, @Param('campaignId') campaignId: string, @Query('action_id') actionId?: string) {
+    return this.reportingService.getCampaignIndicators(user, campaignId, actionId);
+  }
+
   @Get('campaigns/:campaignId/interviews')
   @Permissions('report.read')
   listInterviewSummaries(

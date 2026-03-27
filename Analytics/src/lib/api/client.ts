@@ -184,6 +184,17 @@ export const apiClient = {
         session
       );
     },
+    indicators: async (
+      session: AuthSession,
+      campaignId: string,
+      actionId?: string
+    ): Promise<unknown> => {
+      return request<unknown>(
+        `/reports/campaigns/${campaignId}/indicators${toQueryString({ action_id: actionId })}`,
+        { method: 'GET' },
+        session
+      );
+    },
     executionStats: async (
       session: AuthSession,
       campaignId?: string

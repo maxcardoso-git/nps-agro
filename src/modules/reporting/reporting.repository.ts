@@ -217,6 +217,72 @@ export class ReportingRepository extends SqlRepositoryBase {
     );
   }
 
+  async getCampaignIndicators(campaignId: string, actionId?: string) {
+    const schemaRow = await this.one<{ schema_json: { questions: Array<{ id: string; label: string; type: string; options?: string[] }> } }>(
+      actionId
+        ? `SELECT qv.schema_json FROM core.campaign_action ca JOIN core.questionnaire_version qv ON qv.id = ca.questionnaire_version_id WHERE ca.id = $1`
+        : `SELECT qv.schema_json FROM core.campaign c JOIN core.questionnaire_version qv ON qv.id = c.questionnaire_version_id WHERE c.id = $1`,
+      [actionId || campaignId],
+    );
+
+    if (!schemaRow?.schema_json?.questions) return { questions: [], indicators: [] };
+
+    const questions = schemaRow.schema_json.questions;
+    const filter = actionId ? `i.action_id = $1` : `i.campaign_id = $1`;
+    const filterVal = actionId || campaignId;
+    const indicators = [];
+
+    for (const q of questions) {
+      if (q.type === 'nps') {
+        const data = await this.many<{ value: number; count: number }>(
+          `SELECT a.value_numeric AS value, COUNT(*)::int AS count FROM core.answer a JOIN core.interview i ON i.id = a.interview_id WHERE ${filter} AND a.question_id = $2 AND a.value_numeric IS NOT NULL AND i.status = 'completed' GROUP BY a.value_numeric ORDER BY a.value_numeric`,
+          [filterVal, q.id],
+        );
+        const total = data.reduce((s, r) => s + r.count, 0);
+        const promoters = data.filter((r) => r.value >= 9).reduce((s, r) => s + r.count, 0);
+        const neutrals = data.filter((r) => r.value >= 7 && r.value <= 8).reduce((s, r) => s + r.count, 0);
+        const detractors = data.filter((r) => r.value <= 6).reduce((s, r) => s + r.count, 0);
+        const nps = total > 0 ? Math.round(((promoters - detractors) / total) * 100) : 0;
+        indicators.push({ question_id: q.id, label: q.label, type: 'nps', data: { nps, total, promoters, neutrals, detractors, distribution: data } });
+      } else if (q.type === 'scale') {
+        const data = await this.many<{ value: number; count: number }>(
+          `SELECT a.value_numeric AS value, COUNT(*)::int AS count FROM core.answer a JOIN core.interview i ON i.id = a.interview_id WHERE ${filter} AND a.question_id = $2 AND a.value_numeric IS NOT NULL AND i.status = 'completed' GROUP BY a.value_numeric ORDER BY a.value_numeric`,
+          [filterVal, q.id],
+        );
+        const total = data.reduce((s, r) => s + r.count, 0);
+        const avg = total > 0 ? data.reduce((s, r) => s + r.value * r.count, 0) / total : 0;
+        indicators.push({ question_id: q.id, label: q.label, type: 'scale', data: { avg: Math.round(avg * 10) / 10, total, distribution: data } });
+      } else if (q.type === 'single_choice') {
+        const data = await this.many<{ value: string; count: number }>(
+          `SELECT a.value_text AS value, COUNT(*)::int AS count FROM core.answer a JOIN core.interview i ON i.id = a.interview_id WHERE ${filter} AND a.question_id = $2 AND a.value_text IS NOT NULL AND i.status = 'completed' GROUP BY a.value_text ORDER BY count DESC`,
+          [filterVal, q.id],
+        );
+        const total = data.reduce((s, r) => s + r.count, 0);
+        indicators.push({ question_id: q.id, label: q.label, type: 'single_choice', data: { total, options: data.map((r) => ({ ...r, pct: total > 0 ? Math.round((r.count / total) * 100) : 0 })) } });
+      } else if (q.type === 'multi_choice') {
+        const data = await this.many<{ value: string; count: number }>(
+          `SELECT opt AS value, COUNT(*)::int AS count FROM core.answer a JOIN core.interview i ON i.id = a.interview_id, jsonb_array_elements_text(a.value_json) AS opt WHERE ${filter} AND a.question_id = $2 AND a.value_json IS NOT NULL AND i.status = 'completed' GROUP BY opt ORDER BY count DESC`,
+          [filterVal, q.id],
+        );
+        indicators.push({ question_id: q.id, label: q.label, type: 'multi_choice', data: { options: data } });
+      } else if (q.type === 'text') {
+        const data = await this.many<{ value: string }>(
+          `SELECT a.value_text AS value FROM core.answer a JOIN core.interview i ON i.id = a.interview_id WHERE ${filter} AND a.question_id = $2 AND a.value_text IS NOT NULL AND a.value_text != '' AND i.status = 'completed' ORDER BY a.created_at DESC LIMIT 50`,
+          [filterVal, q.id],
+        );
+        indicators.push({ question_id: q.id, label: q.label, type: 'text', data: { total: data.length, responses: data.map((r) => r.value) } });
+      } else if (q.type === 'number') {
+        const data = await this.one<{ avg: number; min: number; max: number; total: number }>(
+          `SELECT ROUND(AVG(a.value_numeric)::numeric, 1) AS avg, MIN(a.value_numeric)::int AS min, MAX(a.value_numeric)::int AS max, COUNT(*)::int AS total FROM core.answer a JOIN core.interview i ON i.id = a.interview_id WHERE ${filter} AND a.question_id = $2 AND a.value_numeric IS NOT NULL AND i.status = 'completed'`,
+          [filterVal, q.id],
+        );
+        indicators.push({ question_id: q.id, label: q.label, type: 'number', data });
+      }
+    }
+
+    return { campaign_id: campaignId, action_id: actionId || null, questions, indicators };
+  }
+
   getExecutionStats(tenantId: string, campaignId?: string) {
     const where = ['tenant_id = $1'];
     const params: unknown[] = [tenantId];

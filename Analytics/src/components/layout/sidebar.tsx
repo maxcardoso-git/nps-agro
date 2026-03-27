@@ -10,6 +10,7 @@ const items = [
   { key: 'campaignAnalytics', href: '/campaigns' },
   { key: 'segmentAnalytics', href: '/segments' },
   { key: 'interviewExplorer', href: '/interviews' },
+  { key: 'indicators', href: '/indicators' },
   { key: 'operations', href: '/operations' }
 ];
 
