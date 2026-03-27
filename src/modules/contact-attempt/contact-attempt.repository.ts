@@ -163,9 +163,10 @@ export class ContactAttemptRepository extends SqlRepositoryBase {
         acc.name AS account_name,
         COALESCE(
           CASE
-            WHEN ca.outcome = 'success' AND i.status = 'completed' THEN 'completed'
-            WHEN ca.outcome = 'success' AND i.status = 'in_progress' THEN 'in_progress'
-            ELSE ca.outcome
+            WHEN latest_iv.status = 'completed' THEN 'completed'
+            WHEN latest_iv.status = 'review_pending' THEN 'review_pending'
+            WHEN latest_iv.status = 'in_progress' THEN 'in_progress'
+            WHEN ca.outcome IS NOT NULL THEN ca.outcome
           END,
           'pending'
         ) AS contact_status,
@@ -183,6 +184,11 @@ export class ContactAttemptRepository extends SqlRepositoryBase {
         LIMIT 1
       ) ca ON true
       LEFT JOIN core.interview i ON i.id = ca.interview_id
+      LEFT JOIN LATERAL (
+        SELECT iv.status FROM core.interview iv
+        WHERE iv.respondent_id = r.id
+        ORDER BY iv.created_at DESC LIMIT 1
+      ) latest_iv ON true
       LEFT JOIN LATERAL (
         SELECT aai.id, aai.processed FROM core.audio_asset aai
         JOIN core.interview ii ON ii.id = aai.interview_id

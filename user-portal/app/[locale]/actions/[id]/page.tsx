@@ -24,6 +24,7 @@ const STATUS_TONES: Record<string, 'neutral' | 'success' | 'warning' | 'danger'>
   wrong_number: 'danger',
   busy: 'warning',
   refused: 'danger',
+  review_pending: 'warning',
 };
 
 const STATUS_OPTIONS = [
@@ -37,6 +38,7 @@ const STATUS_OPTIONS = [
   { value: 'wrong_number', label: 'Nº errado' },
   { value: 'busy', label: 'Ocupado' },
   { value: 'refused', label: 'Recusou' },
+  { value: 'review_pending', label: 'Em revisão' },
 ];
 
 const PAGE_SIZE = 30;
@@ -287,7 +289,7 @@ export default function ActionContactsPage() {
               <Badge tone={STATUS_TONES[r.contact_status] ?? 'neutral'}>
                 {STATUS_OPTIONS.find((o) => o.value === r.contact_status)?.label || r.contact_status}
               </Badge>
-              {(r.contact_status === 'completed' || r.contact_status === 'success' || r.contact_status === 'in_progress') && (
+              {(r.contact_status === 'completed' || r.contact_status === 'success' || r.contact_status === 'in_progress' || r.contact_status === 'review_pending') && (
                 <span className={`text-[10px] font-medium ${r.has_audio ? 'text-blue-600' : 'text-slate-400'}`}>
                   {r.has_audio ? '🎤 Via áudio' : '✏️ Manual'}
                 </span>
@@ -298,12 +300,12 @@ export default function ActionContactsPage() {
                 <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => handleResume(r)}>
                   {t('resume')}
                 </Button>
-              ) : r.contact_status !== 'completed' ? (
+              ) : r.contact_status !== 'completed' && r.contact_status !== 'review_pending' ? (
                 <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => openModal(r)}>
                   {t('contact')}
                 </Button>
               ) : null}
-              {(r.contact_status === 'completed' || r.contact_status === 'in_progress' || r.contact_status === 'success') && (
+              {(r.contact_status === 'completed' || r.contact_status === 'in_progress' || r.contact_status === 'success' || r.contact_status === 'review_pending') && (
                 <>
                   {r.has_audio && (
                     <button
