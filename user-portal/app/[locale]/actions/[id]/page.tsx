@@ -426,9 +426,8 @@ export default function ActionContactsPage() {
                     const text = reviewData.audio.transcription_text as string;
                     // Split into sentences
                     const sentences = text.split(/(?<=[.?!])\s+/).filter((s: string) => s.trim());
-                    let isInterviewer = true; // First speaker is usually interviewer
-                    const turns: Array<{ speaker: 'interviewer' | 'respondent'; text: string }> = [];
-                    let currentTurn = { speaker: 'interviewer' as const, text: '' };
+                    const turns: Array<{ speaker: string; text: string }> = [];
+                    let currentTurn: { speaker: string; text: string } = { speaker: 'interviewer', text: '' };
 
                     for (const sentence of sentences) {
                       const s = sentence.trim();
@@ -439,7 +438,7 @@ export default function ActionContactsPage() {
                       const isShortAnswer = s.split(' ').length <= 5 && !isQuestion;
                       const isAgreement = /^(sim|não|ok|perfeito|isso|exato|correto|certo|claro|uhum|obrigad)/i.test(s);
 
-                      let speaker: 'interviewer' | 'respondent';
+                      let speaker: string;
                       if (isIntro || isReadingOptions) {
                         speaker = 'interviewer';
                       } else if (isQuestion) {
