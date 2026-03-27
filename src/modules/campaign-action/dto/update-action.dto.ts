@@ -11,6 +11,10 @@ export class UpdateActionDto {
 
   @IsOptional()
   @IsString()
+  status?: string;
+
+  @IsOptional()
+  @IsString()
   questionnaire_version_id?: string;
 
   @IsOptional()
