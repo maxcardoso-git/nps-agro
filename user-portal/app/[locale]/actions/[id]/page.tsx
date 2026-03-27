@@ -283,9 +283,16 @@ export default function ActionContactsPage() {
             <span key={`c-${r.id}`} className="text-xs text-slate-500">{r.external_id || '—'}</span>,
             r.account_name || '—',
             r.phone || '—',
-            <Badge key={`s-${r.id}`} tone={STATUS_TONES[r.contact_status] ?? 'neutral'}>
-              {STATUS_OPTIONS.find((o) => o.value === r.contact_status)?.label || r.contact_status}
-            </Badge>,
+            <div key={`s-${r.id}`} className="flex flex-col items-start gap-1">
+              <Badge tone={STATUS_TONES[r.contact_status] ?? 'neutral'}>
+                {STATUS_OPTIONS.find((o) => o.value === r.contact_status)?.label || r.contact_status}
+              </Badge>
+              {(r.contact_status === 'completed' || r.contact_status === 'success' || r.contact_status === 'in_progress') && (
+                <span className={`text-[10px] font-medium ${r.has_audio ? 'text-blue-600' : 'text-slate-400'}`}>
+                  {r.has_audio ? '🎤 Via áudio' : '✏️ Manual'}
+                </span>
+              )}
+            </div>,
             <div key={`a-${r.id}`} className="flex items-center gap-1">
               {r.contact_status === 'in_progress' ? (
                 <Button variant="ghost" className="h-7 px-2 text-xs" onClick={() => handleResume(r)}>
@@ -301,10 +308,15 @@ export default function ActionContactsPage() {
                   {r.has_audio && (
                     <button
                       onClick={() => r.audio_processed ? handleOpenReview(r) : undefined}
-                      className={`rounded px-2 py-1 text-xs font-medium ${r.audio_processed ? 'cursor-pointer bg-green-100 text-green-700 hover:bg-green-200' : 'bg-amber-100 text-amber-700'}`}
+                      className={`flex items-center gap-1 rounded px-2 py-1 text-xs font-medium ${r.audio_processed ? 'cursor-pointer bg-green-100 text-green-700 hover:bg-green-200' : 'bg-amber-100 text-amber-700'}`}
                       title={r.audio_processed ? 'Ver transcrição e respostas' : 'Processando áudio...'}
                     >
-                      {r.audio_processed ? '✓ Áudio' : '⏳ Áudio'}
+                      {r.audio_processed ? '✓' : '⏳'}
+                      {r.audio_confidence != null && (
+                        <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${Number(r.audio_confidence) >= 0.8 ? 'bg-green-200 text-green-800' : Number(r.audio_confidence) >= 0.5 ? 'bg-amber-200 text-amber-800' : 'bg-red-200 text-red-800'}`}>
+                          {Math.round(Number(r.audio_confidence) * 100)}%
+                        </span>
+                      )}
                     </button>
                   )}
                   <label className={`cursor-pointer rounded px-2 py-1 text-xs font-medium transition ${uploadSuccess === r.id ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`} title="Enviar áudio">

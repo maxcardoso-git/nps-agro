@@ -35,6 +35,7 @@ export interface RespondentWithStatusRow {
   scheduled_at: string | null;
   has_audio: boolean;
   audio_processed: boolean | null;
+  audio_confidence: number | null;
 }
 
 export interface ScheduledCallbackRow {
@@ -170,7 +171,8 @@ export class ContactAttemptRepository extends SqlRepositoryBase {
         ) AS contact_status,
         ca.scheduled_at,
         CASE WHEN aa.id IS NOT NULL THEN true ELSE false END AS has_audio,
-        aa.processed AS audio_processed
+        aa.processed AS audio_processed,
+        ans_stats.avg_confidence AS audio_confidence
       FROM core.respondent r
       LEFT JOIN core.account acc ON acc.id = r.account_id
       LEFT JOIN LATERAL (
@@ -187,6 +189,12 @@ export class ContactAttemptRepository extends SqlRepositoryBase {
         WHERE ii.respondent_id = r.id
         ORDER BY aai.created_at DESC LIMIT 1
       ) aa ON true
+      LEFT JOIN LATERAL (
+        SELECT ROUND(AVG(ans.confidence_score)::numeric, 2) AS avg_confidence
+        FROM core.answer ans
+        JOIN core.interview ii2 ON ii2.id = ans.interview_id
+        WHERE ii2.respondent_id = r.id AND ans.confidence_score IS NOT NULL
+      ) ans_stats ON true
       WHERE ${conditions.join(' AND ')}
     `;
 
