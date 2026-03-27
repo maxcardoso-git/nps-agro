@@ -53,6 +53,7 @@ export default function DashboardPage() {
   const { session } = useRequiredSession();
 
   const [campaignId, setCampaignId] = useState('');
+  const [viewMode, setViewMode] = useState<'charts' | 'tables'>('charts');
 
   const campaignsQuery = useQuery({
     queryKey: ['analytics-dashboard', 'campaigns'],
@@ -136,6 +137,16 @@ export default function DashboardPage() {
         </Select>
       </div>
 
+      {/* View mode tabs */}
+      <div className="flex gap-1 rounded-lg bg-slate-100 p-1">
+        <button onClick={() => setViewMode('charts')} className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition ${viewMode === 'charts' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+          📊 Gráficos
+        </button>
+        <button onClick={() => setViewMode('tables')} className={`flex-1 rounded-md px-3 py-1.5 text-sm font-medium transition ${viewMode === 'tables' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}>
+          📋 Tabelas
+        </button>
+      </div>
+
       {summary ? (
         <>
           {/* KPI Row — NPS gauge + 4 metric cards */}
@@ -176,48 +187,181 @@ export default function DashboardPage() {
             </Card>
           </div>
 
-          {/* Charts — 2 columns */}
-          <div className="grid gap-4 lg:grid-cols-2">
-            <Card title={t('charts.trend')}>
-              <div className="h-72">
-                <TrendChart data={trendData} />
-              </div>
-            </Card>
-            <Card title={t('charts.sentiment')}>
-              <div className="h-72">
-                <SentimentPieChart data={summary.sentiment_distribution} />
-              </div>
-            </Card>
-          </div>
-
-          {/* Topics + Insights */}
-          <div className="grid gap-4 lg:grid-cols-2">
-            <Card title={t('charts.topics')}>
-              <div className="h-64">
-                <TopicBarChart data={summary.top_topics.slice(0, 10)} />
-              </div>
-            </Card>
-            <Card title={t('insights.title')}>
-              <div className="space-y-2">
-                {insights.map((item, i) => (
-                  <InsightCard key={i} title={item.title} description={item.description} tone={item.tone} />
-                ))}
-                {recentDetractors.length > 0 && (
-                  <div className="mt-3 border-t border-slate-200 pt-3">
-                    <p className="mb-2 text-xs font-semibold uppercase text-red-500">{t('alerts.title')}</p>
-                    {recentDetractors.map((d) => (
-                      <InsightCard
-                        key={d.interview_id}
-                        title={d.respondent_name}
-                        description={`${d.region || '—'} · NPS ${d.nps_score ?? '—'}`}
-                        tone="danger"
-                      />
-                    ))}
+          {viewMode === 'charts' ? (
+            <>
+              {/* Charts — 2 columns */}
+              <div className="grid gap-4 lg:grid-cols-2">
+                <Card title={t('charts.trend')}>
+                  <div className="h-72">
+                    <TrendChart data={trendData} />
                   </div>
-                )}
+                </Card>
+                <Card title={t('charts.sentiment')}>
+                  <div className="h-72">
+                    <SentimentPieChart data={summary.sentiment_distribution} />
+                  </div>
+                </Card>
               </div>
-            </Card>
-          </div>
+
+              {/* Topics + Insights */}
+              <div className="grid gap-4 lg:grid-cols-2">
+                <Card title={t('charts.topics')}>
+                  <div className="h-64">
+                    <TopicBarChart data={summary.top_topics.slice(0, 10)} />
+                  </div>
+                </Card>
+                <Card title={t('insights.title')}>
+                  <div className="space-y-2">
+                    {insights.map((item, i) => (
+                      <InsightCard key={i} title={item.title} description={item.description} tone={item.tone} />
+                    ))}
+                    {recentDetractors.length > 0 && (
+                      <div className="mt-3 border-t border-slate-200 pt-3">
+                        <p className="mb-2 text-xs font-semibold uppercase text-red-500">{t('alerts.title')}</p>
+                        {recentDetractors.map((d) => (
+                          <InsightCard
+                            key={d.interview_id}
+                            title={d.respondent_name}
+                            description={`${d.region || '—'} · NPS ${d.nps_score ?? '—'}`}
+                            tone="danger"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* TABLES VIEW */}
+              {/* Sentiment table */}
+              <Card title="Distribuição de Sentimento">
+                <table className="min-w-full divide-y divide-slate-200 text-sm">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-semibold">Sentimento</th>
+                      <th className="px-3 py-2 text-right font-semibold">Quantidade</th>
+                      <th className="px-3 py-2 text-right font-semibold">%</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {summary.sentiment_distribution.map((s) => (
+                      <tr key={s.sentiment}>
+                        <td className="px-3 py-2 capitalize">{s.sentiment}</td>
+                        <td className="px-3 py-2 text-right font-medium">{s.count}</td>
+                        <td className="px-3 py-2 text-right">{summary.kpis.total_interviews > 0 ? `${((s.count / summary.kpis.total_interviews) * 100).toFixed(1)}%` : '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </Card>
+
+              {/* Topics table */}
+              <Card title="Temas Mencionados">
+                <table className="min-w-full divide-y divide-slate-200 text-sm">
+                  <thead className="bg-slate-50">
+                    <tr>
+                      <th className="px-3 py-2 text-left font-semibold">#</th>
+                      <th className="px-3 py-2 text-left font-semibold">Tema</th>
+                      <th className="px-3 py-2 text-right font-semibold">Menções</th>
+                      <th className="px-3 py-2 text-right font-semibold">%</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {summary.top_topics.slice(0, 15).map((topic, i) => (
+                      <tr key={topic.topic}>
+                        <td className="px-3 py-2 text-slate-400">{i + 1}</td>
+                        <td className="px-3 py-2 font-medium">{topic.topic}</td>
+                        <td className="px-3 py-2 text-right">{topic.frequency}</td>
+                        <td className="px-3 py-2 text-right">{summary.kpis.total_interviews > 0 ? `${((topic.frequency / summary.kpis.total_interviews) * 100).toFixed(1)}%` : '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </Card>
+
+              {/* NPS Trend table */}
+              {trendData.length > 0 && (
+                <Card title="Tendência NPS por Período">
+                  <table className="min-w-full divide-y divide-slate-200 text-sm">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="px-3 py-2 text-left font-semibold">Período</th>
+                        <th className="px-3 py-2 text-right font-semibold">NPS Médio</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {trendData.map((t) => (
+                        <tr key={t.period}>
+                          <td className="px-3 py-2">{t.period}</td>
+                          <td className="px-3 py-2 text-right font-bold">{t.value}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </Card>
+              )}
+
+              {/* Regional breakdown table */}
+              {summary.regional_breakdown.length > 0 && (
+                <Card title="Breakdown Regional">
+                  <table className="min-w-full divide-y divide-slate-200 text-sm">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="px-3 py-2 text-left font-semibold">Região</th>
+                        <th className="px-3 py-2 text-right font-semibold">Entrevistas</th>
+                        <th className="px-3 py-2 text-right font-semibold">NPS Médio</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {summary.regional_breakdown.map((r, i) => (
+                        <tr key={i}>
+                          <td className="px-3 py-2 font-medium">{r.region}</td>
+                          <td className="px-3 py-2 text-right">{r.count}</td>
+                          <td className="px-3 py-2 text-right font-bold">{r.avg_nps ?? '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </Card>
+              )}
+
+              {/* Interviews table */}
+              {filteredInterviews.length > 0 && (
+                <Card title={`Entrevistas (${filteredInterviews.length})`}>
+                  <div className="max-h-96 overflow-y-auto">
+                    <table className="min-w-full divide-y divide-slate-200 text-sm">
+                      <thead className="sticky top-0 bg-slate-50">
+                        <tr>
+                          <th className="px-3 py-2 text-left font-semibold">Respondente</th>
+                          <th className="px-3 py-2 text-left font-semibold">Região</th>
+                          <th className="px-3 py-2 text-right font-semibold">NPS</th>
+                          <th className="px-3 py-2 text-left font-semibold">Sentimento</th>
+                          <th className="px-3 py-2 text-left font-semibold">Data</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {filteredInterviews.slice(0, 50).map((iv) => (
+                          <tr key={iv.interview_id}>
+                            <td className="px-3 py-2 font-medium">{iv.respondent_name}</td>
+                            <td className="px-3 py-2">{iv.region || '—'}</td>
+                            <td className="px-3 py-2 text-right">
+                              <Badge tone={iv.nps_score != null && iv.nps_score >= 9 ? 'success' : iv.nps_score != null && iv.nps_score >= 7 ? 'warning' : 'danger'}>
+                                {iv.nps_score ?? '—'}
+                              </Badge>
+                            </td>
+                            <td className="px-3 py-2 capitalize">{iv.sentiment || '—'}</td>
+                            <td className="px-3 py-2 text-xs text-slate-500">{iv.completed_at ? new Date(iv.completed_at).toLocaleDateString('pt-BR') : '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </Card>
+              )}
+            </>
+          )}
 
           {/* NPS by Segment + Region + Top Accounts — 3 columns */}
           <div className="grid gap-4 lg:grid-cols-3">
