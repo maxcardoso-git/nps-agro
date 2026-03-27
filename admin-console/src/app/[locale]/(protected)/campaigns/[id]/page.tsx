@@ -116,13 +116,15 @@ export default function CampaignDetailPage() {
 
   const editMutation = useMutation({
     mutationFn: async () => {
+      const af = actionForm as Record<string, string>;
       const payload: Record<string, unknown> = {
-        name: actionForm.name,
-        description: actionForm.description || undefined,
-        tipo_persona: actionForm.tipo_persona || undefined,
-        cluster: actionForm.cluster || undefined,
-        bu: actionForm.bu || undefined,
-        gt: actionForm.gt || undefined,
+        name: af.name,
+        description: af.description || undefined,
+        status: af.status || undefined,
+        tipo_persona: af.tipo_persona || undefined,
+        cluster: af.cluster || undefined,
+        bu: af.bu || undefined,
+        gt: af.gt || undefined,
       };
       if (actionForm.questionnaire_version_id) {
         payload.questionnaire_version_id = actionForm.questionnaire_version_id;
@@ -175,7 +177,7 @@ export default function CampaignDetailPage() {
     setShowEditCampaign(true);
   };
 
-  const openEdit = async (a: { id: string; name: string; description: string | null; questionnaire_version_id?: string; tipo_persona?: string; cluster?: string; bu?: string; gt?: string }) => {
+  const openEdit = async (a: { id: string; name: string; description: string | null; questionnaire_version_id?: string; tipo_persona?: string; cluster?: string; bu?: string; gt?: string; status?: string }) => {
     setEditingActionId(a.id);
     setActionForm({
       name: a.name,
@@ -185,7 +187,8 @@ export default function CampaignDetailPage() {
       cluster: a.cluster || '',
       bu: a.bu || '',
       gt: a.gt || '',
-    });
+      status: a.status || 'active',
+    } as typeof actionForm & { status: string });
     setError(null);
     // Load current interviewers
     try {
@@ -374,6 +377,19 @@ export default function CampaignDetailPage() {
                   <option key={v.id} value={v.id}>{v.label}</option>
                 ))}
               </Select>
+              {/* Status */}
+              <div>
+                <label className="mb-1 block text-xs font-medium text-slate-600">Status</label>
+                <Select
+                  value={(actionForm as Record<string, string>).status || ''}
+                  onChange={(e) => setActionForm((p) => ({ ...p, status: e.target.value }))}
+                >
+                  <option value="draft">Rascunho</option>
+                  <option value="active">Ativa</option>
+                  <option value="paused">Pausada</option>
+                  <option value="completed">Concluída</option>
+                </Select>
+              </div>
               <div className="grid gap-3 md:grid-cols-2">
                 <Input placeholder="Tipo Persona" value={actionForm.tipo_persona} onChange={(e) => setActionForm((p) => ({ ...p, tipo_persona: e.target.value }))} />
                 <Input placeholder="Cluster" value={actionForm.cluster} onChange={(e) => setActionForm((p) => ({ ...p, cluster: e.target.value }))} />
