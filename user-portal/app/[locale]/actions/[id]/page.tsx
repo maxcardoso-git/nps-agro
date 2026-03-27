@@ -384,11 +384,31 @@ export default function ActionContactsPage() {
         ) : reviewData ? (
           <div className="space-y-5 max-h-[75vh] overflow-y-auto pr-1">
             {/* Info header */}
-            <div className="grid gap-2 rounded-lg bg-slate-50 p-3 text-sm md:grid-cols-2">
-              <div><span className="font-semibold text-slate-500">Campanha:</span> {reviewData.campaign_name || '—'}</div>
-              {reviewData.action_name && <div><span className="font-semibold text-slate-500">Ação:</span> {reviewData.action_name}</div>}
-              <div><span className="font-semibold text-slate-500">Entrevistado:</span> {reviewData.respondent_name || '—'}</div>
-              <div><span className="font-semibold text-slate-500">Código:</span> {reviewData.external_id || '—'}</div>
+            <div className="rounded-lg bg-slate-50 p-3 text-sm">
+              <div className="grid gap-2 md:grid-cols-2">
+                <div><span className="font-semibold text-slate-500">Campanha:</span> {reviewData.campaign_name || '—'}</div>
+                {reviewData.action_name && <div><span className="font-semibold text-slate-500">Ação:</span> {reviewData.action_name}</div>}
+                <div><span className="font-semibold text-slate-500">Entrevistado:</span> {reviewData.respondent_name || '—'}</div>
+                <div><span className="font-semibold text-slate-500">Código:</span> {reviewData.external_id || '—'}</div>
+              </div>
+              {/* Confidence indicator */}
+              {reviewData.answers?.length > 0 && (() => {
+                const withConf = reviewData.answers.filter((a: { confidence_score: number | null }) => a.confidence_score != null);
+                if (withConf.length === 0) return null;
+                const avg = withConf.reduce((s: number, a: { confidence_score: number }) => s + a.confidence_score, 0) / withConf.length;
+                const pct = Math.round(avg * 100);
+                return (
+                  <div className="mt-3 flex items-center gap-3 border-t border-slate-200 pt-3">
+                    <span className="text-xs font-semibold text-slate-500">Correspondência:</span>
+                    <div className="flex-1">
+                      <div className="h-2 rounded-full bg-slate-200">
+                        <div className={`h-2 rounded-full transition-all ${pct >= 80 ? 'bg-green-500' : pct >= 50 ? 'bg-amber-500' : 'bg-red-500'}`} style={{ width: `${pct}%` }} />
+                      </div>
+                    </div>
+                    <span className={`text-sm font-bold ${pct >= 80 ? 'text-green-600' : pct >= 50 ? 'text-amber-600' : 'text-red-600'}`}>{pct}%</span>
+                  </div>
+                );
+              })()}
             </div>
 
             {/* Transcription */}
