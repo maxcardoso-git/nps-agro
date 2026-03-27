@@ -5,13 +5,14 @@ export const allowedRoles: Role[] = [
   'platform_admin',
   'tenant_admin',
   'campaign_manager',
-  'analyst'
+  'analyst',
+  'interviewer'
 ];
 
-export function isRoleAllowed(role: Role | undefined): boolean {
-  if (!role) {
-    return false;
+export function isRoleAllowed(role: Role | undefined, roles?: string[]): boolean {
+  if (roles && roles.length > 0) {
+    return roles.some((r) => allowedRoles.includes(r as Role));
   }
-
+  if (!role) return false;
   return allowedRoles.includes(role);
 }

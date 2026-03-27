@@ -32,6 +32,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   const logout = () => {
     clearSession();
     setSession(null);
+    window.location.href = '/analytics';
   };
 
   const value = useMemo<SessionContextValue>(
