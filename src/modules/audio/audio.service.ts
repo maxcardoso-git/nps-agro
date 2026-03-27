@@ -232,6 +232,7 @@ export class AudioService {
     const response = await fetch(`${WHISPER_URL}/asr?language=pt&output=json`, {
       method: 'POST',
       body: formData,
+      signal: AbortSignal.timeout(600_000), // 10 min timeout for large audio
     });
 
     if (!response.ok) {
