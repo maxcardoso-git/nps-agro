@@ -86,7 +86,8 @@ export type ContactStatus =
   | 'scheduled'
   | 'refused'
   | 'in_progress'
-  | 'completed';
+  | 'completed'
+  | 'review_pending';
 
 export type ContactOutcome =
   | 'success'
