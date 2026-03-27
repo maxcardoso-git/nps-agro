@@ -463,6 +463,35 @@ export default function ActionContactsPage() {
                 )}
               </div>
             )}
+
+            {/* Processing times */}
+            {reviewData.processing?.length > 0 && (
+              <div>
+                <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-200 text-xs text-slate-600">⏱</span>
+                  Tempo de Processamento
+                </h3>
+                <div className="flex flex-wrap gap-2">
+                  {reviewData.processing.map((job: { job_type: string; status: string; duration_seconds: number | null }, i: number) => {
+                    const labels: Record<string, string> = {
+                      audio_transcription: '🎤 Transcrição',
+                      answer_extraction: '📋 Extração',
+                      ai_enrichment: '🧠 Enrichment',
+                    };
+                    const duration = job.duration_seconds;
+                    const formatted = duration != null
+                      ? duration >= 60 ? `${Math.floor(duration / 60)}m ${Math.round(duration % 60)}s` : `${Math.round(duration)}s`
+                      : '—';
+                    return (
+                      <div key={i} className={`rounded-lg border px-3 py-2 text-xs ${job.status === 'completed' ? 'border-green-200 bg-green-50' : job.status === 'failed' ? 'border-red-200 bg-red-50' : 'border-slate-200 bg-slate-50'}`}>
+                        <span className="font-medium">{labels[job.job_type] || job.job_type}</span>
+                        <span className="ml-2 font-bold">{formatted}</span>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         ) : (
           <p className="py-8 text-center text-sm text-slate-400">Nenhum dado disponível</p>

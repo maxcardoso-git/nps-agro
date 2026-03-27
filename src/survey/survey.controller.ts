@@ -118,11 +118,20 @@ export class SurveyController {
       [id],
     );
 
+    // Processing times
+    const jobs = await this.pool.query(
+      `SELECT job_type, status, started_at, finished_at,
+              EXTRACT(EPOCH FROM (finished_at - started_at))::numeric(10,1) AS duration_seconds
+       FROM core.processing_job WHERE interview_id = $1 ORDER BY created_at`,
+      [id],
+    );
+
     return {
       ...info.rows[0],
       answers: answers.rows,
       audio: audio.rows[0] || null,
       enrichment: enrichment.rows[0] || null,
+      processing: jobs.rows,
     };
   }
 }
