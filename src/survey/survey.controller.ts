@@ -11,11 +11,38 @@ export class SurveyController {
     @Inject(PG_POOL) private readonly pool: Pool,
   ) {}
 
+  // Static routes MUST come before :id routes
   @Post('start')
   async startInterview(@Body() body: StartInterviewInput) {
     return this.surveyService.startInterview(body);
   }
 
+  @Get('active')
+  async findActiveInterview(
+    @Query('tenant_id') tenantId: string,
+    @Query('campaign_id') campaignId: string,
+    @Query('respondent_id') respondentId: string,
+  ) {
+    return this.surveyService.findActiveInterview(tenantId, campaignId, respondentId);
+  }
+
+  @Get('by-respondent')
+  async findInterviewByRespondent(
+    @Query('tenant_id') tenantId: string,
+    @Query('campaign_id') campaignId: string,
+    @Query('respondent_id') respondentId: string,
+  ) {
+    const result = await this.pool.query(
+      `SELECT id, tenant_id, campaign_id, respondent_id, status, channel, started_at, completed_at
+       FROM core.interview
+       WHERE tenant_id = $1 AND campaign_id = $2 AND respondent_id = $3
+       ORDER BY created_at DESC LIMIT 1`,
+      [tenantId, campaignId, respondentId],
+    );
+    return result.rows[0] || null;
+  }
+
+  // Dynamic :id routes
   @Post(':id/answer')
   async answerQuestion(@Param('id') id: string, @Body() body: SubmitAnswerInput) {
     return this.surveyService.answerQuestion(id, body);
@@ -53,7 +80,6 @@ export class SurveyController {
 
   @Get(':id/review')
   async getInterviewReview(@Param('id') id: string) {
-    // Interview + respondent + campaign + action info
     const info = await this.pool.query(
       `SELECT
         i.id AS interview_id, i.status, i.channel, i.started_at, i.completed_at,
@@ -73,21 +99,18 @@ export class SurveyController {
 
     if (info.rows.length === 0) return { error: 'Interview not found' };
 
-    // Answers
     const answers = await this.pool.query(
       `SELECT question_id, answer_type, value_numeric, value_text, value_boolean, value_json, confidence_score
        FROM core.answer WHERE interview_id = $1 ORDER BY created_at`,
       [id],
     );
 
-    // Audio + transcription
     const audio = await this.pool.query(
       `SELECT file_name, transcription_text, transcription_confidence, processed, duration_seconds
        FROM core.audio_asset WHERE interview_id = $1 ORDER BY created_at DESC LIMIT 1`,
       [id],
     );
 
-    // Enrichment
     const enrichment = await this.pool.query(
       `SELECT nps_score, nps_class, sentiment, topics_json, summary_text,
               driver_positive_json, driver_negative_json
@@ -102,30 +125,4 @@ export class SurveyController {
       enrichment: enrichment.rows[0] || null,
     };
   }
-
-  @Get('by-respondent')
-  async findInterviewByRespondent(
-    @Query('tenant_id') tenantId: string,
-    @Query('campaign_id') campaignId: string,
-    @Query('respondent_id') respondentId: string,
-  ) {
-    const result = await this.pool.query(
-      `SELECT id, tenant_id, campaign_id, respondent_id, status, channel, started_at, completed_at
-       FROM core.interview
-       WHERE tenant_id = $1 AND campaign_id = $2 AND respondent_id = $3
-       ORDER BY created_at DESC LIMIT 1`,
-      [tenantId, campaignId, respondentId],
-    );
-    return result.rows[0] || null;
-  }
-
-  @Get('active')
-  async findActiveInterview(
-    @Query('tenant_id') tenantId: string,
-    @Query('campaign_id') campaignId: string,
-    @Query('respondent_id') respondentId: string,
-  ) {
-    return this.surveyService.findActiveInterview(tenantId, campaignId, respondentId);
-  }
 }
-
