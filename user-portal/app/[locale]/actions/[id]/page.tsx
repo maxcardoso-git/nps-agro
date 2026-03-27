@@ -64,7 +64,8 @@ export default function ActionContactsPage() {
   const [uploadingId, setUploadingId] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
   const [showReview, setShowReview] = useState(false);
-  const [reviewData, setReviewData] = useState<Record<string, unknown> | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [reviewData, setReviewData] = useState<any>(null);
   const [reviewLoading, setReviewLoading] = useState(false);
 
   // Debounce search
@@ -363,95 +364,82 @@ export default function ActionContactsPage() {
           <div className="space-y-5 max-h-[75vh] overflow-y-auto pr-1">
             {/* Info header */}
             <div className="grid gap-2 rounded-lg bg-slate-50 p-3 text-sm md:grid-cols-2">
-              <div><span className="font-semibold text-slate-500">Campanha:</span> {String(reviewData.campaign_name || '—')}</div>
-              {reviewData.action_name ? <div><span className="font-semibold text-slate-500">Ação:</span> {String(reviewData.action_name)}</div> : null}
-              <div><span className="font-semibold text-slate-500">Entrevistado:</span> {String(reviewData.respondent_name || '—')}</div>
-              <div><span className="font-semibold text-slate-500">Código:</span> {String(reviewData.external_id || '—')}</div>
+              <div><span className="font-semibold text-slate-500">Campanha:</span> {reviewData.campaign_name || '—'}</div>
+              {reviewData.action_name && <div><span className="font-semibold text-slate-500">Ação:</span> {reviewData.action_name}</div>}
+              <div><span className="font-semibold text-slate-500">Entrevistado:</span> {reviewData.respondent_name || '—'}</div>
+              <div><span className="font-semibold text-slate-500">Código:</span> {reviewData.external_id || '—'}</div>
             </div>
 
             {/* Transcription */}
-            {(reviewData.audio as Record<string, unknown>)?.transcription_text && (
+            {reviewData.audio?.transcription_text && (
               <div>
                 <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700">
                   <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-blue-100 text-xs text-blue-600">🎤</span>
                   Transcrição do Áudio
                 </h3>
                 <div className="max-h-60 overflow-y-auto rounded-lg border border-slate-200 bg-white p-4 text-sm leading-relaxed text-slate-700">
-                  {String((reviewData.audio as Record<string, unknown>).transcription_text)}
+                  {reviewData.audio.transcription_text}
                 </div>
               </div>
             )}
 
             {/* Mapped answers by questionnaire */}
-            {(() => {
-              const schema = reviewData.questionnaire_schema as { questions?: Array<{ id: string; label: string; type: string; options?: string[] }> } | null;
-              const answers = (reviewData.answers as Array<{ question_id: string; value_numeric: number | null; value_text: string | null; value_boolean: boolean | null; value_json: unknown; confidence_score: number | null }>) || [];
-              if (!schema?.questions || schema.questions.length === 0) return null;
+            {reviewData.questionnaire_schema?.questions?.length > 0 && (
+              <div>
+                <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs text-emerald-600">📋</span>
+                  Respostas do Questionário
+                </h3>
+                <div className="space-y-3">
+                  {reviewData.questionnaire_schema.questions.map((q: { id: string; label: string; type: string }, idx: number) => {
+                    const ans = (reviewData.answers || []).find((a: { question_id: string }) => a.question_id === q.id);
+                    const value = ans ? (ans.value_text ?? ans.value_numeric ?? ans.value_boolean ?? (ans.value_json ? JSON.stringify(ans.value_json) : null)) : null;
+                    const confidence = ans?.confidence_score;
 
-              return (
-                <div>
-                  <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700">
-                    <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-emerald-100 text-xs text-emerald-600">📋</span>
-                    Respostas do Questionário
-                  </h3>
-                  <div className="space-y-3">
-                    {schema.questions.map((q, idx) => {
-                      const ans = answers.find((a) => a.question_id === q.id);
-                      const value = ans ? (ans.value_text ?? ans.value_numeric ?? ans.value_boolean ?? (ans.value_json ? JSON.stringify(ans.value_json) : null)) : null;
-                      const confidence = ans?.confidence_score;
-
-                      return (
-                        <div key={q.id} className="rounded-lg border border-slate-200 bg-white p-3">
-                          <div className="flex items-start justify-between gap-2">
-                            <div className="flex-1">
-                              <p className="text-xs font-semibold text-slate-500">Pergunta {idx + 1} · {q.type.toUpperCase()}</p>
-                              <p className="mt-0.5 text-sm font-medium text-slate-800">{q.label}</p>
-                            </div>
-                            {confidence !== null && confidence !== undefined && (
-                              <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${confidence >= 0.7 ? 'bg-green-100 text-green-700' : confidence >= 0.4 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
-                                {Math.round(confidence * 100)}%
-                              </span>
-                            )}
+                    return (
+                      <div key={q.id} className="rounded-lg border border-slate-200 bg-white p-3">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1">
+                            <p className="text-xs font-semibold text-slate-500">Pergunta {idx + 1} · {q.type.toUpperCase()}</p>
+                            <p className="mt-0.5 text-sm font-medium text-slate-800">{q.label}</p>
                           </div>
-                          <div className="mt-2 rounded bg-slate-50 px-3 py-2 text-sm">
-                            {value !== null ? (
-                              <span className="text-slate-900">{String(value)}</span>
-                            ) : (
-                              <span className="italic text-slate-400">Sem resposta</span>
-                            )}
-                          </div>
+                          {confidence != null && (
+                            <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${confidence >= 0.7 ? 'bg-green-100 text-green-700' : confidence >= 0.4 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
+                              {Math.round(confidence * 100)}%
+                            </span>
+                          )}
                         </div>
-                      );
-                    })}
-                  </div>
+                        <div className="mt-2 rounded bg-slate-50 px-3 py-2 text-sm">
+                          {value !== null ? (
+                            <span className="text-slate-900">{String(value)}</span>
+                          ) : (
+                            <span className="italic text-slate-400">Sem resposta</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-              );
-            })()}
+              </div>
+            )}
 
             {/* Enrichment */}
-            {(reviewData.enrichment as Record<string, unknown>) && (
+            {reviewData.enrichment && (
               <div>
                 <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700">
                   <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-purple-100 text-xs text-purple-600">🧠</span>
                   Análise IA
                 </h3>
-                {(() => {
-                  const e = reviewData.enrichment as Record<string, unknown>;
-                  return (
-                    <>
-                      <div className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 text-sm md:grid-cols-3">
-                        <div><span className="font-semibold text-slate-500">NPS:</span> <span className="text-lg font-bold">{String(e.nps_score ?? '—')}</span></div>
-                        <div><span className="font-semibold text-slate-500">Classe:</span> {String(e.nps_class ?? '—')}</div>
-                        <div><span className="font-semibold text-slate-500">Sentimento:</span> {String(e.sentiment ?? '—')}</div>
-                      </div>
-                      {e.summary_text ? (
-                        <div className="mt-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
-                          {String(e.summary_text)}
-                        </div>
-                      ) : null}
-                    </>
-                  );
-                })()}
+                <div className="grid gap-3 rounded-lg border border-slate-200 bg-white p-4 text-sm md:grid-cols-3">
+                  <div><span className="font-semibold text-slate-500">NPS:</span> <span className="text-lg font-bold">{reviewData.enrichment.nps_score ?? '—'}</span></div>
+                  <div><span className="font-semibold text-slate-500">Classe:</span> {reviewData.enrichment.nps_class ?? '—'}</div>
+                  <div><span className="font-semibold text-slate-500">Sentimento:</span> {reviewData.enrichment.sentiment ?? '—'}</div>
+                </div>
+                {reviewData.enrichment.summary_text && (
+                  <div className="mt-2 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
+                    {reviewData.enrichment.summary_text}
+                  </div>
+                )}
               </div>
             )}
           </div>
