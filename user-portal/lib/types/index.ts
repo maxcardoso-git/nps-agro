@@ -72,6 +72,8 @@ export interface RespondentWithStatus {
   account_name: string | null;
   contact_status: ContactStatus;
   scheduled_at: string | null;
+  has_audio?: boolean;
+  audio_processed?: boolean | null;
 }
 
 export type ContactStatus =

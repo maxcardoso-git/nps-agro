@@ -269,20 +269,27 @@ export default function ActionContactsPage() {
                 </Button>
               ) : null}
               {(r.contact_status === 'completed' || r.contact_status === 'in_progress' || r.contact_status === 'success') && (
-                <label className={`cursor-pointer rounded px-2 py-1 text-xs font-medium transition ${uploadSuccess === r.id ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`}>
-                  {uploadingId === r.id ? '...' : uploadSuccess === r.id ? '✓' : '🎤'}
-                  <input
-                    type="file"
-                    accept="audio/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) handleUploadAudio(r, file);
-                      e.target.value = '';
-                    }}
-                    disabled={uploadingId === r.id}
-                  />
-                </label>
+                <>
+                  {r.has_audio && (
+                    <span className={`rounded px-2 py-1 text-xs font-medium ${r.audio_processed ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`} title={r.audio_processed ? 'Áudio processado' : 'Processando áudio...'}>
+                      {r.audio_processed ? '✓ Áudio' : '⏳ Áudio'}
+                    </span>
+                  )}
+                  <label className={`cursor-pointer rounded px-2 py-1 text-xs font-medium transition ${uploadSuccess === r.id ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`} title="Enviar áudio">
+                    {uploadingId === r.id ? '...' : uploadSuccess === r.id ? '✓' : '🎤'}
+                    <input
+                      type="file"
+                      accept="audio/*,video/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleUploadAudio(r, file);
+                        e.target.value = '';
+                      }}
+                      disabled={uploadingId === r.id}
+                    />
+                  </label>
+                </>
               )}
             </div>,
           ])}

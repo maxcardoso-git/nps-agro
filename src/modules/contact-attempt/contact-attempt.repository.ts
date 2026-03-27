@@ -33,6 +33,8 @@ export interface RespondentWithStatusRow {
   account_name: string | null;
   contact_status: string;
   scheduled_at: string | null;
+  has_audio: boolean;
+  audio_processed: boolean | null;
 }
 
 export interface ScheduledCallbackRow {
@@ -166,7 +168,9 @@ export class ContactAttemptRepository extends SqlRepositoryBase {
           END,
           'pending'
         ) AS contact_status,
-        ca.scheduled_at
+        ca.scheduled_at,
+        CASE WHEN aa.id IS NOT NULL THEN true ELSE false END AS has_audio,
+        aa.processed AS audio_processed
       FROM core.respondent r
       LEFT JOIN core.account acc ON acc.id = r.account_id
       LEFT JOIN LATERAL (
@@ -177,6 +181,11 @@ export class ContactAttemptRepository extends SqlRepositoryBase {
         LIMIT 1
       ) ca ON true
       LEFT JOIN core.interview i ON i.id = ca.interview_id
+      LEFT JOIN LATERAL (
+        SELECT id, processed FROM core.audio_asset
+        WHERE interview_id = i.id
+        ORDER BY created_at DESC LIMIT 1
+      ) aa ON true
       WHERE ${conditions.join(' AND ')}
     `;
 
