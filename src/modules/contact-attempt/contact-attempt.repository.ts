@@ -182,9 +182,10 @@ export class ContactAttemptRepository extends SqlRepositoryBase {
       ) ca ON true
       LEFT JOIN core.interview i ON i.id = ca.interview_id
       LEFT JOIN LATERAL (
-        SELECT id, processed FROM core.audio_asset
-        WHERE interview_id = i.id
-        ORDER BY created_at DESC LIMIT 1
+        SELECT aai.id, aai.processed FROM core.audio_asset aai
+        JOIN core.interview ii ON ii.id = aai.interview_id
+        WHERE ii.respondent_id = r.id
+        ORDER BY aai.created_at DESC LIMIT 1
       ) aa ON true
       WHERE ${conditions.join(' AND ')}
     `;
