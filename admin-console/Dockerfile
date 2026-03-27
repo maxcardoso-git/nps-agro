@@ -24,5 +24,5 @@ COPY --from=build /app/.next/static ./.next/static
 ENV PORT=3000
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=15s --retries=3 \
-  CMD node -e "fetch('http://0.0.0.0:3000/').then(r=>{if(!r.ok)throw r.status}).catch(()=>process.exit(1))"
+  CMD node -e "fetch('http://0.0.0.0:3000/admin').then(r=>{if(!r.ok)throw r.status}).catch(()=>process.exit(1))"
 CMD ["sh", "-c", "HOSTNAME=0.0.0.0 node server.js"]
