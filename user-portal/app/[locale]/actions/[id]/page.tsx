@@ -220,14 +220,13 @@ export default function ActionContactsPage() {
       )}
 
       {/* Search + Filter */}
-      <div className="flex items-center gap-3">
+      <div className="space-y-2">
         <Input
           value={search}
           onChange={(e) => handleSearch(e.target.value)}
           placeholder="Buscar por nome, código, conta ou telefone..."
-          className="flex-1"
         />
-        <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}>
+        <Select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }} className="w-full md:w-56">
           {STATUS_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>{opt.label}</option>
           ))}
