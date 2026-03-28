@@ -124,7 +124,6 @@ export default function GraphPage() {
               }}
               d3AlphaDecay={0.02}
               d3VelocityDecay={0.3}
-              d3Force={'charge'}
               backgroundColor="#f8fafc"
               showNavInfo={false}
               width={undefined}
