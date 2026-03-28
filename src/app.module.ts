@@ -17,6 +17,7 @@ import { AccountModule } from './modules/account/account.module';
 import { CampaignActionModule } from './modules/campaign-action/campaign-action.module';
 import { ContactAttemptModule } from './modules/contact-attempt/contact-attempt.module';
 import { AudioModule } from './modules/audio/audio.module';
+import { AudioBatchModule } from './modules/audio-batch/audio-batch.module';
 import { EnrichmentModule } from './modules/enrichment/enrichment.module';
 import { LlmResourceModule } from './modules/llm-resource/llm-resource.module';
 import { QualityReviewModule } from './modules/quality-review/quality-review.module';
@@ -43,6 +44,7 @@ import { SurveyModule } from './survey/survey.module';
     CampaignActionModule,
     ContactAttemptModule,
     AudioModule,
+    AudioBatchModule,
     EnrichmentModule,
     LlmResourceModule,
     QualityReviewModule,

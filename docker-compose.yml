@@ -17,6 +17,7 @@ services:
       start_period: 10s
     volumes:
       - uploads:/app/uploads
+      - ${AUDIO_SOURCE_PATH:-/tmp/audio-batch}:/mnt/audios
     restart: unless-stopped
     networks:
       - app-net

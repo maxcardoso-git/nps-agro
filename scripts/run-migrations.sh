@@ -27,6 +27,8 @@ FILES=(
   "010_llm_resources.sql"
   "011_execution_engine.sql"
   "012_generic_resources.sql"
+  "013_action_fields.sql"
+  "014_audio_batch.sql"
 )
 
 for file in "${FILES[@]}"; do

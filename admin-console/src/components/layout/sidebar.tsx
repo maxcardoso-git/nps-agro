@@ -21,6 +21,7 @@ const items: MenuItem[] = [
   { key: 'accounts', href: '/accounts', permissions: ['campaign.read'] },
   { key: 'tenants', href: '/tenants', permissions: ['tenant.read'] },
   { key: 'users', href: '/users', permissions: ['user.read'] },
+  { key: 'audioBatch', href: '/audio-batch', permissions: ['campaign.update'] },
   { key: 'qualityReview', href: '/quality-review', permissions: ['report.read'] },
   { key: 'llmResources', href: '/llm-resources', permissions: ['llm_resource.read'] },
   { key: 'branding', href: '/settings/branding', permissions: ['branding.update', 'tenant.read'] }
