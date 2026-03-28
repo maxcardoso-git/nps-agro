@@ -418,6 +418,23 @@ export function FormEditor({ questionnaire, session, onBack }: FormEditorProps) 
                     {fields.filter((f) => f.type !== 'section').length} {t('config.questions')}
                   </p>
                 </div>
+                <div>
+                  <Label>Instruções para IA</Label>
+                  <p className="mb-1 text-xs text-slate-400">Orientações para a IA ao extrair respostas do áudio</p>
+                  <textarea
+                    className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
+                    rows={4}
+                    placeholder="Ex: O entrevistador lê as opções para o entrevistado. Quando o respondente diz apenas um número, mapear para a escala correspondente. Nomes próprios devem ser capturados completos."
+                    value={schema.meta?.ai_instructions || ''}
+                    onChange={(e) => {
+                      setSchema({
+                        ...schema,
+                        meta: { ...schema.meta, ai_instructions: e.target.value },
+                      });
+                      setDirty(true);
+                    }}
+                  />
+                </div>
               </div>
             </TabsContent>
 

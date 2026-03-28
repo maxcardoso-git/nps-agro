@@ -108,6 +108,7 @@ export interface QuestionnaireSchema {
     name?: string;
     segment?: string;
     version?: number;
+    ai_instructions?: string;
   };
   questions: Question[];
 }

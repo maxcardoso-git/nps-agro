@@ -147,7 +147,8 @@ export class AudioService {
       const version = await this.repo.getQuestionnaireSchema(interview.questionnaire_version_id);
       if (!version?.schema_json) throw new Error('Questionnaire schema not found');
 
-      const schema = version.schema_json as { questions: QuestionSchema[] };
+      const schema = version.schema_json as { meta?: { ai_instructions?: string }; questions: QuestionSchema[] };
+      const aiInstructions = schema.meta?.ai_instructions || '';
 
       // Get LLM for extraction
       let llm = await this.repo.getLlmResource(job.tenant_id, 'enrichment');
@@ -156,7 +157,7 @@ export class AudioService {
       let answers: Array<{ question_id: string; value: unknown; confidence: number }>;
 
       if (llm?.api_key) {
-        answers = await this.extractWithLlm(llm, transcription, schema.questions);
+        answers = await this.extractWithLlm(llm, transcription, schema.questions, aiInstructions);
       } else {
         answers = this.extractRuleBased(transcription, schema.questions);
       }
@@ -336,6 +337,7 @@ export class AudioService {
     llm: { provider: string; model_id: string; api_key: string | null; base_url: string | null },
     transcription: string,
     questions: QuestionSchema[],
+    aiInstructions?: string,
   ): Promise<Array<{ question_id: string; value: unknown; confidence: number }>> {
     const questionsDesc = questions.map((q) => {
       let desc = `- ${q.id} (${q.type}): "${q.label}"`;
@@ -345,7 +347,10 @@ export class AudioService {
       return desc;
     }).join('\n');
 
+    const instructionsBlock = aiInstructions ? `\nInstruções especiais:\n${aiInstructions}\n` : '';
+
     const prompt = `Analise a transcrição de uma entrevista NPS agrícola e extraia as respostas para cada pergunta do questionário.
+${instructionsBlock}
 
 Transcrição:
 """
