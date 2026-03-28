@@ -53,6 +53,10 @@ export function FormEditor({ questionnaire, session, onBack }: FormEditorProps) 
   );
   const [selectedFieldId, setSelectedFieldId] = useState<string | null>(null);
   const [isDirty, setIsDirty] = useState(false);
+  const [aiInstructions, setAiInstructions] = useState(() => {
+    const s = draftVersion?.schema_json ?? latestVersion?.schema_json;
+    return (s as any)?.meta?.ai_instructions || '';
+  });
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [configTab, setConfigTab] = useState('field');
@@ -183,7 +187,9 @@ export function FormEditor({ questionnaire, session, onBack }: FormEditorProps) 
   // --- API mutations ---
   const saveMutation = useMutation({
     mutationFn: async () => {
-      const schema_json = fieldsToSchema(fields) as unknown as Record<string, unknown>;
+      const rawSchema = fieldsToSchema(fields) as any;
+      if (aiInstructions) rawSchema.meta = { ...(rawSchema.meta || {}), ai_instructions: aiInstructions };
+      const schema_json = rawSchema as unknown as Record<string, unknown>;
       if (draftVersionId) {
         return apiClient.questionnaires.updateDraftVersion(session, draftVersionId, { schema_json });
       }
@@ -425,13 +431,10 @@ export function FormEditor({ questionnaire, session, onBack }: FormEditorProps) 
                     className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                     rows={4}
                     placeholder="Ex: O entrevistador lê as opções para o entrevistado. Quando o respondente diz apenas um número, mapear para a escala correspondente. Nomes próprios devem ser capturados completos."
-                    value={schema.meta?.ai_instructions || ''}
+                    value={aiInstructions}
                     onChange={(e) => {
-                      setSchema({
-                        ...schema,
-                        meta: { ...schema.meta, ai_instructions: e.target.value },
-                      });
-                      setDirty(true);
+                      setAiInstructions(e.target.value);
+                      setIsDirty(true);
                     }}
                   />
                 </div>
