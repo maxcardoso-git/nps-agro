@@ -9,7 +9,7 @@ import { useRequiredSession } from '@/hooks/use-required-session';
 import { apiClient } from '@/lib/api/client';
 import { extractItems } from '@/lib/api/helpers';
 
-const ForceGraph2D = dynamic(() => import('react-force-graph-2d'), { ssr: false });
+const ForceGraph3D = dynamic(() => import('react-force-graph-3d'), { ssr: false });
 
 const TYPE_COLORS: Record<string, string> = {
   campaign: '#6366f1',
@@ -29,26 +29,10 @@ const TYPE_LABELS: Record<string, string> = {
   region: 'Região',
 };
 
-interface GraphNode {
-  id: string;
-  label: string;
-  type: string;
-  value: number;
-  color?: string;
-  x?: number;
-  y?: number;
-}
-
-interface GraphLink {
-  source: string | GraphNode;
-  target: string | GraphNode;
-  value: number;
-}
-
 export default function GraphPage() {
   const { session } = useRequiredSession();
   const [campaignId, setCampaignId] = useState('');
-  const [hoveredNode, setHoveredNode] = useState<GraphNode | null>(null);
+  const [hoveredNode, setHoveredNode] = useState<any>(null); // eslint-disable-line
   const graphRef = useRef<any>(null); // eslint-disable-line
 
   const campaignsQuery = useQuery({
@@ -65,50 +49,16 @@ export default function GraphPage() {
   });
 
   const graphData = graphQuery.data;
-
-  const nodeCanvasObject = useCallback((node: any, ctx: CanvasRenderingContext2D, globalScale: number) => { // eslint-disable-line
-    const size = Math.max(3, Math.sqrt(node.value || 1) * 2.5);
-    const color = node.color || TYPE_COLORS[node.type] || '#94a3b8';
-
-    // Glow effect
-    ctx.beginPath();
-    ctx.arc(node.x, node.y, size + 2, 0, 2 * Math.PI);
-    ctx.fillStyle = color + '20';
-    ctx.fill();
-
-    // Draw circle
-    ctx.beginPath();
-    ctx.arc(node.x, node.y, size, 0, 2 * Math.PI);
-    ctx.fillStyle = color;
-    ctx.fill();
-    ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-
-    // Draw label — smaller font, only show when zoomed enough
-    const fontSize = Math.min(4, 12 / globalScale);
-    if (globalScale > 0.6 || node.value >= 3) {
-      const label = node.label.length > 20 ? node.label.substring(0, 18) + '…' : node.label;
-      ctx.font = `${fontSize}px Inter, system-ui, sans-serif`;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      ctx.fillStyle = '#475569';
-      ctx.fillText(label, node.x, node.y + size + 1);
-    }
-  }, []);
-
-  const nodeTypes = graphData?.nodes
-    ? [...new Set(graphData.nodes.map((n) => n.type))]
-    : [];
+  const nodeTypes = graphData?.nodes ? [...new Set(graphData.nodes.map((n) => n.type))] : [];
 
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-slate-900">Grafo Ontológico</h1>
+        <h1 className="text-2xl font-bold text-slate-900">Grafo Ontológico 3D</h1>
         <p className="text-sm text-slate-500">Visão relacional entre campanhas, segmentos, temas, sentimentos e regiões</p>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 flex-wrap">
         <Select value={campaignId} onChange={(e) => setCampaignId(e.target.value)} className="max-w-xs">
           <option value="">Todas as campanhas</option>
           {campaigns.map((c) => (
@@ -116,7 +66,6 @@ export default function GraphPage() {
           ))}
         </Select>
 
-        {/* Legend */}
         <div className="flex flex-wrap gap-3">
           {nodeTypes.map((type) => (
             <div key={type} className="flex items-center gap-1.5 text-xs">
@@ -127,7 +76,6 @@ export default function GraphPage() {
         </div>
       </div>
 
-      {/* Hovered node info */}
       {hoveredNode && (
         <div className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm shadow-sm">
           <span className="font-semibold">{hoveredNode.label}</span>
@@ -137,45 +85,50 @@ export default function GraphPage() {
       )}
 
       <Card className="p-0 overflow-hidden">
-        <div style={{ height: '600px', width: '100%' }}>
+        <div style={{ height: '650px', width: '100%' }}>
           {graphData && graphData.nodes.length > 0 ? (
-            <ForceGraph2D
+            <ForceGraph3D
               ref={graphRef}
               graphData={{ nodes: graphData.nodes as any, links: graphData.links as any }}
-              nodeCanvasObject={nodeCanvasObject}
-              nodePointerAreaPaint={(node: any, color: string, ctx: CanvasRenderingContext2D) => {
-                const size = Math.max(4, Math.sqrt(node.value || 1) * 3);
-                ctx.beginPath();
-                ctx.arc(node.x, node.y, size + 4, 0, 2 * Math.PI);
-                ctx.fillStyle = color;
-                ctx.fill();
-              }}
+              nodeLabel={(node: any) => `<div style="background:#1e293b;color:white;padding:4px 8px;border-radius:6px;font-size:12px"><b>${node.label}</b><br/><span style="opacity:0.7">${TYPE_LABELS[node.type] || node.type} · ${node.value} ocorrências</span></div>`}
+              nodeColor={(node: any) => node.color || TYPE_COLORS[node.type] || '#94a3b8'}
+              nodeVal={(node: any) => Math.max(1, Math.sqrt(node.value || 1) * 2)}
+              nodeOpacity={0.9}
+              nodeResolution={16}
               linkColor={(link: any) => {
-                const sourceNode = typeof link.source === 'object' ? link.source : null;
-                return sourceNode?.color ? sourceNode.color + '40' : '#cbd5e130';
+                const src = typeof link.source === 'object' ? link.source : null;
+                const color = src?.color || TYPE_COLORS[src?.type] || '#94a3b8';
+                return color + '60';
               }}
-              linkWidth={(link: any) => Math.max(0.3, Math.sqrt(link.value || 1) * 0.4)}
+              linkWidth={(link: any) => Math.max(0.2, Math.sqrt(link.value || 1) * 0.3)}
+              linkOpacity={0.4}
               linkDirectionalParticles={1}
-              linkDirectionalParticleWidth={(link: any) => Math.max(0.8, Math.sqrt(link.value || 1) * 0.6)}
-              linkDirectionalParticleSpeed={0.005}
+              linkDirectionalParticleWidth={1.5}
+              linkDirectionalParticleSpeed={0.004}
               linkDirectionalParticleColor={(link: any) => {
-                const sourceNode = typeof link.source === 'object' ? link.source : null;
-                return sourceNode?.color || '#94a3b8';
+                const src = typeof link.source === 'object' ? link.source : null;
+                return src?.color || TYPE_COLORS[src?.type] || '#94a3b8';
               }}
-              linkCurvature={0.15}
+              linkCurvature={0.1}
               onNodeHover={(node: any) => setHoveredNode(node || null)}
               onNodeClick={(node: any) => {
-                if (graphRef.current) {
-                  graphRef.current.centerAt(node.x, node.y, 500);
-                  graphRef.current.zoom(3, 500);
+                if (graphRef.current && node) {
+                  const distance = 80;
+                  const distRatio = 1 + distance / Math.hypot(node.x, node.y, node.z);
+                  graphRef.current.cameraPosition(
+                    { x: node.x * distRatio, y: node.y * distRatio, z: node.z * distRatio },
+                    node,
+                    1000
+                  );
                 }
               }}
-              cooldownTicks={100}
               d3AlphaDecay={0.02}
               d3VelocityDecay={0.3}
-              backgroundColor="#fafafa"
+              d3Force={'charge'}
+              backgroundColor="#f8fafc"
+              showNavInfo={false}
               width={undefined}
-              height={600}
+              height={650}
             />
           ) : graphQuery.isLoading ? (
             <div className="flex h-full items-center justify-center">
@@ -188,6 +141,8 @@ export default function GraphPage() {
           )}
         </div>
       </Card>
+
+      <p className="text-xs text-slate-400 text-center">Arraste para rotacionar · Scroll para zoom · Clique num nó para focar</p>
     </div>
   );
 }
