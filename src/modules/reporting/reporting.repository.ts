@@ -217,6 +217,115 @@ export class ReportingRepository extends SqlRepositoryBase {
     );
   }
 
+  async getGraph(tenantId: string, campaignId?: string) {
+    const campaignFilter = campaignId ? `AND v.campaign_id = '${campaignId}'` : '';
+    const tenantFilter = `v.tenant_id = '${tenantId}'`;
+
+    // Campaigns
+    const campaigns = await this.many<{ id: string; name: string; segment: string | null; interview_count: number }>(
+      `SELECT c.id, c.name, c.segment, COUNT(DISTINCT v.interview_id)::int AS interview_count
+       FROM core.campaign c
+       LEFT JOIN analytics.vw_interview_summary v ON v.campaign_id = c.id AND ${tenantFilter}
+       WHERE c.tenant_id = $1 AND c.status = 'active'
+       GROUP BY c.id, c.name, c.segment`,
+      [tenantId],
+    );
+
+    // Segments with NPS
+    const segments = await this.many<{ segment: string; nps: number; count: number }>(
+      `SELECT v.segment, ROUND((COUNT(*) FILTER (WHERE v.nps_class='promoter')::numeric - COUNT(*) FILTER (WHERE v.nps_class='detractor')::numeric) / NULLIF(COUNT(*),0) * 100, 0) AS nps, COUNT(*)::int AS count
+       FROM analytics.vw_interview_summary v WHERE ${tenantFilter} ${campaignFilter} AND v.segment IS NOT NULL GROUP BY v.segment`,
+      [],
+    );
+
+    // Sentiments
+    const sentiments = await this.many<{ sentiment: string; count: number }>(
+      `SELECT v.sentiment, COUNT(*)::int AS count FROM analytics.vw_interview_summary v WHERE ${tenantFilter} ${campaignFilter} AND v.sentiment IS NOT NULL GROUP BY v.sentiment`,
+      [],
+    );
+
+    // NPS classes
+    const npsClasses = await this.many<{ nps_class: string; count: number }>(
+      `SELECT v.nps_class, COUNT(*)::int AS count FROM analytics.vw_interview_summary v WHERE ${tenantFilter} ${campaignFilter} AND v.nps_class IS NOT NULL GROUP BY v.nps_class`,
+      [],
+    );
+
+    // Topics
+    const topics = await this.many<{ topic: string; count: number }>(
+      `SELECT topic, COUNT(*)::int AS count FROM analytics.vw_topic_frequency WHERE tenant_id = $1 ${campaignId ? `AND campaign_id = '${campaignId}'` : ''} GROUP BY topic ORDER BY count DESC LIMIT 15`,
+      [tenantId],
+    );
+
+    // Regions
+    const regions = await this.many<{ region: string; count: number }>(
+      `SELECT v.region, COUNT(*)::int AS count FROM analytics.vw_interview_summary v WHERE ${tenantFilter} ${campaignFilter} AND v.region IS NOT NULL GROUP BY v.region ORDER BY count DESC LIMIT 10`,
+      [],
+    );
+
+    // Topic-sentiment links
+    const topicSentiment = await this.many<{ topic: string; sentiment: string; count: number }>(
+      `SELECT t.topic, e.sentiment, COUNT(*)::int AS count
+       FROM core.enrichment e, jsonb_array_elements_text(e.topics_json) AS t(topic)
+       WHERE e.tenant_id = $1 ${campaignId ? `AND e.campaign_id = '${campaignId}'` : ''} AND e.sentiment IS NOT NULL
+       GROUP BY t.topic, e.sentiment ORDER BY count DESC LIMIT 30`,
+      [tenantId],
+    );
+
+    // Segment-topic links
+    const segmentTopic = await this.many<{ segment: string; topic: string; count: number }>(
+      `SELECT r.segment, t.topic, COUNT(*)::int AS count
+       FROM core.enrichment e
+       JOIN core.interview i ON i.id = e.interview_id
+       JOIN core.respondent r ON r.id = i.respondent_id, jsonb_array_elements_text(e.topics_json) AS t(topic)
+       WHERE e.tenant_id = $1 ${campaignId ? `AND e.campaign_id = '${campaignId}'` : ''} AND r.segment IS NOT NULL
+       GROUP BY r.segment, t.topic ORDER BY count DESC LIMIT 30`,
+      [tenantId],
+    );
+
+    // Build nodes
+    const nodes: Array<{ id: string; label: string; type: string; value: number; color?: string }> = [];
+    const links: Array<{ source: string; target: string; value: number }> = [];
+
+    campaigns.forEach((c) => nodes.push({ id: `camp_${c.id}`, label: c.name, type: 'campaign', value: c.interview_count || 1 }));
+    segments.forEach((s) => nodes.push({ id: `seg_${s.segment}`, label: s.segment, type: 'segment', value: s.count, color: Number(s.nps) >= 50 ? '#10b981' : Number(s.nps) >= 0 ? '#f59e0b' : '#ef4444' }));
+    sentiments.forEach((s) => nodes.push({ id: `sent_${s.sentiment}`, label: s.sentiment, type: 'sentiment', value: s.count, color: s.sentiment === 'positive' ? '#10b981' : s.sentiment === 'negative' ? '#ef4444' : s.sentiment === 'neutral' ? '#60a5fa' : '#f59e0b' }));
+    npsClasses.forEach((n) => nodes.push({ id: `nps_${n.nps_class}`, label: n.nps_class, type: 'nps_class', value: n.count, color: n.nps_class === 'promoter' ? '#10b981' : n.nps_class === 'detractor' ? '#ef4444' : '#f59e0b' }));
+    topics.forEach((t) => nodes.push({ id: `topic_${t.topic}`, label: t.topic, type: 'topic', value: t.count }));
+    regions.forEach((r) => nodes.push({ id: `region_${r.region}`, label: r.region, type: 'region', value: r.count }));
+
+    // Campaign → segment links
+    campaigns.forEach((c) => {
+      if (c.segment) links.push({ source: `camp_${c.id}`, target: `seg_${c.segment}`, value: c.interview_count || 1 });
+    });
+
+    // Topic → sentiment links
+    topicSentiment.forEach((ts) => {
+      if (nodes.find((n) => n.id === `topic_${ts.topic}`) && nodes.find((n) => n.id === `sent_${ts.sentiment}`)) {
+        links.push({ source: `topic_${ts.topic}`, target: `sent_${ts.sentiment}`, value: ts.count });
+      }
+    });
+
+    // Segment → topic links
+    segmentTopic.forEach((st) => {
+      if (nodes.find((n) => n.id === `seg_${st.segment}`) && nodes.find((n) => n.id === `topic_${st.topic}`)) {
+        links.push({ source: `seg_${st.segment}`, target: `topic_${st.topic}`, value: st.count });
+      }
+    });
+
+    // Sentiment → NPS class links
+    const sentNps = await this.many<{ sentiment: string; nps_class: string; count: number }>(
+      `SELECT e.sentiment, e.nps_class, COUNT(*)::int AS count FROM core.enrichment e WHERE e.tenant_id = $1 ${campaignId ? `AND e.campaign_id = '${campaignId}'` : ''} AND e.sentiment IS NOT NULL AND e.nps_class IS NOT NULL GROUP BY e.sentiment, e.nps_class`,
+      [tenantId],
+    );
+    sentNps.forEach((sn) => {
+      if (nodes.find((n) => n.id === `sent_${sn.sentiment}`) && nodes.find((n) => n.id === `nps_${sn.nps_class}`)) {
+        links.push({ source: `sent_${sn.sentiment}`, target: `nps_${sn.nps_class}`, value: sn.count });
+      }
+    });
+
+    return { nodes, links };
+  }
+
   async getCampaignIndicators(campaignId: string, actionId?: string) {
     const schemaRow = await this.one<{ schema_json: { questions: Array<{ id: string; label: string; type: string; options?: string[] }> } }>(
       actionId

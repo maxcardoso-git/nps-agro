@@ -87,6 +87,10 @@ export class ReportingService {
     return this.reportingRepository.getNpsByAccount(actor.tenant_id, campaignId);
   }
 
+  async getGraph(actor: AuthUserClaims, campaignId?: string) {
+    return this.reportingRepository.getGraph(actor.tenant_id, campaignId);
+  }
+
   async getCampaignIndicators(actor: AuthUserClaims, campaignId: string, actionId?: string) {
     const campaign = await this.reportingRepository.getCampaign(campaignId);
     if (!campaign) throw new DomainException('REPORT_NOT_AVAILABLE', 'Relatório não disponível', HttpStatus.NOT_FOUND);

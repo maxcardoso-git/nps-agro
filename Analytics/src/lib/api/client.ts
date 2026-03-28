@@ -184,6 +184,12 @@ export const apiClient = {
         session
       );
     },
+    graph: async (
+      session: AuthSession,
+      campaignId?: string
+    ): Promise<{ nodes: Array<{ id: string; label: string; type: string; value: number; color?: string }>; links: Array<{ source: string; target: string; value: number }> }> => {
+      return request(`/reports/graph${toQueryString({ campaign_id: campaignId })}`, { method: 'GET' }, session);
+    },
     indicators: async (
       session: AuthSession,
       campaignId: string,

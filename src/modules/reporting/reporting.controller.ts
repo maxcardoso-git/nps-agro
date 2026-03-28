@@ -44,6 +44,12 @@ export class ReportingController {
     return this.reportingService.getQualityStats(user);
   }
 
+  @Get('graph')
+  @Permissions('report.read')
+  getGraph(@CurrentUser() user: AuthUserClaims, @Query('campaign_id') campaignId?: string) {
+    return this.reportingService.getGraph(user, campaignId);
+  }
+
   @Get('campaigns/:campaignId/indicators')
   @Permissions('report.read')
   getCampaignIndicators(@CurrentUser() user: AuthUserClaims, @Param('campaignId') campaignId: string, @Query('action_id') actionId?: string) {
