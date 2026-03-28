@@ -64,6 +64,13 @@ export class AudioRepository extends SqlRepositoryBase {
     ).then(() => undefined);
   }
 
+  updateAdherence(interviewId: string, score: number, details: unknown): Promise<void> {
+    return this.execute(
+      `UPDATE core.audio_asset SET adherence_score = $2, adherence_details = $3, updated_at = NOW() WHERE interview_id = $1`,
+      [interviewId, score, JSON.stringify(details)],
+    ).then(() => undefined);
+  }
+
   getUnprocessed(limit = 10): Promise<AudioAssetRow[]> {
     return this.many<AudioAssetRow>(
       `SELECT * FROM core.audio_asset WHERE processed = false ORDER BY created_at LIMIT $1`,

@@ -173,7 +173,8 @@ export class ContactAttemptRepository extends SqlRepositoryBase {
         ca.scheduled_at,
         CASE WHEN aa.id IS NOT NULL THEN true ELSE false END AS has_audio,
         aa.processed AS audio_processed,
-        ans_stats.avg_confidence AS audio_confidence
+        ans_stats.avg_confidence AS audio_confidence,
+        aa.adherence_score AS adherence_score
       FROM core.respondent r
       LEFT JOIN core.account acc ON acc.id = r.account_id
       LEFT JOIN LATERAL (
@@ -190,7 +191,7 @@ export class ContactAttemptRepository extends SqlRepositoryBase {
         ORDER BY iv.created_at DESC LIMIT 1
       ) latest_iv ON true
       LEFT JOIN LATERAL (
-        SELECT aai.id, aai.processed FROM core.audio_asset aai
+        SELECT aai.id, aai.processed, aai.adherence_score FROM core.audio_asset aai
         JOIN core.interview ii ON ii.id = aai.interview_id
         WHERE ii.respondent_id = r.id
         ORDER BY aai.created_at DESC LIMIT 1

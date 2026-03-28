@@ -184,6 +184,17 @@ export class AudioService {
         });
       }
 
+      // Calculate adherence score
+      if (llm?.api_key) {
+        try {
+          const adherence = await this.calculateAdherence(llm, transcription, schema.questions, answers);
+          await this.repo.updateAdherence(job.interview_id, adherence.score, adherence.details);
+          this.logger.log(`ADHERENCE_CALCULATED interview_id=${job.interview_id} score=${adherence.score}`);
+        } catch (e) {
+          this.logger.warn(`ADHERENCE_FAILED interview_id=${job.interview_id} error=${e instanceof Error ? e.message : e}`);
+        }
+      }
+
       // Decide interview status based on confidence
       const avgConfidence = answers.length > 0
         ? answers.reduce((sum, a) => sum + a.confidence, 0) / answers.length
@@ -412,6 +423,86 @@ Regras:
   }
 
   // ─── Rule-based extraction fallback ───────────────────────────────────────
+
+  // ─── Adherence calculation ─────────────────────────────────────────────
+
+  private async calculateAdherence(
+    llm: { provider: string; model_id: string; api_key: string | null; base_url: string | null },
+    transcription: string,
+    questions: QuestionSchema[],
+    answers: Array<{ question_id: string; value: unknown; confidence: number }>,
+  ): Promise<{ score: number; details: Array<{ question_id: string; asked: boolean; followed_script: boolean; notes: string }> }> {
+    const questionsDesc = questions.map((q) => `- ${q.id}: "${q.label}" (${q.type})`).join('\n');
+    const answeredIds = answers.map((a) => a.question_id);
+
+    const prompt = `Analise a aderência do entrevistador ao roteiro do questionário NPS.
+
+Transcrição da entrevista:
+"""
+${transcription.substring(0, 3000)}
+"""
+
+Perguntas do questionário (roteiro):
+${questionsDesc}
+
+Perguntas que tiveram resposta extraída: ${answeredIds.join(', ')}
+
+Avalie para CADA pergunta do questionário:
+1. "asked": o entrevistador fez esta pergunta? (true/false)
+2. "followed_script": seguiu o roteiro/fraseado correto? (true/false)
+3. "notes": observação breve (max 20 palavras)
+
+Retorne um JSON:
+{
+  "score": <0-100 aderência geral>,
+  "details": [
+    { "question_id": "id", "asked": true/false, "followed_script": true/false, "notes": "..." }
+  ]
+}`;
+
+    let text: string;
+    if (llm.provider === 'google') {
+      const baseUrl = llm.base_url || 'https://generativelanguage.googleapis.com/v1beta';
+      const response = await fetch(`${baseUrl}/models/${llm.model_id}:generateContent?key=${llm.api_key}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { temperature: 0.1, maxOutputTokens: 2048 } }),
+      });
+      if (!response.ok) throw new Error(`Gemini API error ${response.status}`);
+      const data = await response.json() as Record<string, unknown>;
+      const candidates = data.candidates as Array<{ content?: { parts?: Array<{ text?: string }> } }> | undefined;
+      text = candidates?.[0]?.content?.parts?.[0]?.text ?? '';
+    } else if (llm.provider === 'anthropic') {
+      const baseUrl = llm.base_url || 'https://api.anthropic.com/v1';
+      const response = await fetch(`${baseUrl}/messages`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-api-key': llm.api_key!, 'anthropic-version': '2023-06-01' },
+        body: JSON.stringify({ model: llm.model_id, max_tokens: 2048, messages: [{ role: 'user', content: prompt }] }),
+      });
+      if (!response.ok) throw new Error(`Anthropic error ${response.status}`);
+      const data = await response.json() as Record<string, unknown>;
+      text = (data.content as Array<{ text?: string }>)?.[0]?.text ?? '';
+    } else {
+      const baseUrl = llm.base_url || 'https://api.openai.com/v1/chat';
+      const response = await fetch(`${baseUrl}/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${llm.api_key}` },
+        body: JSON.stringify({ model: llm.model_id, messages: [{ role: 'user', content: prompt }], response_format: { type: 'json_object' }, temperature: 0.1 }),
+      });
+      if (!response.ok) throw new Error(`OpenAI error ${response.status}`);
+      const data = await response.json() as Record<string, unknown>;
+      text = (data.choices as Array<{ message?: { content?: string } }>)?.[0]?.message?.content ?? '';
+    }
+
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return { score: 0, details: [] };
+
+    const parsed = JSON.parse(jsonMatch[0]);
+    return {
+      score: typeof parsed.score === 'number' ? parsed.score : 0,
+      details: Array.isArray(parsed.details) ? parsed.details : [],
+    };
+  }
 
   private extractRuleBased(
     transcription: string,

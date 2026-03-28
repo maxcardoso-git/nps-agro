@@ -322,6 +322,11 @@ export default function ActionContactsPage() {
                           {Math.round(Number(r.audio_confidence) * 100)}%
                         </span>
                       )}
+                      {(r as any).adherence_score != null && (
+                        <span className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${Number((r as any).adherence_score) >= 80 ? 'bg-indigo-200 text-indigo-800' : Number((r as any).adherence_score) >= 60 ? 'bg-amber-200 text-amber-800' : 'bg-red-200 text-red-800'}`} title="Aderência ao roteiro">
+                          📏{Math.round(Number((r as any).adherence_score))}%
+                        </span>
+                      )}
                     </button>
                   )}
                   <label className={`cursor-pointer rounded px-2 py-1 text-xs font-medium transition ${uploadSuccess === r.id ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-600 hover:bg-slate-200'}`} title="Enviar áudio">
@@ -413,6 +418,41 @@ export default function ActionContactsPage() {
                 );
               })()}
             </div>
+
+            {/* Adherence indicator */}
+            {reviewData.audio?.adherence_score != null && (
+              <div>
+                <h3 className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700">
+                  <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs text-indigo-600">📏</span>
+                  Aderência ao Roteiro
+                </h3>
+                <div className="rounded-lg border border-slate-200 bg-white p-4">
+                  <div className="flex items-center gap-3 mb-3">
+                    <div className="flex-1">
+                      <div className="h-3 rounded-full bg-slate-200 overflow-hidden">
+                        <div className={`h-full rounded-full ${Number(reviewData.audio.adherence_score) >= 80 ? 'bg-green-500' : Number(reviewData.audio.adherence_score) >= 60 ? 'bg-amber-500' : 'bg-red-500'}`}
+                          style={{ width: `${reviewData.audio.adherence_score}%` }} />
+                      </div>
+                    </div>
+                    <span className={`text-lg font-bold ${Number(reviewData.audio.adherence_score) >= 80 ? 'text-green-600' : Number(reviewData.audio.adherence_score) >= 60 ? 'text-amber-600' : 'text-red-600'}`}>
+                      {Math.round(Number(reviewData.audio.adherence_score))}%
+                    </span>
+                  </div>
+                  {reviewData.audio.adherence_details && Array.isArray(reviewData.audio.adherence_details) && (
+                    <div className="space-y-1">
+                      {reviewData.audio.adherence_details.map((d: { question_id: string; asked: boolean; followed_script: boolean; notes: string }, i: number) => (
+                        <div key={i} className="flex items-center gap-2 text-xs">
+                          <span className={`h-2 w-2 rounded-full ${d.asked && d.followed_script ? 'bg-green-500' : d.asked ? 'bg-amber-500' : 'bg-red-500'}`} />
+                          <span className="flex-1 text-slate-600">{d.question_id}</span>
+                          <span className={d.asked ? 'text-green-600' : 'text-red-600'}>{d.asked ? 'Perguntou' : 'Não perguntou'}</span>
+                          {d.asked && <span className={d.followed_script ? 'text-green-600' : 'text-amber-600'}>{d.followed_script ? '✓ Roteiro' : '~ Adaptou'}</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
             {/* Transcription */}
             {reviewData.audio?.transcription_text && (

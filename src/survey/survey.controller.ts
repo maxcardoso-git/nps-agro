@@ -134,7 +134,7 @@ export class SurveyController {
     );
 
     const audio = await this.pool.query(
-      `SELECT file_name, transcription_text, transcription_confidence, processed, duration_seconds
+      `SELECT file_name, transcription_text, transcription_confidence, processed, duration_seconds, adherence_score, adherence_details
        FROM core.audio_asset WHERE interview_id = $1 ORDER BY created_at DESC LIMIT 1`,
       [id],
     );
