@@ -217,6 +217,35 @@ export class ReportingRepository extends SqlRepositoryBase {
     );
   }
 
+  async getAdherenceStats(tenantId: string, campaignId?: string) {
+    const filter = campaignId ? `AND aa.campaign_id = '${campaignId}'` : '';
+
+    const stats = await this.one<{ avg_adherence: number; total: number; high: number; medium: number; low: number }>(
+      `SELECT
+        ROUND(AVG(aa.adherence_score)::numeric, 1) AS avg_adherence,
+        COUNT(*)::int AS total,
+        COUNT(*) FILTER (WHERE aa.adherence_score >= 80)::int AS high,
+        COUNT(*) FILTER (WHERE aa.adherence_score >= 60 AND aa.adherence_score < 80)::int AS medium,
+        COUNT(*) FILTER (WHERE aa.adherence_score < 60)::int AS low
+      FROM core.audio_asset aa
+      WHERE aa.tenant_id = $1 AND aa.adherence_score IS NOT NULL ${filter}`,
+      [tenantId],
+    );
+
+    const details = await this.many<{ respondent_name: string; code: string; adherence_score: number }>(
+      `SELECT r.name AS respondent_name, r.external_id AS code, aa.adherence_score
+       FROM core.audio_asset aa
+       JOIN core.interview i ON i.id = aa.interview_id
+       JOIN core.respondent r ON r.id = i.respondent_id
+       WHERE aa.tenant_id = $1 AND aa.adherence_score IS NOT NULL ${filter}
+       ORDER BY aa.adherence_score ASC
+       LIMIT 20`,
+      [tenantId],
+    );
+
+    return { ...stats, total_with_adherence: stats?.total || 0, details };
+  }
+
   async getGraph(tenantId: string, campaignId?: string) {
     const campaignFilter = campaignId ? `AND v.campaign_id = '${campaignId}'` : '';
     const tenantFilter = `v.tenant_id = '${tenantId}'`;

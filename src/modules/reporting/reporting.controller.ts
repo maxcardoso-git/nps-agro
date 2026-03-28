@@ -44,6 +44,12 @@ export class ReportingController {
     return this.reportingService.getQualityStats(user);
   }
 
+  @Get('adherence-stats')
+  @Permissions('report.read')
+  getAdherenceStats(@CurrentUser() user: AuthUserClaims, @Query('campaign_id') campaignId?: string) {
+    return this.reportingService.getAdherenceStats(user, campaignId);
+  }
+
   @Get('graph')
   @Permissions('report.read')
   getGraph(@CurrentUser() user: AuthUserClaims, @Query('campaign_id') campaignId?: string) {

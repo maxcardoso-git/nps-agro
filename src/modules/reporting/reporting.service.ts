@@ -87,6 +87,10 @@ export class ReportingService {
     return this.reportingRepository.getNpsByAccount(actor.tenant_id, campaignId);
   }
 
+  async getAdherenceStats(actor: AuthUserClaims, campaignId?: string) {
+    return this.reportingRepository.getAdherenceStats(actor.tenant_id, campaignId);
+  }
+
   async getGraph(actor: AuthUserClaims, campaignId?: string) {
     return this.reportingRepository.getGraph(actor.tenant_id, campaignId);
   }

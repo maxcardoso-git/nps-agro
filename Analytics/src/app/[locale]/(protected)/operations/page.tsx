@@ -48,6 +48,21 @@ export default function OperationsPage() {
     enabled: Boolean(session),
   });
 
+  // Adherence stats
+  const adherenceQuery = useQuery({
+    queryKey: ['ops-adherence', campaignId],
+    queryFn: async () => {
+      const API_URL = process.env.NEXT_PUBLIC_API_BASE_URL || '/api';
+      const res = await fetch(`${API_URL}/reports/adherence-stats${campaignId ? `?campaign_id=${campaignId}` : ''}`, {
+        headers: { 'Authorization': `Bearer ${session!.access_token}`, 'x-tenant-id': session!.user.tenant_id },
+      });
+      if (!res.ok) return null;
+      const body = await res.json();
+      return body?.data || body;
+    },
+    enabled: Boolean(session && campaignId),
+  });
+
   const contactStats = (contactStatsQuery.data || []) as Array<{ status: string; count: number }>;
   const summary = summaryQuery.data;
   const quality = qualityQuery.data as { pending: number; approved: number; rejected: number; avg_score: number | null; rejection_rate: number | null } | null;
@@ -222,6 +237,65 @@ export default function OperationsPage() {
                   <p className="text-xs text-purple-700">Score Médio</p>
                 </div>
               </div>
+            </Card>
+          )}
+
+          {/* Adherence stats */}
+          {adherenceQuery.data && (
+            <Card title="Aderência ao Roteiro">
+              {(() => {
+                const a = adherenceQuery.data as { avg_adherence: number | null; total_with_adherence: number; high: number; medium: number; low: number; details: Array<{ respondent_name: string; code: string; adherence_score: number }> };
+                return (
+                  <>
+                    <div className="grid gap-4 md:grid-cols-4 text-center">
+                      <div className="rounded-lg bg-indigo-50 p-3">
+                        <p className={`text-3xl font-bold ${Number(a.avg_adherence) >= 80 ? 'text-green-600' : Number(a.avg_adherence) >= 60 ? 'text-amber-600' : 'text-red-600'}`}>
+                          {a.avg_adherence != null ? `${Math.round(Number(a.avg_adherence))}%` : '—'}
+                        </p>
+                        <p className="text-xs text-indigo-700">Média Aderência</p>
+                      </div>
+                      <div className="rounded-lg bg-green-50 p-3">
+                        <p className="text-2xl font-bold text-green-600">{a.high || 0}</p>
+                        <p className="text-xs text-green-700">Alta (≥80%)</p>
+                      </div>
+                      <div className="rounded-lg bg-amber-50 p-3">
+                        <p className="text-2xl font-bold text-amber-600">{a.medium || 0}</p>
+                        <p className="text-xs text-amber-700">Média (60-79%)</p>
+                      </div>
+                      <div className="rounded-lg bg-red-50 p-3">
+                        <p className="text-2xl font-bold text-red-600">{a.low || 0}</p>
+                        <p className="text-xs text-red-700">Baixa (&lt;60%)</p>
+                      </div>
+                    </div>
+                    {a.details && a.details.length > 0 && (
+                      <div className="mt-4">
+                        <table className="min-w-full divide-y divide-slate-200 text-sm">
+                          <thead className="bg-slate-50">
+                            <tr>
+                              <th className="px-3 py-2 text-left font-semibold">Entrevistado</th>
+                              <th className="px-3 py-2 text-left font-semibold">Código</th>
+                              <th className="px-3 py-2 text-right font-semibold">Aderência</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-100">
+                            {a.details.map((d, i) => (
+                              <tr key={i}>
+                                <td className="px-3 py-2">{d.respondent_name}</td>
+                                <td className="px-3 py-2 text-slate-500">{d.code}</td>
+                                <td className="px-3 py-2 text-right">
+                                  <span className={`font-bold ${Number(d.adherence_score) >= 80 ? 'text-green-600' : Number(d.adherence_score) >= 60 ? 'text-amber-600' : 'text-red-600'}`}>
+                                    {Math.round(Number(d.adherence_score))}%
+                                  </span>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </Card>
           )}
         </>
