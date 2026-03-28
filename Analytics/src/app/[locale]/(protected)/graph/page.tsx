@@ -66,26 +66,35 @@ export default function GraphPage() {
 
   const graphData = graphQuery.data;
 
-  const nodeCanvasObject = useCallback((node: any, ctx: CanvasRenderingContext2D) => { // eslint-disable-line
-    const size = Math.max(4, Math.sqrt(node.value || 1) * 3);
+  const nodeCanvasObject = useCallback((node: any, ctx: CanvasRenderingContext2D, globalScale: number) => { // eslint-disable-line
+    const size = Math.max(3, Math.sqrt(node.value || 1) * 2.5);
     const color = node.color || TYPE_COLORS[node.type] || '#94a3b8';
+
+    // Glow effect
+    ctx.beginPath();
+    ctx.arc(node.x, node.y, size + 2, 0, 2 * Math.PI);
+    ctx.fillStyle = color + '20';
+    ctx.fill();
 
     // Draw circle
     ctx.beginPath();
     ctx.arc(node.x, node.y, size, 0, 2 * Math.PI);
     ctx.fillStyle = color;
     ctx.fill();
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 1;
     ctx.stroke();
 
-    // Draw label
-    const label = node.label;
-    ctx.font = `${Math.max(10, size * 0.8)}px Inter, sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'top';
-    ctx.fillStyle = '#334155';
-    ctx.fillText(label, node.x, node.y + size + 2);
+    // Draw label — smaller font, only show when zoomed enough
+    const fontSize = Math.min(4, 12 / globalScale);
+    if (globalScale > 0.6 || node.value >= 3) {
+      const label = node.label.length > 20 ? node.label.substring(0, 18) + '…' : node.label;
+      ctx.font = `${fontSize}px Inter, system-ui, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillStyle = '#475569';
+      ctx.fillText(label, node.x, node.y + size + 1);
+    }
   }, []);
 
   const nodeTypes = graphData?.nodes
@@ -141,11 +150,19 @@ export default function GraphPage() {
                 ctx.fillStyle = color;
                 ctx.fill();
               }}
-              linkColor={() => '#e2e8f0'}
-              linkWidth={(link: any) => Math.max(0.5, Math.sqrt(link.value || 1) * 0.5)}
-              linkDirectionalParticles={2}
-              linkDirectionalParticleWidth={(link: any) => Math.max(1, Math.sqrt(link.value || 1))}
-              linkDirectionalParticleColor={() => '#94a3b8'}
+              linkColor={(link: any) => {
+                const sourceNode = typeof link.source === 'object' ? link.source : null;
+                return sourceNode?.color ? sourceNode.color + '40' : '#cbd5e130';
+              }}
+              linkWidth={(link: any) => Math.max(0.3, Math.sqrt(link.value || 1) * 0.4)}
+              linkDirectionalParticles={1}
+              linkDirectionalParticleWidth={(link: any) => Math.max(0.8, Math.sqrt(link.value || 1) * 0.6)}
+              linkDirectionalParticleSpeed={0.005}
+              linkDirectionalParticleColor={(link: any) => {
+                const sourceNode = typeof link.source === 'object' ? link.source : null;
+                return sourceNode?.color || '#94a3b8';
+              }}
+              linkCurvature={0.15}
               onNodeHover={(node: any) => setHoveredNode(node || null)}
               onNodeClick={(node: any) => {
                 if (graphRef.current) {
