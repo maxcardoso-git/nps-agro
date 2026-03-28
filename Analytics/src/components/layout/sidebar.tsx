@@ -9,6 +9,7 @@ const items = [
   { key: 'dashboard', href: '/dashboard' },
   { key: 'campaignAnalytics', href: '/campaigns' },
   { key: 'interviewExplorer', href: '/interviews' },
+  { key: 'chat', href: '/chat' },
   { key: 'graph', href: '/graph' },
   { key: 'indicators', href: '/indicators' },
   { key: 'operations', href: '/operations' }
